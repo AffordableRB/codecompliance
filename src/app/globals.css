@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8fafc;
+  --foreground: #0f172a;
 }
 
 @theme inline {
@@ -12,15 +12,220 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), "Inter", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Form Inputs */
+.form-input {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  padding: 0.5rem 0.625rem;
+  font-size: 0.8125rem;
+  color: #0f172a;
+  background: #fff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #1e293b;
+  box-shadow: 0 0 0 1px #1e293b;
+}
+
+select.form-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.625rem center;
+  padding-right: 2rem;
+}
+
+/* ═══════════════════════════════════════════
+   REPORT DOCUMENT — the brief output
+   ═══════════════════════════════════════════ */
+
+.brief-content {
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: #1e293b;
+}
+
+/* Top-level heading (# Code Analysis Report) — hide since we have our own header */
+.brief-content > h1:first-child {
+  display: none;
+}
+
+.brief-content h1 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 1.5rem 0 0.5rem;
+}
+
+/* Section headers (## and ###) */
+.brief-content h2 {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #1e3a5f;
+  margin: 2rem 0 0.75rem;
+  padding: 0.5rem 0.625rem;
+  background: #f1f5f9;
+  border-left: 3px solid #1e3a5f;
+}
+
+.brief-content h3 {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #1e3a5f;
+  margin: 1.75rem 0 0.625rem;
+  padding: 0.5rem 0.625rem;
+  background: #f1f5f9;
+  border-left: 3px solid #3b82f6;
+}
+
+/* Paragraphs */
+.brief-content p {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+/* Lists */
+.brief-content ul,
+.brief-content ol {
+  margin-left: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.brief-content li {
+  margin-bottom: 0.25rem;
+  line-height: 1.5;
+}
+
+.brief-content ul li { list-style-type: disc; }
+.brief-content ol li { list-style-type: decimal; }
+
+/* Inline styles */
+.brief-content strong {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.brief-content a {
+  color: #2563eb;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.brief-content blockquote {
+  border-left: 2px solid #1e3a5f;
+  padding-left: 0.75rem;
+  margin: 0.75rem 0;
+  color: #475569;
+  font-style: italic;
+}
+
+/* ═══════════════════════════════════════════
+   TABLES — professional engineering style
+   ═══════════════════════════════════════════ */
+
+.brief-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.5rem 0 1rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.brief-content thead {
+  position: sticky;
+  top: 0;
+}
+
+.brief-content th {
+  background: #1e293b;
+  color: #f1f5f9;
+  font-weight: 600;
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  border: 1px solid #1e293b;
+}
+
+.brief-content td {
+  border: 1px solid #e2e8f0;
+  padding: 0.4375rem 0.75rem;
+  text-align: left;
+  vertical-align: top;
+  color: #334155;
+}
+
+.brief-content tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.brief-content tbody tr:hover {
+  background: #eff6ff;
+}
+
+/* First column — requirement name */
+.brief-content td:first-child {
+  font-weight: 600;
+  color: #0f172a;
+  white-space: nowrap;
+  width: 1%;
+}
+
+/* Last column — widest */
+.brief-content td:last-child {
+  color: #334155;
+}
+
+/* ═══════════════════════════════════════════
+   PRINT — produce a clean PDF/print
+   ═══════════════════════════════════════════ */
+
+@media print {
+  body { background: white; }
+
+  .no-print { display: none !important; }
+
+  .report-document {
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  .brief-content { font-size: 9pt; }
+
+  .brief-content h2,
+  .brief-content h3 {
+    background: #f1f5f9 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    break-after: avoid;
+  }
+
+  .brief-content table { break-inside: avoid; }
+
+  .brief-content th {
+    background: #1e293b !important;
+    color: #f1f5f9 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .brief-content tbody tr:nth-child(even) {
+    background: #f8fafc !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 }

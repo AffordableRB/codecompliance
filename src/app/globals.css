@@ -1,37 +1,42 @@
 @import "tailwindcss";
 
 /* ═══════════════════════════════════════════
-   DESIGN TOKENS
+   DESIGN TOKENS — Architecture Aesthetic
+   Warm off-white ground, near-black type,
+   muted stone accent. No gradients. No radius.
    ═══════════════════════════════════════════ */
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-
-  /* Brand */
-  --brand-900: #0a0f1e;
-  --brand-800: #0f172a;
-  --brand-700: #1e293b;
-  --brand-600: #334155;
-  --brand-accent: #3b82f6;
-  --brand-accent-dim: #1d4ed8;
-
-  /* Surface */
-  --surface-0: #ffffff;
-  --surface-1: #f8fafc;
-  --surface-2: #f1f5f9;
-  --surface-border: #e2e8f0;
+  /* Ground */
+  --bg-base:    #faf8f5;
+  --bg-warm:    #f5f2ee;
+  --bg-stone:   #ede9e3;
+  --bg-dark:    #111111;
 
   /* Text */
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
-  --text-inverse: #f8fafc;
+  --text-primary:   #1a1a1a;
+  --text-secondary: #4a4a4a;
+  --text-muted:     #888888;
+  --text-inverse:   #f5f2ee;
+
+  /* Borders */
+  --border-light:  #e5e0d8;
+  --border-medium: #ccc7be;
+  --border-dark:   #333333;
+
+  /* Accent — muted warm stone / desaturated bronze */
+  --accent:       #8c7b6b;
+  --accent-light: #b5a898;
+  --accent-dark:  #5c4f42;
+
+  /* Functional */
+  --error:   #8b1a1a;
+  --success: #1a4a2e;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--bg-base);
+  --color-foreground: var(--text-primary);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -40,114 +45,123 @@
    BASE
    ═══════════════════════════════════════════ */
 
-*, *::before, *::after {
-  box-sizing: border-box;
-}
+*, *::before, *::after { box-sizing: border-box; }
 
-html {
-  scroll-behavior: smooth;
-}
+html { scroll-behavior: smooth; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), "Inter", system-ui, -apple-system, sans-serif;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-sans), "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "kern" 1, "liga" 1;
 }
 
 /* ═══════════════════════════════════════════
-   FORM INPUTS — refined
+   FORM INPUTS
    ═══════════════════════════════════════════ */
 
 .form-input {
   width: 100%;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
+  border: 1px solid var(--border-medium);
+  border-radius: 0;
   padding: 0.5625rem 0.75rem;
   font-size: 0.8125rem;
-  color: #0f172a;
+  color: var(--text-primary);
   background: #ffffff;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.15s ease;
   line-height: 1.5;
+  font-family: inherit;
 }
 
-.form-input::placeholder {
-  color: #94a3b8;
-}
+.form-input::placeholder { color: var(--text-muted); }
 
 .form-input:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+  border-color: var(--text-primary);
+  box-shadow: none;
 }
 
 select.form-input {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%23888' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
   padding-right: 2.25rem;
   cursor: pointer;
 }
 
+textarea.form-input { resize: vertical; }
+
 /* ═══════════════════════════════════════════
-   REPORT DOCUMENT — the brief output
+   SECTION UTILITIES
+   ═══════════════════════════════════════════ */
+
+.section-label {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.section-title {
+  font-size: 1.75rem;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+
+/* ═══════════════════════════════════════════
+   REPORT DOCUMENT
    ═══════════════════════════════════════════ */
 
 .brief-content {
   font-size: 0.8125rem;
-  line-height: 1.7;
-  color: #1e293b;
+  line-height: 1.75;
+  color: var(--text-primary);
 }
 
-/* Top-level heading — hidden, we have our own header */
-.brief-content > h1:first-child {
-  display: none;
-}
+/* Hide top-level H1 — we have our own header */
+.brief-content > h1:first-child { display: none; }
 
 .brief-content h1 {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: #0f172a;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
   margin: 2rem 0 0.625rem;
   letter-spacing: -0.01em;
 }
 
 /* Section headers */
 .brief-content h2 {
-  font-size: 0.625rem;
+  font-size: 0.5625rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #1e3a5f;
-  margin: 2.25rem 0 0.875rem;
+  color: var(--text-primary);
+  margin: 2.5rem 0 0.875rem;
   padding: 0.5rem 0.75rem;
-  background: #f1f5f9;
-  border-left: 3px solid #1e3a5f;
-  border-radius: 0 4px 4px 0;
+  background: var(--bg-warm);
+  border-left: 2px solid var(--text-primary);
 }
 
 .brief-content h3 {
-  font-size: 0.625rem;
+  font-size: 0.5625rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #1e3a5f;
-  margin: 1.875rem 0 0.75rem;
+  color: var(--text-secondary);
+  margin: 2rem 0 0.75rem;
   padding: 0.5rem 0.75rem;
-  background: #f8fafc;
-  border-left: 3px solid #3b82f6;
-  border-radius: 0 4px 4px 0;
+  background: var(--bg-warm);
+  border-left: 2px solid var(--accent);
 }
 
-/* Paragraphs */
-.brief-content p {
-  margin-bottom: 0.625rem;
-  line-height: 1.7;
-}
+.brief-content p { margin-bottom: 0.625rem; }
 
-/* Lists */
 .brief-content ul,
 .brief-content ol {
   margin-left: 1.375rem;
@@ -156,20 +170,19 @@ select.form-input {
 
 .brief-content li {
   margin-bottom: 0.3125rem;
-  line-height: 1.6;
+  line-height: 1.65;
 }
 
 .brief-content ul li { list-style-type: disc; }
 .brief-content ol li { list-style-type: decimal; }
 
-/* Inline */
 .brief-content strong {
   font-weight: 600;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .brief-content a {
-  color: #2563eb;
+  color: var(--text-primary);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -177,24 +190,19 @@ select.form-input {
 .brief-content code {
   font-family: var(--font-mono), "Fira Code", monospace;
   font-size: 0.75rem;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  border-radius: 3px;
+  background: var(--bg-warm);
+  border: 1px solid var(--border-light);
   padding: 0.1em 0.35em;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .brief-content blockquote {
-  border-left: 3px solid #3b82f6;
-  padding-left: 0.875rem;
+  border-left: 2px solid var(--accent);
+  padding: 0.375rem 0.875rem;
   margin: 0.875rem 0;
-  color: #475569;
+  color: var(--text-secondary);
   font-style: italic;
-  background: #f8fafc;
-  border-radius: 0 4px 4px 0;
-  padding-top: 0.375rem;
-  padding-bottom: 0.375rem;
-  padding-right: 0.75rem;
+  background: var(--bg-warm);
 }
 
 /* ═══════════════════════════════════════════
@@ -204,58 +212,48 @@ select.form-input {
 .brief-content table {
   width: 100%;
   border-collapse: collapse;
-  margin: 0.625rem 0 1.25rem;
+  margin: 0.625rem 0 1.5rem;
   font-size: 0.75rem;
   line-height: 1.45;
-  border-radius: 6px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-}
-
-.brief-content thead {
-  position: sticky;
-  top: 0;
 }
 
 .brief-content th {
-  background: #0f172a;
-  color: #e2e8f0;
+  background: var(--bg-dark);
+  color: var(--text-inverse);
   font-weight: 600;
   font-size: 0.5625rem;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   padding: 0.5625rem 0.875rem;
   text-align: left;
-  border: 1px solid #1e293b;
+  border: 1px solid #000;
 }
 
 .brief-content td {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-light);
   padding: 0.5rem 0.875rem;
   text-align: left;
   vertical-align: top;
-  color: #334155;
+  color: var(--text-secondary);
 }
 
 .brief-content tbody tr:nth-child(even) {
-  background: #f8fafc;
+  background: var(--bg-warm);
 }
 
 .brief-content tbody tr:hover {
-  background: #eff6ff;
-  transition: background 0.1s ease;
+  background: var(--bg-stone);
 }
 
-/* First column — label */
 .brief-content td:first-child {
   font-weight: 600;
-  color: #0f172a;
+  color: var(--text-primary);
   white-space: nowrap;
   width: 1%;
 }
 
 /* ═══════════════════════════════════════════
-   STREAMING CURSOR ANIMATION
+   STREAMING CURSOR
    ═══════════════════════════════════════════ */
 
 @keyframes blink {
@@ -266,15 +264,26 @@ select.form-input {
 .streaming-cursor::after {
   content: "▋";
   display: inline-block;
-  animation: blink 0.9s step-end infinite;
-  color: #3b82f6;
+  animation: blink 0.85s step-end infinite;
+  color: var(--accent);
   font-size: 0.875em;
   margin-left: 1px;
-  vertical-align: baseline;
 }
 
 /* ═══════════════════════════════════════════
-   PRINT — clean PDF output
+   FAQ ACCORDION
+   ═══════════════════════════════════════════ */
+
+.faq-item {
+  border-bottom: 1px solid var(--border-light);
+}
+
+.faq-item:first-child {
+  border-top: 1px solid var(--border-light);
+}
+
+/* ═══════════════════════════════════════════
+   PRINT — clean document output
    ═══════════════════════════════════════════ */
 
 @media print {
@@ -291,26 +300,23 @@ select.form-input {
 
   .brief-content h2,
   .brief-content h3 {
-    background: #f1f5f9 !important;
+    background: #f5f2ee !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
     break-after: avoid;
   }
 
-  .brief-content table {
-    break-inside: avoid;
-    box-shadow: none !important;
-  }
+  .brief-content table { break-inside: avoid; }
 
   .brief-content th {
-    background: #0f172a !important;
-    color: #e2e8f0 !important;
+    background: #111111 !important;
+    color: #f5f2ee !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
   .brief-content tbody tr:nth-child(even) {
-    background: #f8fafc !important;
+    background: #f5f2ee !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }

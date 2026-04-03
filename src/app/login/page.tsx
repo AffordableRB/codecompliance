@@ -1,474 +1,258 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase-browser";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [mode, setMode] = useState<"login" | "signup">("login");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
-  const router = useRouter();
+  const [success, setSuccess] = useState("");
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleEmail(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
-    setMessage("");
+    setSuccess("");
 
-    if (mode === "signup") {
-      const { error } = await supabase.auth.signUp({ email, password });
-      if (error) {
-        setError(error.message);
-      } else {
-        setMessage("Check your email for a confirmation link.");
-      }
-    } else {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error) {
-        setError(error.message);
-      } else {
-        router.push("/dashboard");
-      }
-    }
+    const { error: authError } =
+      mode === "signin"
+        ? await supabase.auth.signInWithPassword({ email, password })
+        : await supabase.auth.signUp({ email, password });
+
     setLoading(false);
+
+    if (authError) {
+      setError(authError.message);
+    } else if (mode === "signup") {
+      setSuccess("Check your email to confirm your account, then sign in below.");
+      setMode("signin");
+    } else {
+      router.push("/dashboard");
+    }
   }
 
-  async function handleGoogleSignIn() {
-    const { error } = await supabase.auth.signInWithOAuth({
+  async function handleGoogle() {
+    setError("");
+    const { error: authError } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo: `${window.location.origin}/dashboard` },
     });
-    if (error) setError(error.message);
+    if (authError) setError(authError.message);
   }
 
   return (
-    <div
-      className="min-h-screen flex"
-      style={{ background: "#f8fafc" }}
-    >
-      {/* Left panel — branding */}
+    <div className="min-h-screen flex" style={{ background: "var(--bg-base)" }}>
+      {/* LEFT — Branding Panel */}
       <div
-        className="hidden lg:flex lg:w-[420px] xl:w-[480px] flex-col justify-between p-12 relative overflow-hidden flex-shrink-0"
-        style={{ background: "#0a0f1e" }}
+        className="hidden lg:flex lg:w-1/2 flex-col justify-between p-14"
+        style={{ background: "#111111" }}
       >
-        {/* Grid texture */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.025) 1px, transparent 0)",
-            backgroundSize: "28px 28px",
-          }}
-        />
-        {/* Glow */}
-        <div
-          className="absolute pointer-events-none"
-          style={{
-            bottom: "-60px",
-            left: "-60px",
-            width: "400px",
-            height: "400px",
-            background:
-              "radial-gradient(ellipse at center, rgba(59,130,246,0.1) 0%, transparent 65%)",
-          }}
-        />
-
-        {/* Logo */}
-        <div className="relative flex items-center gap-3">
+        <a href="/" className="flex items-center gap-3">
           <div
-            className="w-9 h-9 rounded-lg flex items-center justify-center"
-            style={{
-              background: "rgba(59,130,246,0.15)",
-              border: "1px solid rgba(59,130,246,0.3)",
-            }}
+            className="w-7 h-7 flex items-center justify-center"
+            style={{ border: "1px solid rgba(245,242,238,0.3)" }}
           >
-            <svg className="w-5 h-5" viewBox="0 0 20 20" fill="none">
-              <path
-                d="M4 5h12M4 8h8M4 11h10M4 14h6"
-                stroke="#60a5fa"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-            </svg>
+            <span className="text-[10px] font-bold tracking-tight" style={{ color: "#f5f2ee" }}>
+              CB
+            </span>
           </div>
           <span
-            className="font-semibold tracking-tight"
-            style={{ color: "#f1f5f9" }}
+            className="text-sm font-medium tracking-widest uppercase"
+            style={{ color: "#f5f2ee", letterSpacing: "0.12em" }}
           >
             CodeBrief
           </span>
-        </div>
+        </a>
 
-        {/* Tagline */}
-        <div className="relative">
+        <div className="max-w-sm">
           <p
-            className="text-2xl font-bold leading-snug tracking-tight mb-4"
-            style={{ color: "#f1f5f9" }}
+            className="text-[9px] font-semibold tracking-widest uppercase mb-6"
+            style={{ color: "#b5a898" }}
           >
-            Pre-design code intelligence
+            Pre-Design Code Intelligence
+          </p>
+          <h2
+            className="text-3xl font-light leading-tight mb-8"
+            style={{ color: "#f5f2ee", letterSpacing: "-0.02em" }}
+          >
+            Know your code constraints
             <br />
-            <span style={{ color: "#3b82f6" }}>for architects.</span>
-          </p>
-          <p className="text-sm leading-relaxed mb-8" style={{ color: "#475569" }}>
-            Get a complete building code compliance brief in under 60 seconds.
-            Zoning, fire separation, egress, accessibility, energy code, and
-            risk flags — all in one report.
-          </p>
-
-          {/* Feature list */}
-          <div className="space-y-3">
+            before schematic design.
+          </h2>
+          <ul className="space-y-4">
             {[
+              "Zoning, IBC, ADA, IECC — one report",
               "20,000+ US jurisdictions covered",
-              "IBC, IFC, ADA, IECC, IPC citations",
-              "Tabular format with calculations",
-              "Free tier — 2 briefs per month",
-            ].map((feat) => (
-              <div key={feat} className="flex items-center gap-2.5">
-                <div
-                  className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{ background: "rgba(59,130,246,0.15)" }}
-                >
-                  <svg className="w-2.5 h-2.5" viewBox="0 0 10 10" fill="none">
-                    <path
-                      d="M2 5l2 2 4-4"
-                      stroke="#60a5fa"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
-                <span className="text-xs" style={{ color: "#64748b" }}>
-                  {feat}
+              "IBC section citations, not summaries",
+              "Risk flags before they become RFIs",
+            ].map((item) => (
+              <li key={item} className="flex items-start gap-3">
+                <span className="mt-0.5 text-xs flex-shrink-0" style={{ color: "#b5a898" }}>—</span>
+                <span className="text-sm" style={{ color: "rgba(245,242,238,0.55)", fontWeight: 300 }}>
+                  {item}
                 </span>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
 
-        {/* Footer note */}
-        <p className="relative text-[10px]" style={{ color: "#334155" }}>
-          &copy; {new Date().getFullYear()} CodeBrief
+        <p className="text-[10px] tracking-widest uppercase" style={{ color: "rgba(245,242,238,0.2)" }}>
+          For architects. Not contractors. Not engineers.
         </p>
       </div>
 
-      {/* Right panel — auth form */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
-        {/* Mobile logo */}
-        <div className="lg:hidden flex items-center gap-2.5 mb-8">
+      {/* RIGHT — Auth Panel */}
+      <div className="flex-1 flex flex-col justify-center items-center px-8 py-16">
+        <div className="lg:hidden mb-10 flex items-center gap-3">
           <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center"
-            style={{
-              background: "#0f172a",
-              border: "1px solid rgba(255,255,255,0.08)",
-            }}
+            className="w-7 h-7 flex items-center justify-center"
+            style={{ border: "1px solid var(--border-medium)" }}
           >
-            <svg className="w-4 h-4" viewBox="0 0 20 20" fill="none">
-              <path
-                d="M4 5h12M4 8h8M4 11h10M4 14h6"
-                stroke="#60a5fa"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-            </svg>
+            <span className="text-[10px] font-bold" style={{ color: "var(--text-primary)" }}>CB</span>
           </div>
-          <span className="font-semibold text-sm" style={{ color: "#0f172a" }}>
+          <span
+            className="text-sm font-medium tracking-widest uppercase"
+            style={{ color: "var(--text-primary)", letterSpacing: "0.12em" }}
+          >
             CodeBrief
           </span>
         </div>
 
-        <div className="w-full max-w-[380px]">
-          {/* Heading */}
-          <div className="mb-7">
+        <div className="w-full max-w-sm">
+          <div className="mb-8">
             <h1
-              className="text-xl font-bold tracking-tight mb-1"
-              style={{ color: "#0f172a" }}
+              className="text-2xl font-light tracking-tight mb-1.5"
+              style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}
             >
-              {mode === "login" ? "Welcome back" : "Create your account"}
+              {mode === "signin" ? "Sign in" : "Create account"}
             </h1>
-            <p className="text-sm" style={{ color: "#64748b" }}>
-              {mode === "login"
-                ? "Sign in to access your code analysis reports."
-                : "Start generating code compliance briefs for free."}
+            <p className="text-sm" style={{ color: "var(--text-muted)", fontWeight: 300 }}>
+              {mode === "signin"
+                ? "Welcome back to CodeBrief."
+                : "Start with 2 free briefs per month."}
             </p>
           </div>
 
-          {/* Card */}
-          <div
-            className="rounded-xl p-6"
-            style={{
-              background: "#ffffff",
-              border: "1px solid #e2e8f0",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.04)",
-            }}
-          >
-            {/* Google */}
-            <button
-              onClick={handleGoogleSignIn}
-              className="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors mb-5"
-              style={{
-                border: "1px solid #e2e8f0",
-                color: "#334155",
-                background: "#ffffff",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.background = "#f8fafc")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.background = "#ffffff")
-              }
+          {success && (
+            <div
+              className="mb-5 px-4 py-3 text-xs"
+              style={{ background: "#f0fdf4", border: "1px solid #86efac", color: "#1a4a2e" }}
             >
-              <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
-                <path
-                  fill="#4285F4"
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
-                />
-                <path
-                  fill="#34A853"
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                />
-                <path
-                  fill="#FBBC05"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                />
-                <path
-                  fill="#EA4335"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                />
-              </svg>
-              Continue with Google
-            </button>
-
-            {/* Divider */}
-            <div className="relative mb-5">
-              <div
-                className="absolute inset-0 flex items-center"
-                aria-hidden="true"
-              >
-                <div
-                  className="w-full"
-                  style={{ borderTop: "1px solid #f1f5f9" }}
-                />
-              </div>
-              <div className="relative flex justify-center">
-                <span
-                  className="px-3 text-xs"
-                  style={{ background: "#ffffff", color: "#94a3b8" }}
-                >
-                  or continue with email
-                </span>
-              </div>
+              {success}
             </div>
+          )}
 
-            {/* Email/Password Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label
-                  className="block text-[10px] font-semibold tracking-widest uppercase mb-1.5"
-                  style={{ color: "#64748b" }}
-                >
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="form-input"
-                  placeholder="you@example.com"
-                  required
-                  autoComplete="email"
-                />
-              </div>
-              <div>
-                <label
-                  className="block text-[10px] font-semibold tracking-widest uppercase mb-1.5"
-                  style={{ color: "#64748b" }}
-                >
-                  Password
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="form-input"
-                  placeholder="••••••••"
-                  required
-                  minLength={6}
-                  autoComplete={
-                    mode === "signup" ? "new-password" : "current-password"
-                  }
-                />
-              </div>
+          {error && (
+            <div
+              className="mb-5 px-4 py-3 text-xs"
+              style={{ background: "#fef2f2", border: "1px solid #fca5a5", color: "#8b1a1a" }}
+            >
+              {error}
+            </div>
+          )}
 
-              {/* Feedback */}
-              {error && (
-                <div
-                  className="p-3 rounded-lg flex items-start gap-2 text-xs"
-                  style={{
-                    background: "#fef2f2",
-                    border: "1px solid #fecaca",
-                    color: "#b91c1c",
-                  }}
-                >
-                  <svg
-                    className="w-3.5 h-3.5 flex-shrink-0 mt-0.5"
-                    viewBox="0 0 16 16"
-                    fill="none"
-                  >
-                    <circle
-                      cx="8"
-                      cy="8"
-                      r="7"
-                      stroke="#ef4444"
-                      strokeWidth="1.5"
-                    />
-                    <path
-                      d="M8 5v3M8 10.5h.01"
-                      stroke="#ef4444"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  {error}
-                </div>
-              )}
-              {message && (
-                <div
-                  className="p-3 rounded-lg flex items-start gap-2 text-xs"
-                  style={{
-                    background: "#f0fdf4",
-                    border: "1px solid #bbf7d0",
-                    color: "#15803d",
-                  }}
-                >
-                  <svg
-                    className="w-3.5 h-3.5 flex-shrink-0 mt-0.5"
-                    viewBox="0 0 16 16"
-                    fill="none"
-                  >
-                    <circle
-                      cx="8"
-                      cy="8"
-                      r="7"
-                      stroke="#22c55e"
-                      strokeWidth="1.5"
-                    />
-                    <path
-                      d="M5 8l2 2 4-4"
-                      stroke="#22c55e"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  {message}
-                </div>
-              )}
+          <button
+            onClick={handleGoogle}
+            className="w-full flex items-center justify-center gap-3 py-2.5 mb-5 text-xs font-medium tracking-wide transition-colors"
+            style={{
+              border: "1px solid var(--border-medium)",
+              background: "#ffffff",
+              color: "var(--text-primary)",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-warm)")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "#ffffff")}
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+            </svg>
+            Continue with Google
+          </button>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50"
-                style={{
-                  background: "#0f172a",
-                  color: "#f1f5f9",
-                }}
-                onMouseEnter={(e) =>
-                  !loading &&
-                  (e.currentTarget.style.background = "#1e293b")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "#0f172a")
-                }
-              >
-                {loading ? (
-                  <>
-                    <svg
-                      className="w-3.5 h-3.5 animate-spin"
-                      viewBox="0 0 16 16"
-                      fill="none"
-                    >
-                      <circle
-                        cx="8"
-                        cy="8"
-                        r="6"
-                        stroke="rgba(241,245,249,0.3)"
-                        strokeWidth="2"
-                      />
-                      <path
-                        d="M8 2a6 6 0 016 6"
-                        stroke="#f1f5f9"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                    Loading...
-                  </>
-                ) : mode === "login" ? (
-                  "Sign In"
-                ) : (
-                  "Create Account"
-                )}
-              </button>
-            </form>
+          <div className="relative flex items-center mb-5">
+            <div className="flex-1 h-px" style={{ background: "var(--border-light)" }} />
+            <span className="px-3 text-[10px] tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>or</span>
+            <div className="flex-1 h-px" style={{ background: "var(--border-light)" }} />
           </div>
 
-          {/* Mode toggle */}
-          <p className="mt-5 text-center text-xs" style={{ color: "#64748b" }}>
-            {mode === "login" ? (
-              <>
-                Don&apos;t have an account?{" "}
-                <button
-                  onClick={() => {
-                    setMode("signup");
-                    setError("");
-                    setMessage("");
-                  }}
-                  className="font-semibold transition-colors"
-                  style={{ color: "#3b82f6" }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.color = "#1d4ed8")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.color = "#3b82f6")
-                  }
-                >
-                  Sign up free
-                </button>
-              </>
-            ) : (
-              <>
-                Already have an account?{" "}
-                <button
-                  onClick={() => {
-                    setMode("login");
-                    setError("");
-                    setMessage("");
-                  }}
-                  className="font-semibold transition-colors"
-                  style={{ color: "#3b82f6" }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.color = "#1d4ed8")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.color = "#3b82f6")
-                  }
-                >
-                  Sign in
-                </button>
-              </>
-            )}
+          <form onSubmit={handleEmail} className="space-y-3.5">
+            <div>
+              <label
+                className="block text-[9px] font-semibold tracking-widest uppercase mb-1.5"
+                style={{ color: "var(--text-muted)" }}
+              >
+                Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@firm.com"
+                className="form-input"
+                required
+                autoComplete="email"
+              />
+            </div>
+            <div>
+              <label
+                className="block text-[9px] font-semibold tracking-widest uppercase mb-1.5"
+                style={{ color: "var(--text-muted)" }}
+              >
+                Password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="form-input"
+                required
+                autoComplete={mode === "signin" ? "current-password" : "new-password"}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-2.5 text-xs font-medium tracking-widest uppercase transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ background: "#111111", color: "#f5f2ee" }}
+              onMouseEnter={(e) => { if (!loading) e.currentTarget.style.background = "#333333"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "#111111"; }}
+            >
+              {loading ? "Please wait..." : mode === "signin" ? "Sign In" : "Create Account"}
+            </button>
+          </form>
+
+          <p className="mt-6 text-xs text-center" style={{ color: "var(--text-muted)" }}>
+            {mode === "signin" ? "Don't have an account?" : "Already have an account?"}{" "}
+            <button
+              onClick={() => { setMode(mode === "signin" ? "signup" : "signin"); setError(""); setSuccess(""); }}
+              className="font-medium transition-colors"
+              style={{ color: "var(--text-primary)" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--accent)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
+            >
+              {mode === "signin" ? "Create account" : "Sign in"}
+            </button>
           </p>
 
-          <p className="mt-3 text-center text-[10px]" style={{ color: "#cbd5e1" }}>
-            Free tier includes 2 briefs per month. No credit card required.
+          <p className="mt-4 text-center">
+            <a
+              href="/"
+              className="text-[10px] tracking-wide transition-colors"
+              style={{ color: "var(--border-medium)" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--border-medium)")}
+            >
+              &larr; Back to CodeBrief
+            </a>
           </p>
         </div>
       </div>

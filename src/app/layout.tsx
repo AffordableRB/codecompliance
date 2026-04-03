@@ -6,6 +6,7 @@ import "./globals.css";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 const geistMono = Geist_Mono({
@@ -14,9 +15,18 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CodeBrief — AI Code Compliance Briefs for Architects",
+  title: "CodeBrief — Pre-Design Code Intelligence for Architects",
   description:
-    "Get a complete building code compliance brief in under 60 seconds. Zoning, setbacks, fire separation, accessibility, energy code, parking, and risk flags — all in one report.",
+    "Enter your project parameters. Get a professional building code compliance brief in 60 seconds — zoning, construction type, fire separation, egress, accessibility, energy code, and risk flags, with IBC section citations.",
+  keywords: [
+    "building code compliance",
+    "IBC code analysis",
+    "architect code brief",
+    "pre-design code intelligence",
+    "zoning analysis",
+    "ADA compliance",
+    "IECC energy code",
+  ],
 };
 
 export default function RootLayout({

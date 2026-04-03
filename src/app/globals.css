@@ -1,8 +1,32 @@
 @import "tailwindcss";
 
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS
+   ═══════════════════════════════════════════ */
+
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
+
+  /* Brand */
+  --brand-900: #0a0f1e;
+  --brand-800: #0f172a;
+  --brand-700: #1e293b;
+  --brand-600: #334155;
+  --brand-accent: #3b82f6;
+  --brand-accent-dim: #1d4ed8;
+
+  /* Surface */
+  --surface-0: #ffffff;
+  --surface-1: #f8fafc;
+  --surface-2: #f1f5f9;
+  --surface-border: #e2e8f0;
+
+  /* Text */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --text-inverse: #f8fafc;
 }
 
 @theme inline {
@@ -12,36 +36,59 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* ═══════════════════════════════════════════
+   BASE
+   ═══════════════════════════════════════════ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), "Inter", system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Form Inputs */
+/* ═══════════════════════════════════════════
+   FORM INPUTS — refined
+   ═══════════════════════════════════════════ */
+
 .form-input {
   width: 100%;
   border: 1px solid #cbd5e1;
-  padding: 0.5rem 0.625rem;
+  border-radius: 6px;
+  padding: 0.5625rem 0.75rem;
   font-size: 0.8125rem;
   color: #0f172a;
-  background: #fff;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  background: #ffffff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  line-height: 1.5;
+}
+
+.form-input::placeholder {
+  color: #94a3b8;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #1e293b;
-  box-shadow: 0 0 0 1px #1e293b;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
 }
 
 select.form-input {
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 0.625rem center;
-  padding-right: 2rem;
+  background-position: right 0.75rem center;
+  padding-right: 2.25rem;
+  cursor: pointer;
 }
 
 /* ═══════════════════════════════════════════
@@ -50,11 +97,11 @@ select.form-input {
 
 .brief-content {
   font-size: 0.8125rem;
-  line-height: 1.6;
+  line-height: 1.7;
   color: #1e293b;
 }
 
-/* Top-level heading (# Code Analysis Report) — hide since we have our own header */
+/* Top-level heading — hidden, we have our own header */
 .brief-content > h1:first-child {
   display: none;
 }
@@ -63,56 +110,59 @@ select.form-input {
   font-size: 1.125rem;
   font-weight: 700;
   color: #0f172a;
-  margin: 1.5rem 0 0.5rem;
+  margin: 2rem 0 0.625rem;
+  letter-spacing: -0.01em;
 }
 
-/* Section headers (## and ###) */
+/* Section headers */
 .brief-content h2 {
-  font-size: 0.6875rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #1e3a5f;
+  margin: 2.25rem 0 0.875rem;
+  padding: 0.5rem 0.75rem;
+  background: #f1f5f9;
+  border-left: 3px solid #1e3a5f;
+  border-radius: 0 4px 4px 0;
+}
+
+.brief-content h3 {
+  font-size: 0.625rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #1e3a5f;
-  margin: 2rem 0 0.75rem;
-  padding: 0.5rem 0.625rem;
-  background: #f1f5f9;
-  border-left: 3px solid #1e3a5f;
-}
-
-.brief-content h3 {
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #1e3a5f;
-  margin: 1.75rem 0 0.625rem;
-  padding: 0.5rem 0.625rem;
-  background: #f1f5f9;
+  margin: 1.875rem 0 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: #f8fafc;
   border-left: 3px solid #3b82f6;
+  border-radius: 0 4px 4px 0;
 }
 
 /* Paragraphs */
 .brief-content p {
-  margin-bottom: 0.5rem;
-  line-height: 1.6;
+  margin-bottom: 0.625rem;
+  line-height: 1.7;
 }
 
 /* Lists */
 .brief-content ul,
 .brief-content ol {
-  margin-left: 1.25rem;
-  margin-bottom: 0.75rem;
+  margin-left: 1.375rem;
+  margin-bottom: 0.875rem;
 }
 
 .brief-content li {
-  margin-bottom: 0.25rem;
-  line-height: 1.5;
+  margin-bottom: 0.3125rem;
+  line-height: 1.6;
 }
 
 .brief-content ul li { list-style-type: disc; }
 .brief-content ol li { list-style-type: decimal; }
 
-/* Inline styles */
+/* Inline */
 .brief-content strong {
   font-weight: 600;
   color: #0f172a;
@@ -124,24 +174,42 @@ select.form-input {
   text-underline-offset: 2px;
 }
 
+.brief-content code {
+  font-family: var(--font-mono), "Fira Code", monospace;
+  font-size: 0.75rem;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 3px;
+  padding: 0.1em 0.35em;
+  color: #0f172a;
+}
+
 .brief-content blockquote {
-  border-left: 2px solid #1e3a5f;
-  padding-left: 0.75rem;
-  margin: 0.75rem 0;
+  border-left: 3px solid #3b82f6;
+  padding-left: 0.875rem;
+  margin: 0.875rem 0;
   color: #475569;
   font-style: italic;
+  background: #f8fafc;
+  border-radius: 0 4px 4px 0;
+  padding-top: 0.375rem;
+  padding-bottom: 0.375rem;
+  padding-right: 0.75rem;
 }
 
 /* ═══════════════════════════════════════════
-   TABLES — professional engineering style
+   TABLES — engineering document style
    ═══════════════════════════════════════════ */
 
 .brief-content table {
   width: 100%;
   border-collapse: collapse;
-  margin: 0.5rem 0 1rem;
+  margin: 0.625rem 0 1.25rem;
   font-size: 0.75rem;
-  line-height: 1.4;
+  line-height: 1.45;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
 
 .brief-content thead {
@@ -150,20 +218,20 @@ select.form-input {
 }
 
 .brief-content th {
-  background: #1e293b;
-  color: #f1f5f9;
+  background: #0f172a;
+  color: #e2e8f0;
   font-weight: 600;
-  font-size: 0.625rem;
-  letter-spacing: 0.08em;
+  font-size: 0.5625rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  padding: 0.5rem 0.75rem;
+  padding: 0.5625rem 0.875rem;
   text-align: left;
   border: 1px solid #1e293b;
 }
 
 .brief-content td {
   border: 1px solid #e2e8f0;
-  padding: 0.4375rem 0.75rem;
+  padding: 0.5rem 0.875rem;
   text-align: left;
   vertical-align: top;
   color: #334155;
@@ -175,9 +243,10 @@ select.form-input {
 
 .brief-content tbody tr:hover {
   background: #eff6ff;
+  transition: background 0.1s ease;
 }
 
-/* First column — requirement name */
+/* First column — label */
 .brief-content td:first-child {
   font-weight: 600;
   color: #0f172a;
@@ -185,13 +254,27 @@ select.form-input {
   width: 1%;
 }
 
-/* Last column — widest */
-.brief-content td:last-child {
-  color: #334155;
+/* ═══════════════════════════════════════════
+   STREAMING CURSOR ANIMATION
+   ═══════════════════════════════════════════ */
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.streaming-cursor::after {
+  content: "▋";
+  display: inline-block;
+  animation: blink 0.9s step-end infinite;
+  color: #3b82f6;
+  font-size: 0.875em;
+  margin-left: 1px;
+  vertical-align: baseline;
 }
 
 /* ═══════════════════════════════════════════
-   PRINT — produce a clean PDF/print
+   PRINT — clean PDF output
    ═══════════════════════════════════════════ */
 
 @media print {
@@ -204,7 +287,7 @@ select.form-input {
     border: none !important;
   }
 
-  .brief-content { font-size: 9pt; }
+  .brief-content { font-size: 9pt; line-height: 1.5; }
 
   .brief-content h2,
   .brief-content h3 {
@@ -214,11 +297,14 @@ select.form-input {
     break-after: avoid;
   }
 
-  .brief-content table { break-inside: avoid; }
+  .brief-content table {
+    break-inside: avoid;
+    box-shadow: none !important;
+  }
 
   .brief-content th {
-    background: #1e293b !important;
-    color: #f1f5f9 !important;
+    background: #0f172a !important;
+    color: #e2e8f0 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }

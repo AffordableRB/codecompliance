@@ -300,8 +300,8 @@ export default function Home() {
       <nav
         className="no-print sticky top-0 z-50"
         style={{
-          background: "#111111",
-          borderBottom: "1px solid #222222",
+          background: "#f7f3ec",
+          borderBottom: "1px solid #ddd5c8",
         }}
       >
         <div className="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
@@ -309,18 +309,18 @@ export default function Home() {
           <a href="/" className="flex items-center gap-3">
             <div
               className="w-7 h-7 flex items-center justify-center"
-              style={{ border: "1px solid rgba(245,242,238,0.4)" }}
+              style={{ border: "1px solid #1c1a17" }}
             >
               <span
                 className="text-[10px] font-bold tracking-tight"
-                style={{ color: "#f5f2ee" }}
+                style={{ color: "#1c1a17" }}
               >
                 CB
               </span>
             </div>
             <span
               className="text-sm font-medium tracking-widest uppercase"
-              style={{ color: "#f5f2ee", letterSpacing: "0.12em" }}
+              style={{ color: "#1c1a17", letterSpacing: "0.12em" }}
             >
               CodeBrief
             </span>
@@ -333,12 +333,12 @@ export default function Home() {
                 key={item}
                 href={`#${item.toLowerCase().replace(/\s+/g, "-")}`}
                 className="text-xs tracking-wide transition-colors"
-                style={{ color: "rgba(245,242,238,0.5)" }}
+                style={{ color: "#8a8078" }}
                 onMouseEnter={(e) =>
-                  (e.currentTarget.style.color = "rgba(245,242,238,0.9)")
+                  (e.currentTarget.style.color = "#1c1a17")
                 }
                 onMouseLeave={(e) =>
-                  (e.currentTarget.style.color = "rgba(245,242,238,0.5)")
+                  (e.currentTarget.style.color = "#8a8078")
                 }
               >
                 {item}
@@ -353,12 +353,12 @@ export default function Home() {
                 <a
                   href="/dashboard"
                   className="text-xs tracking-wide transition-colors"
-                  style={{ color: "rgba(245,242,238,0.5)" }}
+                  style={{ color: "#8a8078" }}
                   onMouseEnter={(e) =>
-                    (e.currentTarget.style.color = "rgba(245,242,238,0.9)")
+                    (e.currentTarget.style.color = "#1c1a17")
                   }
                   onMouseLeave={(e) =>
-                    (e.currentTarget.style.color = "rgba(245,242,238,0.5)")
+                    (e.currentTarget.style.color = "#8a8078")
                   }
                 >
                   Dashboard
@@ -367,12 +367,12 @@ export default function Home() {
                 <a
                   href="/login"
                   className="text-xs tracking-wide transition-colors"
-                  style={{ color: "rgba(245,242,238,0.5)" }}
+                  style={{ color: "#8a8078" }}
                   onMouseEnter={(e) =>
-                    (e.currentTarget.style.color = "rgba(245,242,238,0.9)")
+                    (e.currentTarget.style.color = "#1c1a17")
                   }
                   onMouseLeave={(e) =>
-                    (e.currentTarget.style.color = "rgba(245,242,238,0.5)")
+                    (e.currentTarget.style.color = "#8a8078")
                   }
                 >
                   Sign In
@@ -382,15 +382,15 @@ export default function Home() {
               onClick={scrollToForm}
               className="px-4 py-2 text-xs font-medium tracking-widest uppercase transition-colors no-print"
               style={{
-                background: "#f5f2ee",
-                color: "#111111",
+                background: "#1c1a17",
+                color: "#f7f3ec",
                 border: "none",
               }}
               onMouseEnter={(e) =>
-                (e.currentTarget.style.background = "#e5e0d8")
+                (e.currentTarget.style.background = "#333")
               }
               onMouseLeave={(e) =>
-                (e.currentTarget.style.background = "#f5f2ee")
+                (e.currentTarget.style.background = "#1c1a17")
               }
             >
               Get Started

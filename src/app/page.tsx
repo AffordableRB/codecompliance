@@ -415,8 +415,14 @@ export default function Home() {
                   <div>
                     <p className="section-label mb-5">Pre-Design Intelligence</p>
                     <h1
-                      className="text-4xl md:text-5xl font-light leading-tight tracking-tight mb-6"
-                      style={{ color: "#f5f2ee", letterSpacing: "-0.02em" }}
+                      className="text-4xl md:text-5xl leading-tight mb-6"
+                      style={{
+                        color: "#f5f2ee",
+                        fontFamily: "var(--font-serif-display), Georgia, serif",
+                        fontWeight: 400,
+                        letterSpacing: "-0.01em",
+                        lineHeight: 1.1,
+                      }}
                     >
                       Code compliance briefs,
                       <br />

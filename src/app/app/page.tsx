@@ -172,6 +172,7 @@ export default function AppWorkspace() {
 
   // Wizard steps: 1=project details, 2=select reports, 3=generating, 4=results
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [substep, setSubstep] = useState<1 | 2 | 3 | 4>(1);
   const [form, setForm] = useState<ProjectInput>(initialForm);
   const [selectedReports, setSelectedReports] = useState<string[]>(["code-analysis"]);
 
@@ -219,6 +220,7 @@ export default function AppWorkspace() {
   function handleNewBrief() {
     setForm(initialForm);
     setStep(1);
+    setSubstep(1);
     setStreamText("");
     setCompletedBrief("");
     setError("");
@@ -406,73 +408,176 @@ export default function AppWorkspace() {
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
 
-          {/* ═══ STEP 1: PROJECT DETAILS ═══ */}
+          {/* ═══ STEP 1: PROJECT DETAILS (micro-steps) ═══ */}
           {step === 1 && (
-            <div className="max-w-xl mx-auto px-6 py-16">
-              <div className="text-center mb-10">
-                <p className="text-[9px] font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--accent)" }}>Step 1 of 4</p>
-                <h1 className="text-2xl font-light tracking-tight mb-2" style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}>
-                  Describe your project
-                </h1>
-                <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                  We&apos;ll search jurisdiction-specific codes based on these parameters.
-                </p>
-              </div>
+            <div className="flex-1 flex items-center justify-center px-6">
+              <div className="w-full max-w-md">
+                {/* Progress dots */}
+                <div className="flex items-center justify-center gap-2 mb-12">
+                  {[1, 2, 3, 4].map((s) => (
+                    <div
+                      key={s}
+                      className="h-1 transition-all duration-300"
+                      style={{
+                        width: substep === s ? 32 : 8,
+                        background: substep >= s ? "var(--text-primary)" : "var(--border-light)",
+                      }}
+                    />
+                  ))}
+                </div>
 
-              <div style={{ background: "#fff", border: "1px solid var(--border-medium)" }}>
-                <div className="px-6 py-5">
-                  <div className="grid grid-cols-2 gap-x-5 gap-y-4">
-                    <FormField label="Building Type" required>
-                      <select value={form.buildingType} onChange={(e) => update("buildingType", e.target.value)} className="form-input" required>
-                        <option value="">Select...</option>
-                        {BUILDING_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-                      </select>
-                    </FormField>
-                    <FormField label="Location" required>
-                      <input type="text" value={form.location} onChange={(e) => update("location", e.target.value)} placeholder="City, State or address" className="form-input" required />
-                    </FormField>
-                    <FormField label="Gross Area (SF)" required>
-                      <input type="text" value={form.squareFootage} onChange={(e) => update("squareFootage", e.target.value)} placeholder="e.g., 25,000" className="form-input" required />
-                    </FormField>
-                    <FormField label="Stories" required>
-                      <input type="text" value={form.stories} onChange={(e) => update("stories", e.target.value)} placeholder="e.g., 4" className="form-input" required />
-                    </FormField>
+                {/* Substep 1: What are you building? */}
+                {substep === 1 && (
+                  <div className="text-center">
+                    <h1 className="text-3xl font-light tracking-tight mb-8" style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}>
+                      What are you building?
+                    </h1>
+                    <div className="grid grid-cols-2 gap-2 mb-8">
+                      {BUILDING_TYPES.map((t) => (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => { update("buildingType", t); setSubstep(2); }}
+                          className="text-left px-4 py-3 text-sm transition-colors"
+                          style={{
+                            background: form.buildingType === t ? "var(--bg-dark)" : "#fff",
+                            color: form.buildingType === t ? "var(--text-inverse)" : "var(--text-primary)",
+                            border: form.buildingType === t ? "1px solid var(--bg-dark)" : "1px solid var(--border-medium)",
+                          }}
+                          onMouseEnter={(e) => { if (form.buildingType !== t) e.currentTarget.style.background = "var(--bg-warm)"; }}
+                          onMouseLeave={(e) => { if (form.buildingType !== t) e.currentTarget.style.background = "#fff"; }}
+                        >
+                          {t}
+                        </button>
+                      ))}
+                    </div>
                   </div>
+                )}
 
-                  <div className="mt-5 pt-5" style={{ borderTop: "1px solid var(--border-light)" }}>
-                    <p className="text-[9px] font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--text-muted)" }}>Optional — improves accuracy</p>
-                    <div className="grid grid-cols-3 gap-x-5 gap-y-4">
-                      <FormField label="Occupancy">
+                {/* Substep 2: Where? */}
+                {substep === 2 && (
+                  <div className="text-center">
+                    <p className="text-[9px] font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--accent)" }}>{form.buildingType}</p>
+                    <h1 className="text-3xl font-light tracking-tight mb-8" style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}>
+                      Where is it located?
+                    </h1>
+                    <input
+                      type="text"
+                      value={form.location}
+                      onChange={(e) => update("location", e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter" && form.location.length >= 3) setSubstep(3); }}
+                      placeholder="City, State or full address"
+                      className="form-input text-center text-lg py-4 mb-6"
+                      autoFocus
+                    />
+                    <div className="flex items-center justify-between">
+                      <button onClick={() => setSubstep(1)} className="text-[10px] tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>Back</button>
+                      <button
+                        onClick={() => form.location.length >= 3 && setSubstep(3)}
+                        disabled={form.location.length < 3}
+                        className="px-6 py-2.5 text-[10px] font-semibold tracking-widest uppercase transition-opacity disabled:opacity-30"
+                        style={{ background: "var(--bg-dark)", color: "var(--text-inverse)" }}
+                      >
+                        Continue
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Substep 3: How big? */}
+                {substep === 3 && (
+                  <div className="text-center">
+                    <p className="text-[9px] font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--accent)" }}>
+                      {form.buildingType} — {form.location}
+                    </p>
+                    <h1 className="text-3xl font-light tracking-tight mb-8" style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}>
+                      How big is the project?
+                    </h1>
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                      <div>
+                        <label className="block text-[9px] font-semibold tracking-widest uppercase mb-2 text-left" style={{ color: "var(--text-muted)" }}>
+                          Gross Area (SF)
+                        </label>
+                        <input
+                          type="text"
+                          value={form.squareFootage}
+                          onChange={(e) => update("squareFootage", e.target.value)}
+                          placeholder="e.g., 25,000"
+                          className="form-input text-center text-lg py-3"
+                          autoFocus
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[9px] font-semibold tracking-widest uppercase mb-2 text-left" style={{ color: "var(--text-muted)" }}>
+                          Stories Above Grade
+                        </label>
+                        <input
+                          type="text"
+                          value={form.stories}
+                          onChange={(e) => update("stories", e.target.value)}
+                          onKeyDown={(e) => { if (e.key === "Enter" && form.squareFootage && form.stories) setSubstep(4); }}
+                          placeholder="e.g., 4"
+                          className="form-input text-center text-lg py-3"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <button onClick={() => setSubstep(2)} className="text-[10px] tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>Back</button>
+                      <button
+                        onClick={() => form.squareFootage && form.stories && setSubstep(4)}
+                        disabled={!form.squareFootage || !form.stories}
+                        className="px-6 py-2.5 text-[10px] font-semibold tracking-widest uppercase transition-opacity disabled:opacity-30"
+                        style={{ background: "var(--bg-dark)", color: "var(--text-inverse)" }}
+                      >
+                        Continue
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Substep 4: Anything else? (optional, skippable) */}
+                {substep === 4 && (
+                  <div className="text-center">
+                    <p className="text-[9px] font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--accent)" }}>
+                      {form.buildingType} — {form.location} — {form.squareFootage} SF — {form.stories} stories
+                    </p>
+                    <h1 className="text-3xl font-light tracking-tight mb-2" style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}>
+                      Anything else?
+                    </h1>
+                    <p className="text-sm mb-8" style={{ color: "var(--text-muted)" }}>Optional — skip if you&apos;re not sure.</p>
+
+                    <div className="text-left space-y-4 mb-8" style={{ background: "#fff", border: "1px solid var(--border-medium)", padding: "1.25rem" }}>
+                      <FormField label="Occupancy Classification">
                         <select value={form.occupancyType} onChange={(e) => update("occupancyType", e.target.value)} className="form-input">
-                          <option value="">Auto</option>
+                          <option value="">Auto-classify</option>
                           {OCCUPANCY_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
                         </select>
                       </FormField>
-                      <FormField label="Occupant Load">
-                        <input type="text" value={form.occupantLoad} onChange={(e) => update("occupantLoad", e.target.value)} placeholder="e.g., 200" className="form-input" />
-                      </FormField>
-                      <FormField label="Lot Size">
-                        <input type="text" value={form.lotSize} onChange={(e) => update("lotSize", e.target.value)} placeholder="e.g., 10,000 SF" className="form-input" />
-                      </FormField>
-                    </div>
-                    <div className="mt-4">
-                      <FormField label="Notes">
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField label="Occupant Load">
+                          <input type="text" value={form.occupantLoad} onChange={(e) => update("occupantLoad", e.target.value)} placeholder="e.g., 200" className="form-input" />
+                        </FormField>
+                        <FormField label="Lot Size">
+                          <input type="text" value={form.lotSize} onChange={(e) => update("lotSize", e.target.value)} placeholder="e.g., 10,000 SF" className="form-input" />
+                        </FormField>
+                      </div>
+                      <FormField label="Project Notes">
                         <textarea value={form.additionalNotes} onChange={(e) => update("additionalNotes", e.target.value)} rows={2} placeholder="Renovation vs. new construction, specific concerns..." className="form-input" />
                       </FormField>
                     </div>
-                  </div>
-                </div>
 
-                <div className="px-6 py-3 flex justify-end" style={{ background: "var(--bg-warm)", borderTop: "1px solid var(--border-light)" }}>
-                  <button
-                    onClick={() => canSubmit && setStep(2)}
-                    disabled={!canSubmit}
-                    className="px-6 py-2.5 text-[10px] font-semibold tracking-widest uppercase transition-opacity disabled:opacity-30"
-                    style={{ background: "var(--bg-dark)", color: "var(--text-inverse)" }}
-                  >
-                    Continue — Select Reports
-                  </button>
-                </div>
+                    <div className="flex items-center justify-between">
+                      <button onClick={() => setSubstep(3)} className="text-[10px] tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>Back</button>
+                      <button
+                        onClick={() => setStep(2)}
+                        className="px-6 py-2.5 text-[10px] font-semibold tracking-widest uppercase"
+                        style={{ background: "var(--bg-dark)", color: "var(--text-inverse)" }}
+                      >
+                        Continue — Select Reports
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

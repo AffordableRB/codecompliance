@@ -187,6 +187,13 @@ export default function AppWorkspace() {
   const [error, setError] = useState("");
   const [researchLogIndex, setResearchLogIndex] = useState(0);
   const [currentReportId, setCurrentReportId] = useState("code-analysis");
+  const [reportMetadata, setReportMetadata] = useState<{
+    searchQueries: string[];
+    searchLog: { query: string; status: string; summary: string }[];
+    reportName: string;
+    generatedAt: string;
+  } | null>(null);
+  const [showMethodology, setShowMethodology] = useState(false);
 
   const briefRef = useRef<HTMLDivElement>(null);
   const logInterval = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -232,6 +239,8 @@ export default function AppWorkspace() {
     setActiveBriefId(null);
     setSelectedReports(["code-analysis"]);
     setExtraFields({});
+    setReportMetadata(null);
+    setShowMethodology(false);
   }
 
   function handleSelectBrief(brief: SavedBrief) {
@@ -292,12 +301,36 @@ export default function AppWorkspace() {
 
       const decoder = new TextDecoder();
       let accumulated = "";
+      let metadataParsed = false;
+      const DELIMITER = "\n<!--CODEBRIEF_METADATA_END-->\n";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         accumulated += decoder.decode(value, { stream: true });
-        setStreamText(accumulated);
+
+        // Parse metadata from the first chunk
+        if (!metadataParsed && accumulated.includes(DELIMITER)) {
+          const delimIdx = accumulated.indexOf(DELIMITER);
+          const metaJson = accumulated.slice(0, delimIdx);
+          try {
+            setReportMetadata(JSON.parse(metaJson));
+          } catch { /* ignore parse errors */ }
+          accumulated = accumulated.slice(delimIdx + DELIMITER.length);
+          metadataParsed = true;
+        }
+
+        if (metadataParsed) {
+          setStreamText(accumulated);
+        }
+      }
+
+      // In case metadata wasn't found (backwards compatibility)
+      if (!metadataParsed && accumulated.includes(DELIMITER)) {
+        const delimIdx = accumulated.indexOf(DELIMITER);
+        const metaJson = accumulated.slice(0, delimIdx);
+        try { setReportMetadata(JSON.parse(metaJson)); } catch { /* */ }
+        accumulated = accumulated.slice(delimIdx + DELIMITER.length);
       }
 
       setCompletedBrief(accumulated);
@@ -899,6 +932,112 @@ export default function AppWorkspace() {
                   <span className="text-[9px]" style={{ color: "rgba(245,242,238,0.25)" }}>codebrief.ai</span>
                 </div>
               </div>
+
+              {/* Methodology Panel */}
+              {reportMetadata && (
+                <div className="mt-4 no-print">
+                  <button
+                    onClick={() => setShowMethodology(!showMethodology)}
+                    className="w-full flex items-center justify-between px-5 py-3 transition-colors"
+                    style={{ background: "var(--bg-warm)", border: "1px solid var(--border-light)" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-stone)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "var(--bg-warm)")}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.5">
+                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
+                        View methodology — how this report was generated
+                      </span>
+                    </div>
+                    <svg
+                      width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2"
+                      style={{ transform: showMethodology ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}
+                    >
+                      <path d="M6 9l6 6 6-6" />
+                    </svg>
+                  </button>
+
+                  {showMethodology && (
+                    <div style={{ border: "1px solid var(--border-light)", borderTop: "none", background: "#fff" }}>
+                      {/* Search Queries */}
+                      <div className="px-5 py-4" style={{ borderBottom: "1px solid var(--border-light)" }}>
+                        <p className="text-[9px] font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--accent)" }}>
+                          Search Queries Executed
+                        </p>
+                        <div className="space-y-1.5">
+                          {reportMetadata.searchQueries.map((q, i) => (
+                            <div key={i} className="flex items-start gap-2">
+                              <span className="text-[10px] font-mono flex-shrink-0 mt-0.5" style={{ color: "var(--text-muted)" }}>{i + 1}.</span>
+                              <span className="text-[11px] font-mono" style={{ color: "var(--text-secondary)" }}>{q}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Search Results Log */}
+                      <div className="px-5 py-4" style={{ borderBottom: "1px solid var(--border-light)" }}>
+                        <p className="text-[9px] font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--accent)" }}>
+                          Sources Found
+                        </p>
+                        <div className="space-y-2.5">
+                          {reportMetadata.searchLog.map((entry, i) => (
+                            <div key={i} className="flex items-start gap-2.5">
+                              <span className="flex-shrink-0 mt-0.5">
+                                {entry.status === "success" ? (
+                                  <span className="text-xs" style={{ color: "#16a34a" }}>✓</span>
+                                ) : (
+                                  <span className="text-xs" style={{ color: "var(--error)" }}>✗</span>
+                                )}
+                              </span>
+                              <div className="min-w-0">
+                                <p className="text-[11px] font-medium truncate" style={{ color: "var(--text-primary)" }}>
+                                  {entry.query}
+                                </p>
+                                <p className="text-[10px] mt-0.5 leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                                  {entry.summary}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Generation Info */}
+                      <div className="px-5 py-4">
+                        <p className="text-[9px] font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--accent)" }}>
+                          Generation Details
+                        </p>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <p className="text-[9px] tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>Report Type</p>
+                            <p className="text-xs" style={{ color: "var(--text-primary)" }}>{reportMetadata.reportName}</p>
+                          </div>
+                          <div>
+                            <p className="text-[9px] tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>Generated</p>
+                            <p className="text-xs" style={{ color: "var(--text-primary)" }}>{new Date(reportMetadata.generatedAt).toLocaleString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-[9px] tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>Searches Executed</p>
+                            <p className="text-xs" style={{ color: "var(--text-primary)" }}>{reportMetadata.searchQueries.length}</p>
+                          </div>
+                          <div>
+                            <p className="text-[9px] tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>Successful</p>
+                            <p className="text-xs" style={{ color: "var(--text-primary)" }}>{reportMetadata.searchLog.filter(e => e.status === "success").length} / {reportMetadata.searchLog.length}</p>
+                          </div>
+                        </div>
+                        <p className="text-[9px] mt-4 leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                          This report was generated by searching public code databases for jurisdiction-specific requirements,
+                          then synthesizing the results with IBC, IFC, IPC, ADA, IECC, and local amendment knowledge.
+                          Items marked ⚠ VERIFY WITH AHJ indicate requirements that could not be confirmed from available sources
+                          and should be verified with the Authority Having Jurisdiction.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>

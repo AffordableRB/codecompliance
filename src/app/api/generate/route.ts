@@ -113,7 +113,7 @@ export async function POST(req: Request) {
       buildingType: input.buildingType,
       occupancyType: input.occupancyType,
     });
-    const searchResults = await performSearches(queries);
+    const { searchResults, searchLog } = await performSearches(queries);
 
     // Phase 2: LLM synthesis — use report-type-specific prompt
     const userPrompt = buildUserPrompt(input, searchResults, reportType.userPromptSuffix);
@@ -126,9 +126,22 @@ export async function POST(req: Request) {
     });
 
     const encoder = new TextEncoder();
+    // Send metadata header as first chunk, separated by a delimiter
+    const DELIMITER = "\n<!--CODEBRIEF_METADATA_END-->\n";
+    const metadata = JSON.stringify({
+      searchQueries: queries,
+      searchLog,
+      reportType: reportTypeId,
+      reportName: reportType.name,
+      generatedAt: new Date().toISOString(),
+    });
+
     const readable = new ReadableStream({
       async start(controller) {
         try {
+          // Send metadata block first
+          controller.enqueue(encoder.encode(metadata + DELIMITER));
+
           for await (const event of stream) {
             if (
               event.type === "content_block_delta" &&
@@ -162,19 +175,31 @@ export async function POST(req: Request) {
   }
 }
 
-async function performSearches(queries: string[]): Promise<string> {
+interface SearchLogEntry {
+  query: string;
+  status: "success" | "failed";
+  summary: string;
+}
+
+async function performSearches(queries: string[]): Promise<{ searchResults: string; searchLog: SearchLogEntry[] }> {
   const results: string[] = [];
+  const searchLog: SearchLogEntry[] = [];
 
   for (const query of queries) {
     try {
       const result = await webSearch(query);
+      const summary = result
+        ? result.slice(0, 200).replace(/\n/g, " ").trim() + (result.length > 200 ? "..." : "")
+        : "No results found.";
       results.push(`\n--- Search: "${query}" ---\n${result || "No results found."}`);
+      searchLog.push({ query, status: result ? "success" : "failed", summary });
     } catch {
       results.push(`\n--- Search: "${query}" ---\nNo results found.`);
+      searchLog.push({ query, status: "failed", summary: "Search failed" });
     }
   }
 
-  return results.join("\n");
+  return { searchResults: results.join("\n"), searchLog };
 }
 
 async function webSearch(query: string): Promise<string> {

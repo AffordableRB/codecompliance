@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/lib/supabase-browser";
 import { marked } from "marked";
-import { REPORT_TYPES, DEFAULT_REPORT_TYPE } from "@/lib/report-types";
+import { REPORT_TYPES } from "@/lib/report-types";
 
 /* ═══════════════════════════════════════════
    TYPES
@@ -34,76 +34,129 @@ interface SavedBrief {
 }
 
 const BUILDING_TYPES = [
-  "Single-Family Residential",
-  "Multi-Family Residential",
-  "Mixed-Use (Residential/Commercial)",
-  "Office / Commercial",
-  "Retail",
-  "Restaurant / Food Service",
-  "Hotel / Hospitality",
-  "K-12 School",
-  "Higher Education",
-  "Healthcare / Medical Office",
-  "Hospital",
-  "Assembly / Event Space",
-  "Warehouse / Industrial",
-  "Religious / House of Worship",
-  "Parking Structure",
-  "Other",
+  "Single-Family Residential", "Multi-Family Residential",
+  "Mixed-Use (Residential/Commercial)", "Office / Commercial", "Retail",
+  "Restaurant / Food Service", "Hotel / Hospitality", "K-12 School",
+  "Higher Education", "Healthcare / Medical Office", "Hospital",
+  "Assembly / Event Space", "Warehouse / Industrial",
+  "Religious / House of Worship", "Parking Structure", "Other",
 ];
 
 const OCCUPANCY_TYPES = [
-  "A-1 Assembly (theater, concert hall)",
-  "A-2 Assembly (restaurant, bar, banquet)",
-  "A-3 Assembly (worship, recreation, museum)",
-  "A-4 Assembly (arena, indoor sports)",
-  "A-5 Assembly (outdoor, stadium)",
-  "B Business (office, professional)",
-  "E Educational",
-  "F-1 Factory / Industrial (moderate hazard)",
-  "F-2 Factory / Industrial (low hazard)",
-  "H Hazardous",
-  "I-1 Institutional (assisted living)",
-  "I-2 Institutional (hospital, nursing home)",
-  "I-3 Institutional (detention)",
-  "M Mercantile (retail, department store)",
-  "R-1 Residential (hotel, motel)",
-  "R-2 Residential (apartment, dormitory)",
-  "R-3 Residential (1-2 family dwelling)",
-  "R-4 Residential (care facility, small)",
-  "S-1 Storage (moderate hazard)",
-  "S-2 Storage (low hazard)",
-  "U Utility / Miscellaneous",
-  "Not sure — help me classify",
+  "A-1 Assembly (theater, concert hall)", "A-2 Assembly (restaurant, bar, banquet)",
+  "A-3 Assembly (worship, recreation, museum)", "A-4 Assembly (arena, indoor sports)",
+  "A-5 Assembly (outdoor, stadium)", "B Business (office, professional)",
+  "E Educational", "F-1 Factory / Industrial (moderate hazard)",
+  "F-2 Factory / Industrial (low hazard)", "H Hazardous",
+  "I-1 Institutional (assisted living)", "I-2 Institutional (hospital, nursing home)",
+  "I-3 Institutional (detention)", "M Mercantile (retail, department store)",
+  "R-1 Residential (hotel, motel)", "R-2 Residential (apartment, dormitory)",
+  "R-3 Residential (1-2 family dwelling)", "R-4 Residential (care facility, small)",
+  "S-1 Storage (moderate hazard)", "S-2 Storage (low hazard)",
+  "U Utility / Miscellaneous", "Not sure — help me classify",
 ];
 
 const initialForm: ProjectInput = {
-  buildingType: "",
-  location: "",
-  squareFootage: "",
-  stories: "",
-  occupancyType: "",
-  occupantLoad: "",
-  lotSize: "",
-  additionalNotes: "",
+  buildingType: "", location: "", squareFootage: "", stories: "",
+  occupancyType: "", occupantLoad: "", lotSize: "", additionalNotes: "",
 };
 
 /* ═══════════════════════════════════════════
-   PROGRESS MESSAGES
+   RESEARCH LOG MESSAGES
    ═══════════════════════════════════════════ */
 
-const PROGRESS_STEPS = [
-  "Identifying jurisdiction and applicable codes...",
-  "Searching zoning ordinances and land use regulations...",
-  "Checking IBC adoption and local amendments...",
-  "Analyzing fire separation and sprinkler requirements...",
-  "Calculating egress and occupant loads...",
-  "Reviewing ADA and accessibility standards...",
-  "Checking energy code (IECC) requirements...",
-  "Analyzing parking and transportation requirements...",
-  "Compiling risk flags and special conditions...",
-  "Generating code analysis report...",
-];
+function getResearchLog(reportId: string, location: string): { text: string; detail: string }[] {
+  const city = location.split(",")[0]?.trim() || location;
+  const base = [
+    { text: `Identifying jurisdiction`, detail: `${city} — municipal code database` },
+    { text: `Searching zoning ordinances`, detail: `${city} planning department records` },
+  ];
+  const reportSpecific: Record<string, { text: string; detail: string }[]> = {
+    "code-analysis": [
+      { text: "Checking IBC adoption", detail: "International Building Code version & local amendments" },
+      { text: "Analyzing fire separation", detail: "IBC Table 508.4 — occupancy separation requirements" },
+      { text: "Calculating egress requirements", detail: "IBC Table 1004.5 — occupant load factors" },
+      { text: "Reviewing accessibility standards", detail: "ADA 2010 Standards & state equivalents" },
+      { text: "Checking energy code", detail: "IECC adoption, climate zone, envelope requirements" },
+      { text: "Analyzing parking requirements", detail: "Municipal code — parking ratios by use type" },
+      { text: "Computing plumbing fixtures", detail: "IPC Table 403.1 — fixture counts by occupancy" },
+      { text: "Compiling risk flags", detail: "Flood zones, seismic, historic overlays, special permits" },
+    ],
+    "zoning-feasibility": [
+      { text: "Analyzing zoning districts", detail: "Permitted uses, conditional uses, overlay zones" },
+      { text: "Calculating FAR & lot coverage", detail: "Floor area ratio limits vs. proposed" },
+      { text: "Checking dimensional standards", detail: "Height, setbacks, building width/depth" },
+      { text: "Reviewing overlay districts", detail: "Historic, conservation, transit-oriented, planned development" },
+      { text: "Assessing variance requirements", detail: "Relief needed, approval process, timeline" },
+      { text: "Determining feasibility", detail: "Can this project be built on this site?" },
+    ],
+    "energy-compliance": [
+      { text: "Identifying energy code version", detail: "IECC / ASHRAE 90.1 adoption year" },
+      { text: "Determining climate zone", detail: "Heating/cooling degree days, humidity classification" },
+      { text: "Analyzing envelope requirements", detail: "R-values, U-factors, air barrier standards" },
+      { text: "Checking mechanical efficiency", detail: "HVAC minimums, economizer requirements" },
+      { text: "Reviewing lighting power density", detail: "Interior/exterior LPD by space type" },
+      { text: "Identifying local stretch codes", detail: "Amendments exceeding base energy code" },
+    ],
+    "cost-context": [
+      { text: "Researching construction costs", detail: "Cost per SF by building type & market" },
+      { text: "Analyzing permit fees", detail: "Building permit, plan review, inspection fees" },
+      { text: "Calculating impact fees", detail: "Schools, transportation, parks, utilities" },
+      { text: "Reviewing market conditions", detail: "Labor availability, material cost trends" },
+      { text: "Estimating soft costs", detail: "A/E fees, legal, insurance, contingency" },
+    ],
+    "risk-due-diligence": [
+      { text: "Checking FEMA flood maps", detail: "Flood zone designation & base flood elevation" },
+      { text: "Analyzing seismic risk", detail: "Design category, ground motion parameters" },
+      { text: "Reviewing environmental constraints", detail: "Wetlands, buffers, contamination records" },
+      { text: "Checking historic resources", detail: "Landmark status, Section 106, design review" },
+      { text: "Identifying regulatory risks", detail: "Variances, public hearings, approval timelines" },
+      { text: "Assessing construction risks", detail: "Soil conditions, access, adjacent properties" },
+    ],
+    "site-constraints": [
+      { text: "Mapping setback requirements", detail: "Front, side, rear, corner side distances" },
+      { text: "Calculating buildable area", detail: "Lot area minus setbacks, coverage limits" },
+      { text: "Checking impervious cover", detail: "Stormwater regulations, drainage requirements" },
+      { text: "Reviewing utility availability", detail: "Water, sewer, electric, gas, telecom providers" },
+      { text: "Analyzing height & bulk", detail: "Stepbacks, solar access, setback planes" },
+    ],
+    "sustainability-scoping": [
+      { text: "Checking mandatory green requirements", detail: "Local green building ordinances" },
+      { text: "Analyzing LEED pathway", detail: "Credit categories, achievable points" },
+      { text: "Reviewing WELL standard", detail: "Health & wellness features by concept" },
+      { text: "Identifying cost-benefit tradeoffs", detail: "Premium vs. savings for each strategy" },
+    ],
+    "permitting-pathway": [
+      { text: "Mapping required approvals", detail: "Zoning, building, fire, health, DOT" },
+      { text: "Sequencing review process", detail: "Parallel vs. sequential approvals" },
+      { text: "Estimating timelines", detail: "Jurisdiction-specific review durations" },
+      { text: "Identifying potential delays", detail: "Design review, hearings, agency backlog" },
+      { text: "Locating agency contacts", detail: "Building dept, planning, fire marshal" },
+    ],
+    "accessibility-review": [
+      { text: "Reviewing federal ADA standards", detail: "2010 ADA Standards for Accessible Design" },
+      { text: "Checking state accessibility code", detail: "State amendments exceeding federal ADA" },
+      { text: "Calculating accessible parking", detail: "ADA §208 — spaces by total count" },
+      { text: "Analyzing Fair Housing requirements", detail: "Covered dwelling units, adaptable features" },
+      { text: "Identifying common pitfalls", detail: "Frequently missed requirements for this type" },
+    ],
+    "consultant-scoping": [
+      { text: "Identifying required disciplines", detail: "Code-mandated and practically necessary" },
+      { text: "Scoping recommended consultants", detail: "Specialty disciplines for this project type" },
+      { text: "Checking special inspections", detail: "IBC Chapter 17 requirements" },
+      { text: "Estimating fee ranges", detail: "Typical percentages by discipline" },
+    ],
+    "project-schedule": [
+      { text: "Estimating design phase durations", detail: "SD, DD, CD by project size & type" },
+      { text: "Researching permit timelines", detail: "Jurisdiction-specific review periods" },
+      { text: "Projecting construction duration", detail: "Months by building type & complexity" },
+      { text: "Identifying critical path items", detail: "Long-lead items, approval bottlenecks" },
+      { text: "Calculating total timeline", detail: "Best case, typical, worst case" },
+    ],
+  };
+
+  return [...base, ...(reportSpecific[reportId] || reportSpecific["code-analysis"])];
+}
 
 /* ═══════════════════════════════════════════
    MAIN COMPONENT
@@ -112,115 +165,103 @@ const PROGRESS_STEPS = [
 export default function AppWorkspace() {
   const { user, signOut, loading: authLoading } = useAuth();
 
-  // Sidebar state
+  // Sidebar
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [savedBriefs, setSavedBriefs] = useState<SavedBrief[]>([]);
   const [activeBriefId, setActiveBriefId] = useState<string | null>(null);
 
-  // Form state
+  // Wizard steps: 1=project details, 2=select reports, 3=generating, 4=results
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [form, setForm] = useState<ProjectInput>(initialForm);
-  const [selectedReport, setSelectedReport] = useState(DEFAULT_REPORT_TYPE);
-  const [mode, setMode] = useState<"form" | "generating" | "viewing">("form");
+  const [selectedReports, setSelectedReports] = useState<string[]>(["code-analysis"]);
 
-  // Generation state
+  // Generation
   const [streamText, setStreamText] = useState("");
   const [completedBrief, setCompletedBrief] = useState("");
   const [error, setError] = useState("");
-  const [progressStep, setProgressStep] = useState(0);
+  const [researchLogIndex, setResearchLogIndex] = useState(0);
+  const [currentReportId, setCurrentReportId] = useState("code-analysis");
 
   const briefRef = useRef<HTMLDivElement>(null);
-  const progressInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+  const logInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const canSubmit =
-    form.buildingType && form.location && form.squareFootage && form.stories;
+  const canSubmit = form.buildingType && form.location && form.squareFootage && form.stories;
 
   // Load saved briefs
   const loadBriefs = useCallback(async () => {
     if (!user) return;
     const { data } = await supabase
-      .from("briefs")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(50);
+      .from("briefs").select("*").eq("user_id", user.id)
+      .order("created_at", { ascending: false }).limit(50);
     if (data) setSavedBriefs(data);
   }, [user]);
 
-  useEffect(() => {
-    loadBriefs();
-  }, [loadBriefs]);
+  useEffect(() => { loadBriefs(); }, [loadBriefs]);
 
-  // Progress animation during generation
+  // Research log animation
+  const researchLog = getResearchLog(currentReportId, form.location);
   useEffect(() => {
-    if (mode === "generating" && !streamText) {
-      setProgressStep(0);
-      progressInterval.current = setInterval(() => {
-        setProgressStep((prev) =>
-          prev < PROGRESS_STEPS.length - 1 ? prev + 1 : prev
-        );
-      }, 4000);
-    } else {
-      if (progressInterval.current) {
-        clearInterval(progressInterval.current);
-        progressInterval.current = null;
-      }
+    if (step === 3 && !streamText) {
+      setResearchLogIndex(0);
+      logInterval.current = setInterval(() => {
+        setResearchLogIndex((prev) => prev < researchLog.length - 1 ? prev + 1 : prev);
+      }, 3000);
+    } else if (logInterval.current) {
+      clearInterval(logInterval.current);
+      logInterval.current = null;
     }
-    return () => {
-      if (progressInterval.current) clearInterval(progressInterval.current);
-    };
-  }, [mode, streamText]);
+    return () => { if (logInterval.current) clearInterval(logInterval.current); };
+  }, [step, streamText, researchLog.length]);
 
   const update = (field: keyof ProjectInput, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
-  // Start new brief
   function handleNewBrief() {
     setForm(initialForm);
-    setMode("form");
+    setStep(1);
     setStreamText("");
     setCompletedBrief("");
     setError("");
     setActiveBriefId(null);
+    setSelectedReports(["code-analysis"]);
   }
 
-  // View a saved brief
   function handleSelectBrief(brief: SavedBrief) {
     setActiveBriefId(brief.id);
     setCompletedBrief(brief.brief_content);
     setStreamText("");
-    setMode("viewing");
+    setStep(4);
     setError("");
-    // Restore form data if available
-    if (brief.input_json) {
-      setForm(brief.input_json);
-    } else {
-      setForm({
-        ...initialForm,
-        buildingType: brief.building_type,
-        location: brief.location,
-        squareFootage: brief.square_footage,
-        stories: brief.stories,
-        occupancyType: brief.occupancy_type || "",
-      });
-    }
+    if (brief.input_json) setForm(brief.input_json);
+    else setForm({ ...initialForm, buildingType: brief.building_type, location: brief.location, squareFootage: brief.square_footage, stories: brief.stories, occupancyType: brief.occupancy_type || "" });
   }
 
-  // Generate brief
-  async function handleGenerate(e: React.FormEvent) {
-    e.preventDefault();
-    if (!canSubmit) return;
+  function toggleReport(id: string) {
+    setSelectedReports((prev) =>
+      prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id]
+    );
+  }
 
-    setMode("generating");
+  async function handleGenerate() {
+    if (!canSubmit || selectedReports.length === 0) return;
+
+    setStep(3);
     setError("");
     setStreamText("");
     setCompletedBrief("");
     setActiveBriefId(null);
+    setCurrentReportId(selectedReports[0]);
 
     try {
+      // For now, generate the first selected report
+      // TODO: sequential generation for multiple reports
+      const reportId = selectedReports[0];
+      setCurrentReportId(reportId);
+
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, reportType: selectedReport }),
+        body: JSON.stringify({ ...form, reportType: reportId }),
       });
 
       if (!res.ok) {
@@ -243,37 +284,24 @@ export default function AppWorkspace() {
 
       setCompletedBrief(accumulated);
       setStreamText("");
-      setMode("viewing");
+      setStep(4);
 
-      // Save to database
       if (user) {
         const { data } = await supabase
-          .from("briefs")
-          .insert({
-            user_id: user.id,
-            building_type: form.buildingType,
-            location: form.location,
-            square_footage: form.squareFootage,
-            stories: form.stories,
-            occupancy_type: form.occupancyType || null,
-            brief_content: accumulated,
-            input_json: form,
-          })
-          .select("id")
-          .single();
-
-        if (data) {
-          setActiveBriefId(data.id);
-          loadBriefs();
-        }
+          .from("briefs").insert({
+            user_id: user.id, building_type: form.buildingType,
+            location: form.location, square_footage: form.squareFootage,
+            stories: form.stories, occupancy_type: form.occupancyType || null,
+            brief_content: accumulated, input_json: form,
+          }).select("id").single();
+        if (data) { setActiveBriefId(data.id); loadBriefs(); }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
-      setMode("form");
+      setStep(2);
     }
   }
 
-  // Delete a brief
   async function handleDeleteBrief(id: string) {
     await supabase.from("briefs").delete().eq("id", id);
     if (activeBriefId === id) handleNewBrief();
@@ -281,461 +309,361 @@ export default function AppWorkspace() {
   }
 
   const displayContent = streamText || completedBrief;
+  const currentReportName = REPORT_TYPES.find((r) => r.id === currentReportId)?.name || "Report";
 
   return (
     <div className="h-screen flex overflow-hidden" style={{ background: "var(--bg-base)" }}>
       {/* ═══ SIDEBAR ═══ */}
       <aside
-        className={`${sidebarOpen ? "w-72" : "w-0"} flex-shrink-0 flex flex-col transition-all duration-200 overflow-hidden`}
+        className={`${sidebarOpen ? "w-72" : "w-0"} flex-shrink-0 flex flex-col transition-all duration-200 overflow-hidden no-print`}
         style={{ background: "var(--bg-dark)", borderRight: "1px solid #222" }}
       >
         <div className="flex flex-col h-full w-72">
-          {/* Sidebar Header */}
           <div className="px-4 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid #222" }}>
             <a href="/" className="flex items-center gap-2.5">
-              <div
-                className="w-6 h-6 flex items-center justify-center flex-shrink-0"
-                style={{ border: "1px solid rgba(245,242,238,0.3)" }}
-              >
+              <div className="w-6 h-6 flex items-center justify-center flex-shrink-0" style={{ border: "1px solid rgba(245,242,238,0.3)" }}>
                 <span className="text-[8px] font-bold" style={{ color: "#f5f2ee" }}>CB</span>
               </div>
-              <span
-                className="text-xs font-medium tracking-widest uppercase"
-                style={{ color: "#f5f2ee", letterSpacing: "0.12em" }}
-              >
-                CodeBrief
-              </span>
+              <span className="text-xs font-medium tracking-widest uppercase" style={{ color: "#f5f2ee", letterSpacing: "0.12em" }}>CodeBrief</span>
             </a>
           </div>
 
-          {/* New Brief Button */}
           <div className="px-3 py-3">
-            <button
-              onClick={handleNewBrief}
-              className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-medium tracking-wide transition-colors"
-              style={{
-                background: "rgba(245,242,238,0.08)",
-                color: "#f5f2ee",
-                border: "1px solid rgba(245,242,238,0.12)",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(245,242,238,0.14)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(245,242,238,0.08)")}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
+            <button onClick={handleNewBrief} className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-medium tracking-wide transition-colors" style={{ background: "rgba(245,242,238,0.08)", color: "#f5f2ee", border: "1px solid rgba(245,242,238,0.12)" }} onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(245,242,238,0.14)")} onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(245,242,238,0.08)")}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14" /></svg>
               New Brief
             </button>
           </div>
 
-          {/* Brief History */}
           <div className="flex-1 overflow-y-auto px-2">
-            <p
-              className="px-2 py-2 text-[9px] font-semibold tracking-widest uppercase"
-              style={{ color: "rgba(245,242,238,0.3)" }}
-            >
-              History
-            </p>
+            <p className="px-2 py-2 text-[9px] font-semibold tracking-widest uppercase" style={{ color: "rgba(245,242,238,0.3)" }}>History</p>
             {savedBriefs.length === 0 ? (
-              <p className="px-2 py-4 text-xs" style={{ color: "rgba(245,242,238,0.2)" }}>
-                No briefs yet
-              </p>
+              <p className="px-2 py-4 text-xs" style={{ color: "rgba(245,242,238,0.2)" }}>No briefs yet</p>
             ) : (
               <div className="space-y-0.5">
                 {savedBriefs.map((brief) => (
-                  <button
-                    key={brief.id}
-                    onClick={() => handleSelectBrief(brief)}
-                    className="w-full text-left px-3 py-2.5 rounded-sm transition-colors group relative"
-                    style={{
-                      background: activeBriefId === brief.id ? "rgba(245,242,238,0.1)" : "transparent",
-                      color: activeBriefId === brief.id ? "#f5f2ee" : "rgba(245,242,238,0.5)",
-                    }}
-                    onMouseEnter={(e) => {
-                      if (activeBriefId !== brief.id)
-                        e.currentTarget.style.background = "rgba(245,242,238,0.06)";
-                    }}
-                    onMouseLeave={(e) => {
-                      if (activeBriefId !== brief.id)
-                        e.currentTarget.style.background = "transparent";
-                    }}
-                  >
+                  <button key={brief.id} onClick={() => handleSelectBrief(brief)} className="w-full text-left px-3 py-2.5 rounded-sm transition-colors group relative" style={{ background: activeBriefId === brief.id ? "rgba(245,242,238,0.1)" : "transparent", color: activeBriefId === brief.id ? "#f5f2ee" : "rgba(245,242,238,0.5)" }} onMouseEnter={(e) => { if (activeBriefId !== brief.id) e.currentTarget.style.background = "rgba(245,242,238,0.06)"; }} onMouseLeave={(e) => { if (activeBriefId !== brief.id) e.currentTarget.style.background = "transparent"; }}>
                     <p className="text-xs font-medium truncate">{brief.building_type}</p>
-                    <p className="text-[10px] mt-0.5 truncate" style={{ color: "rgba(245,242,238,0.3)" }}>
-                      {brief.location}
-                    </p>
-                    <p className="text-[9px] mt-0.5" style={{ color: "rgba(245,242,238,0.2)" }}>
-                      {new Date(brief.created_at).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </p>
-                    {/* Delete button */}
-                    <span
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteBrief(brief.id);
-                      }}
-                      className="absolute right-2 top-2.5 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                      style={{ color: "rgba(245,242,238,0.3)" }}
-                      onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(245,242,238,0.7)")}
-                      onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(245,242,238,0.3)")}
-                    >
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M18 6L6 18M6 6l12 12" />
-                      </svg>
-                    </span>
+                    <p className="text-[10px] mt-0.5 truncate" style={{ color: "rgba(245,242,238,0.3)" }}>{brief.location}</p>
+                    <p className="text-[9px] mt-0.5" style={{ color: "rgba(245,242,238,0.2)" }}>{new Date(brief.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</p>
+                    <span onClick={(e) => { e.stopPropagation(); handleDeleteBrief(brief.id); }} className="absolute right-2 top-2.5 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" style={{ color: "rgba(245,242,238,0.3)" }}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg></span>
                   </button>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Sidebar Footer — User */}
           <div className="px-4 py-3" style={{ borderTop: "1px solid #222" }}>
             {user ? (
               <div className="flex items-center justify-between">
-                <span className="text-[10px] truncate" style={{ color: "rgba(245,242,238,0.4)" }}>
-                  {user.email}
-                </span>
-                <button
-                  onClick={signOut}
-                  className="text-[10px] transition-colors"
-                  style={{ color: "rgba(245,242,238,0.25)" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(245,242,238,0.6)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(245,242,238,0.25)")}
-                >
-                  Sign out
-                </button>
+                <span className="text-[10px] truncate" style={{ color: "rgba(245,242,238,0.4)" }}>{user.email}</span>
+                <button onClick={signOut} className="text-[10px] transition-colors" style={{ color: "rgba(245,242,238,0.25)" }}>Sign out</button>
               </div>
             ) : (
-              <a
-                href="/login"
-                className="block text-center text-[10px] py-1.5 transition-colors"
-                style={{ color: "rgba(245,242,238,0.5)", border: "1px solid rgba(245,242,238,0.12)" }}
-              >
-                Sign in to save briefs
-              </a>
+              <a href="/login" className="block text-center text-[10px] py-1.5 transition-colors" style={{ color: "rgba(245,242,238,0.5)", border: "1px solid rgba(245,242,238,0.12)" }}>Sign in to save briefs</a>
             )}
           </div>
         </div>
       </aside>
 
-      {/* ═══ MAIN CONTENT ═══ */}
+      {/* ═══ MAIN ═══ */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Bar */}
-        <div
-          className="flex items-center justify-between px-6 py-2.5 flex-shrink-0 no-print"
-          style={{ borderBottom: "1px solid var(--border-light)" }}
-        >
+        <div className="flex items-center justify-between px-6 py-2.5 flex-shrink-0 no-print" style={{ borderBottom: "1px solid var(--border-light)" }}>
           <div className="flex items-center gap-3">
-            {/* Sidebar toggle */}
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-1.5 transition-colors"
-              style={{ color: "var(--text-muted)" }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M3 6h18M3 12h18M3 18h18" />
-              </svg>
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5" style={{ color: "var(--text-muted)" }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
             </button>
-
-            {/* Breadcrumb */}
-            <span className="text-[10px] tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>
-              {mode === "form" && "New Brief"}
-              {mode === "generating" && "Generating..."}
-              {mode === "viewing" && `${form.buildingType} — ${form.location}`}
-            </span>
+            {/* Step indicator */}
+            <div className="flex items-center gap-1.5">
+              {[1, 2, 3, 4].map((s) => (
+                <div key={s} className="flex items-center gap-1.5">
+                  <div className="w-5 h-5 flex items-center justify-center text-[9px] font-bold" style={{
+                    background: step >= s ? "var(--bg-dark)" : "var(--bg-warm)",
+                    color: step >= s ? "var(--text-inverse)" : "var(--text-muted)",
+                  }}>{s}</div>
+                  {s < 4 && <div className="w-4 h-px" style={{ background: step > s ? "var(--bg-dark)" : "var(--border-light)" }} />}
+                </div>
+              ))}
+              <span className="ml-2 text-[9px] tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>
+                {step === 1 && "Project Details"}
+                {step === 2 && "Select Reports"}
+                {step === 3 && "Researching"}
+                {step === 4 && "Results"}
+              </span>
+            </div>
           </div>
-
-          <div className="flex items-center gap-4">
-            {mode === "viewing" && (
+          <div className="flex items-center gap-3">
+            {step === 4 && (
               <>
-                <button
-                  onClick={() => window.print()}
-                  className="text-[10px] tracking-widest uppercase transition-colors"
-                  style={{ color: "var(--text-muted)" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
-                >
-                  Export PDF
-                </button>
-                <button
-                  onClick={handleNewBrief}
-                  className="px-3 py-1.5 text-[10px] font-medium tracking-widest uppercase transition-colors"
-                  style={{ background: "var(--bg-dark)", color: "var(--text-inverse)" }}
-                >
-                  New Brief
-                </button>
+                <button onClick={() => window.print()} className="text-[10px] tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>Export PDF</button>
+                <button onClick={handleNewBrief} className="px-3 py-1.5 text-[10px] font-medium tracking-widest uppercase" style={{ background: "var(--bg-dark)", color: "var(--text-inverse)" }}>New Brief</button>
               </>
             )}
           </div>
         </div>
 
-        {/* Content Area */}
+        {/* Content */}
         <div className="flex-1 overflow-y-auto">
-          {/* ═══ FORM MODE ═══ */}
-          {mode === "form" && (
-            <div className="max-w-2xl mx-auto px-6 py-12">
-              <div className="text-center mb-8">
-                <h1
-                  className="text-2xl font-light tracking-tight mb-2"
-                  style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}
-                >
-                  Every applicable code. One report.
+
+          {/* ═══ STEP 1: PROJECT DETAILS ═══ */}
+          {step === 1 && (
+            <div className="max-w-xl mx-auto px-6 py-16">
+              <div className="text-center mb-10">
+                <p className="text-[9px] font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--accent)" }}>Step 1 of 4</p>
+                <h1 className="text-2xl font-light tracking-tight mb-2" style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}>
+                  Describe your project
                 </h1>
-                <p className="text-sm mb-6" style={{ color: "var(--text-muted)" }}>
-                  Enter your project — get a complete code analysis including the requirements you didn&apos;t know to search for.
+                <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                  We&apos;ll search jurisdiction-specific codes based on these parameters.
                 </p>
-
-                {/* Value Strip */}
-                <div className="flex items-center justify-center gap-5 flex-wrap">
-                  {[
-                    { num: "20,000+", label: "US Jurisdictions" },
-                    { num: "12", label: "Code Domains" },
-                    { num: "60s", label: "Delivery" },
-                    { num: "IBC", label: "Citations & Math" },
-                  ].map((stat) => (
-                    <div key={stat.label} className="flex items-center gap-2">
-                      <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{stat.num}</span>
-                      <span className="text-[9px] tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>{stat.label}</span>
-                    </div>
-                  ))}
-                </div>
               </div>
 
-              {/* Report Type Selector */}
-              <div className="mb-6">
-                <p className="text-[9px] font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--text-muted)" }}>
-                  Select Report Type
-                </p>
-                <div className="grid grid-cols-2 gap-2">
-                  {REPORT_TYPES.map((rt) => (
-                    <button
-                      key={rt.id}
-                      type="button"
-                      onClick={() => setSelectedReport(rt.id)}
-                      className="text-left px-3 py-2.5 transition-colors"
-                      style={{
-                        background: selectedReport === rt.id ? "var(--bg-dark)" : "#fff",
-                        color: selectedReport === rt.id ? "var(--text-inverse)" : "var(--text-primary)",
-                        border: selectedReport === rt.id ? "1px solid var(--bg-dark)" : "1px solid var(--border-medium)",
-                      }}
-                      onMouseEnter={(e) => {
-                        if (selectedReport !== rt.id) e.currentTarget.style.background = "var(--bg-warm)";
-                      }}
-                      onMouseLeave={(e) => {
-                        if (selectedReport !== rt.id) e.currentTarget.style.background = "#fff";
-                      }}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs">{rt.icon}</span>
-                        <span className="text-[11px] font-medium">{rt.shortName}</span>
-                      </div>
-                      <p
-                        className="text-[9px] mt-1 leading-relaxed"
-                        style={{
-                          color: selectedReport === rt.id ? "rgba(245,242,238,0.5)" : "var(--text-muted)",
-                        }}
-                      >
-                        {rt.description.slice(0, 80)}{rt.description.length > 80 ? "..." : ""}
-                      </p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <form onSubmit={handleGenerate}>
-                <div style={{ background: "#fff", border: "1px solid var(--border-medium)" }}>
-                  {/* Form Header */}
-                  <div className="px-6 py-3" style={{ background: "var(--bg-dark)" }}>
-                    <h2 className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "var(--text-inverse)" }}>
-                      Project Information
-                    </h2>
+              <div style={{ background: "#fff", border: "1px solid var(--border-medium)" }}>
+                <div className="px-6 py-5">
+                  <div className="grid grid-cols-2 gap-x-5 gap-y-4">
+                    <FormField label="Building Type" required>
+                      <select value={form.buildingType} onChange={(e) => update("buildingType", e.target.value)} className="form-input" required>
+                        <option value="">Select...</option>
+                        {BUILDING_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+                      </select>
+                    </FormField>
+                    <FormField label="Location" required>
+                      <input type="text" value={form.location} onChange={(e) => update("location", e.target.value)} placeholder="City, State or address" className="form-input" required />
+                    </FormField>
+                    <FormField label="Gross Area (SF)" required>
+                      <input type="text" value={form.squareFootage} onChange={(e) => update("squareFootage", e.target.value)} placeholder="e.g., 25,000" className="form-input" required />
+                    </FormField>
+                    <FormField label="Stories" required>
+                      <input type="text" value={form.stories} onChange={(e) => update("stories", e.target.value)} placeholder="e.g., 4" className="form-input" required />
+                    </FormField>
                   </div>
 
-                  <div className="px-6 py-5">
-                    <div className="grid grid-cols-2 gap-x-5 gap-y-4">
-                      <FormField label="Building Type" required>
-                        <select value={form.buildingType} onChange={(e) => update("buildingType", e.target.value)} className="form-input" required>
-                          <option value="">Select...</option>
-                          {BUILDING_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+                  <div className="mt-5 pt-5" style={{ borderTop: "1px solid var(--border-light)" }}>
+                    <p className="text-[9px] font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--text-muted)" }}>Optional — improves accuracy</p>
+                    <div className="grid grid-cols-3 gap-x-5 gap-y-4">
+                      <FormField label="Occupancy">
+                        <select value={form.occupancyType} onChange={(e) => update("occupancyType", e.target.value)} className="form-input">
+                          <option value="">Auto</option>
+                          {OCCUPANCY_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
                         </select>
                       </FormField>
-                      <FormField label="Location" required>
-                        <input type="text" value={form.location} onChange={(e) => update("location", e.target.value)} placeholder="City, State or address" className="form-input" required />
+                      <FormField label="Occupant Load">
+                        <input type="text" value={form.occupantLoad} onChange={(e) => update("occupantLoad", e.target.value)} placeholder="e.g., 200" className="form-input" />
                       </FormField>
-                      <FormField label="Gross Area (SF)" required>
-                        <input type="text" value={form.squareFootage} onChange={(e) => update("squareFootage", e.target.value)} placeholder="e.g., 25,000" className="form-input" required />
-                      </FormField>
-                      <FormField label="Stories" required>
-                        <input type="text" value={form.stories} onChange={(e) => update("stories", e.target.value)} placeholder="e.g., 4" className="form-input" required />
+                      <FormField label="Lot Size">
+                        <input type="text" value={form.lotSize} onChange={(e) => update("lotSize", e.target.value)} placeholder="e.g., 10,000 SF" className="form-input" />
                       </FormField>
                     </div>
-
-                    <div className="mt-4 pt-4" style={{ borderTop: "1px solid var(--border-light)" }}>
-                      <p className="text-[9px] font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--text-muted)" }}>
-                        Optional
-                      </p>
-                      <div className="grid grid-cols-3 gap-x-5 gap-y-4">
-                        <FormField label="Occupancy">
-                          <select value={form.occupancyType} onChange={(e) => update("occupancyType", e.target.value)} className="form-input">
-                            <option value="">Auto</option>
-                            {OCCUPANCY_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-                          </select>
-                        </FormField>
-                        <FormField label="Occupant Load">
-                          <input type="text" value={form.occupantLoad} onChange={(e) => update("occupantLoad", e.target.value)} placeholder="e.g., 200" className="form-input" />
-                        </FormField>
-                        <FormField label="Lot Size">
-                          <input type="text" value={form.lotSize} onChange={(e) => update("lotSize", e.target.value)} placeholder="e.g., 10,000 SF" className="form-input" />
-                        </FormField>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 pt-4" style={{ borderTop: "1px solid var(--border-light)" }}>
+                    <div className="mt-4">
                       <FormField label="Notes">
                         <textarea value={form.additionalNotes} onChange={(e) => update("additionalNotes", e.target.value)} rows={2} placeholder="Renovation vs. new construction, specific concerns..." className="form-input" />
                       </FormField>
                     </div>
                   </div>
-
-                  {/* Submit Bar */}
-                  <div className="px-6 py-3 flex items-center justify-between" style={{ background: "var(--bg-warm)", borderTop: "1px solid var(--border-light)" }}>
-                    <span className="text-[9px]" style={{ color: "var(--text-muted)" }}>
-                      {REPORT_TYPES.find((r) => r.id === selectedReport)?.shortName || "Code Analysis"}
-                    </span>
-                    <button
-                      type="submit"
-                      disabled={!canSubmit}
-                      className="px-5 py-2 text-[10px] font-semibold tracking-widest uppercase transition-opacity disabled:opacity-30"
-                      style={{ background: "var(--bg-dark)", color: "var(--text-inverse)" }}
-                    >
-                      Generate {REPORT_TYPES.find((r) => r.id === selectedReport)?.shortName || "Report"}
-                    </button>
-                  </div>
                 </div>
 
-                {error && (
-                  <div className="mt-4 px-4 py-3 text-xs" style={{ background: "#fef2f2", border: "1px solid #fca5a5", color: "var(--error)" }}>
-                    {error}
-                  </div>
-                )}
-              </form>
-
-              {/* Sample Report Preview */}
-              <SampleReportPreview />
-            </div>
-          )}
-
-          {/* ═══ GENERATING MODE ═══ */}
-          {mode === "generating" && !streamText && (
-            <div className="max-w-xl mx-auto px-6 py-20">
-              <div className="space-y-3">
-                {PROGRESS_STEPS.map((step, i) => (
-                  <div
-                    key={step}
-                    className="flex items-center gap-3 transition-opacity duration-500"
-                    style={{ opacity: i <= progressStep ? 1 : 0.15 }}
+                <div className="px-6 py-3 flex justify-end" style={{ background: "var(--bg-warm)", borderTop: "1px solid var(--border-light)" }}>
+                  <button
+                    onClick={() => canSubmit && setStep(2)}
+                    disabled={!canSubmit}
+                    className="px-6 py-2.5 text-[10px] font-semibold tracking-widest uppercase transition-opacity disabled:opacity-30"
+                    style={{ background: "var(--bg-dark)", color: "var(--text-inverse)" }}
                   >
-                    {i < progressStep ? (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--success)" strokeWidth="2">
-                        <path d="M20 6L9 17l-5-5" />
-                      </svg>
-                    ) : i === progressStep ? (
-                      <div
-                        className="w-3.5 h-3.5 border border-t-transparent animate-spin"
-                        style={{ borderColor: "var(--accent)", borderTopColor: "transparent" }}
-                      />
-                    ) : (
-                      <div className="w-3.5 h-3.5 rounded-full" style={{ background: "var(--border-light)" }} />
-                    )}
-                    <span className="text-xs" style={{ color: i <= progressStep ? "var(--text-primary)" : "var(--text-muted)" }}>
-                      {step}
-                    </span>
-                  </div>
-                ))}
+                    Continue — Select Reports
+                  </button>
+                </div>
               </div>
             </div>
           )}
 
-          {/* ═══ STREAMING / VIEWING MODE ═══ */}
-          {displayContent && (
-            <div ref={briefRef} className="max-w-4xl mx-auto px-6 py-8">
-              {/* Document */}
-              <div className="report-document" style={{ background: "#fff", border: "1px solid var(--border-medium)" }}>
-                {/* Header Band */}
-                <div className="px-8 py-5" style={{ background: "var(--bg-dark)" }}>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-[9px] font-semibold tracking-widest uppercase" style={{ color: "var(--accent-light)" }}>
-                        {REPORT_TYPES.find((r) => r.id === selectedReport)?.name || "Code Analysis Report"}
-                      </p>
-                      <h2 className="text-lg font-light tracking-tight mt-1" style={{ color: "#f5f2ee", letterSpacing: "-0.02em" }}>
-                        {form.buildingType}
-                      </h2>
-                      <p className="text-sm mt-0.5" style={{ color: "rgba(245,242,238,0.5)" }}>
-                        {form.location}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className="w-5 h-5 flex items-center justify-center" style={{ border: "1px solid rgba(245,242,238,0.3)" }}>
-                          <span className="text-[7px] font-bold" style={{ color: "#f5f2ee" }}>CB</span>
+          {/* ═══ STEP 2: SELECT REPORTS ═══ */}
+          {step === 2 && (
+            <div className="max-w-3xl mx-auto px-6 py-16">
+              <div className="text-center mb-8">
+                <p className="text-[9px] font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--accent)" }}>Step 2 of 4</p>
+                <h1 className="text-2xl font-light tracking-tight mb-2" style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}>
+                  Select your reports
+                </h1>
+                <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                  {form.buildingType} — {form.location} — {form.squareFootage} SF — {form.stories} stories
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                {REPORT_TYPES.map((rt) => {
+                  const isSelected = selectedReports.includes(rt.id);
+                  return (
+                    <button
+                      key={rt.id}
+                      onClick={() => toggleReport(rt.id)}
+                      className="text-left px-4 py-3.5 transition-all relative"
+                      style={{
+                        background: isSelected ? "var(--bg-dark)" : "#fff",
+                        color: isSelected ? "var(--text-inverse)" : "var(--text-primary)",
+                        border: isSelected ? "1px solid var(--bg-dark)" : "1px solid var(--border-medium)",
+                      }}
+                    >
+                      {/* Checkmark */}
+                      {isSelected && (
+                        <div className="absolute top-2.5 right-2.5 w-4 h-4 flex items-center justify-center" style={{ background: "var(--accent)" }}>
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3"><path d="M20 6L9 17l-5-5" /></svg>
                         </div>
-                        <span className="text-[9px] font-medium tracking-widest uppercase" style={{ color: "rgba(245,242,238,0.6)" }}>
-                          CodeBrief
-                        </span>
+                      )}
+                      <div className="flex items-center gap-2.5 mb-1.5">
+                        <span className="text-sm">{rt.icon}</span>
+                        <span className="text-xs font-semibold tracking-wide">{rt.shortName}</span>
                       </div>
-                      <p className="text-[10px]" style={{ color: "rgba(245,242,238,0.3)" }}>
-                        {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+                      <p className="text-[10px] leading-relaxed" style={{ color: isSelected ? "rgba(245,242,238,0.55)" : "var(--text-muted)" }}>
+                        {rt.description}
                       </p>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {error && (
+                <div className="mt-4 px-4 py-3 text-xs" style={{ background: "#fef2f2", border: "1px solid #fca5a5", color: "var(--error)" }}>{error}</div>
+              )}
+
+              <div className="mt-6 flex items-center justify-between">
+                <button onClick={() => setStep(1)} className="text-[10px] tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>
+                  Back
+                </button>
+                <div className="flex items-center gap-4">
+                  <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+                    {selectedReports.length} report{selectedReports.length !== 1 ? "s" : ""} selected — {selectedReports.length} brief{selectedReports.length !== 1 ? "s" : ""} used
+                  </span>
+                  <button
+                    onClick={handleGenerate}
+                    disabled={selectedReports.length === 0}
+                    className="px-6 py-2.5 text-[10px] font-semibold tracking-widest uppercase transition-opacity disabled:opacity-30"
+                    style={{ background: "var(--bg-dark)", color: "var(--text-inverse)" }}
+                  >
+                    Generate {selectedReports.length} Report{selectedReports.length !== 1 ? "s" : ""}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ═══ STEP 3: RESEARCHING ═══ */}
+          {step === 3 && !streamText && (
+            <div className="max-w-2xl mx-auto px-6 py-16">
+              <div className="text-center mb-10">
+                <p className="text-[9px] font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--accent)" }}>Step 3 of 4</p>
+                <h1 className="text-2xl font-light tracking-tight mb-2" style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}>
+                  Researching {form.location}
+                </h1>
+                <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                  Searching public code databases and synthesizing your {currentReportName.toLowerCase()}
+                </p>
+              </div>
+
+              {/* Live research log */}
+              <div style={{ background: "var(--bg-dark)", border: "1px solid #222" }}>
+                <div className="px-5 py-3 flex items-center justify-between" style={{ borderBottom: "1px solid #333" }}>
+                  <span className="text-[9px] font-semibold tracking-widest uppercase" style={{ color: "var(--accent-light)" }}>
+                    Research Log
+                  </span>
+                  <span className="text-[9px]" style={{ color: "rgba(245,242,238,0.3)" }}>
+                    {researchLogIndex + 1} / {researchLog.length}
+                  </span>
+                </div>
+
+                <div className="px-5 py-4 font-mono text-xs space-y-2.5" style={{ minHeight: 300 }}>
+                  {researchLog.map((entry, i) => (
+                    <div
+                      key={i}
+                      className="flex items-start gap-3 transition-all duration-500"
+                      style={{ opacity: i <= researchLogIndex ? 1 : 0.08 }}
+                    >
+                      <div className="flex-shrink-0 mt-0.5">
+                        {i < researchLogIndex ? (
+                          <span style={{ color: "#4ade80" }}>✓</span>
+                        ) : i === researchLogIndex ? (
+                          <div className="w-3 h-3 border border-t-transparent animate-spin mt-0.5" style={{ borderColor: "var(--accent-light)", borderTopColor: "transparent" }} />
+                        ) : (
+                          <span style={{ color: "#333" }}>○</span>
+                        )}
+                      </div>
+                      <div>
+                        <p style={{ color: i <= researchLogIndex ? "#f5f2ee" : "#333" }}>
+                          {entry.text}
+                        </p>
+                        <p className="mt-0.5" style={{ color: i <= researchLogIndex ? "rgba(245,242,238,0.35)" : "#222" }}>
+                          → {entry.detail}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  {/* Data Strip */}
-                  <div className="flex gap-8 mt-4 pt-3" style={{ borderTop: "1px solid #333" }}>
-                    <DataPoint label="Area" value={`${form.squareFootage} SF`} />
-                    <DataPoint label="Stories" value={form.stories} />
-                    {form.occupancyType && <DataPoint label="Occupancy" value={form.occupancyType.split(" ")[0]} />}
-                    {form.lotSize && <DataPoint label="Lot" value={form.lotSize} />}
-                  </div>
+                  ))}
                 </div>
 
-                {/* Brief Content */}
-                <div className={`px-8 py-6 ${streamText ? "streaming-cursor" : ""}`}>
-                  <div
-                    className="brief-content"
-                    dangerouslySetInnerHTML={{ __html: marked.parse(displayContent, { async: false }) as string }}
-                  />
+                {/* Progress bar */}
+                <div className="px-5 py-3" style={{ borderTop: "1px solid #333" }}>
+                  <div className="w-full h-1" style={{ background: "#222" }}>
+                    <div
+                      className="h-full transition-all duration-1000"
+                      style={{
+                        width: `${((researchLogIndex + 1) / researchLog.length) * 100}%`,
+                        background: "var(--accent)",
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ═══ STEP 3 → 4: STREAMING ═══ */}
+          {step === 3 && streamText && (
+            <div className="max-w-4xl mx-auto px-6 py-8">
+              <div className="mb-4">
+                <span className="text-[9px] font-semibold tracking-widest uppercase" style={{ color: "var(--accent)" }}>
+                  Generating report...
+                </span>
+              </div>
+              <div className="report-document" style={{ background: "#fff", border: "1px solid var(--border-medium)" }}>
+                <ReportHeader form={form} reportName={currentReportName} />
+                <div className="px-8 py-6 streaming-cursor">
+                  <div className="brief-content" dangerouslySetInnerHTML={{ __html: marked.parse(streamText, { async: false }) as string }} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ═══ STEP 4: RESULTS ═══ */}
+          {step === 4 && completedBrief && (
+            <div ref={briefRef} className="max-w-4xl mx-auto px-6 py-8">
+              <div className="mb-4 flex items-center justify-between">
+                <span className="text-[9px] font-semibold tracking-widest uppercase" style={{ color: "var(--accent)" }}>
+                  {currentReportName}
+                </span>
+                <span className="text-[9px]" style={{ color: "var(--text-muted)" }}>
+                  Generated {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                </span>
+              </div>
+
+              <div className="report-document" style={{ background: "#fff", border: "1px solid var(--border-medium)" }}>
+                <ReportHeader form={form} reportName={currentReportName} />
+                <div className="px-8 py-6">
+                  <div className="brief-content" dangerouslySetInnerHTML={{ __html: marked.parse(completedBrief, { async: false }) as string }} />
                 </div>
 
-                {/* Disclaimer */}
-                {!streamText && completedBrief && (
-                  <div className="px-8 py-4" style={{ borderTop: "1px solid var(--border-light)" }}>
-                    <p className="text-[10px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
-                      <strong style={{ color: "var(--text-secondary)" }}>Disclaimer:</strong> This
-                      report is AI-generated research guidance and does not constitute legal or
-                      professional advice. Verify all requirements with the Authority Having
-                      Jurisdiction (AHJ) before proceeding with design or permit applications.
-                    </p>
-                  </div>
-                )}
+                <div className="px-8 py-4" style={{ borderTop: "1px solid var(--border-light)" }}>
+                  <p className="text-[10px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                    <strong style={{ color: "var(--text-secondary)" }}>Disclaimer:</strong> This report is AI-generated research guidance and does not constitute legal or professional advice. Verify all requirements with the Authority Having Jurisdiction (AHJ) before proceeding with design or permit applications.
+                  </p>
+                </div>
 
-                {/* Branded Footer */}
                 <div className="px-8 py-3 flex items-center justify-between" style={{ background: "var(--bg-dark)" }}>
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 flex items-center justify-center" style={{ border: "1px solid rgba(245,242,238,0.3)" }}>
                       <span className="text-[6px] font-bold" style={{ color: "#f5f2ee" }}>CB</span>
                     </div>
-                    <span className="text-[9px] tracking-widest uppercase" style={{ color: "rgba(245,242,238,0.5)" }}>
-                      Generated by CodeBrief
-                    </span>
+                    <span className="text-[9px] tracking-widest uppercase" style={{ color: "rgba(245,242,238,0.5)" }}>Generated by CodeBrief</span>
                   </div>
-                  <span className="text-[9px]" style={{ color: "rgba(245,242,238,0.25)" }}>
-                    codebrief.ai
-                  </span>
+                  <span className="text-[9px]" style={{ color: "rgba(245,242,238,0.25)" }}>codebrief.ai</span>
                 </div>
               </div>
             </div>
@@ -761,133 +689,42 @@ function FormField({ label, required, children }: { label: string; required?: bo
   );
 }
 
+function ReportHeader({ form, reportName }: { form: ProjectInput; reportName: string }) {
+  return (
+    <div className="px-8 py-5" style={{ background: "var(--bg-dark)" }}>
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-[9px] font-semibold tracking-widest uppercase" style={{ color: "var(--accent-light)" }}>{reportName}</p>
+          <h2 className="text-lg font-light tracking-tight mt-1" style={{ color: "#f5f2ee", letterSpacing: "-0.02em" }}>{form.buildingType}</h2>
+          <p className="text-sm mt-0.5" style={{ color: "rgba(245,242,238,0.5)" }}>{form.location}</p>
+        </div>
+        <div className="text-right">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-5 h-5 flex items-center justify-center" style={{ border: "1px solid rgba(245,242,238,0.3)" }}>
+              <span className="text-[7px] font-bold" style={{ color: "#f5f2ee" }}>CB</span>
+            </div>
+            <span className="text-[9px] font-medium tracking-widest uppercase" style={{ color: "rgba(245,242,238,0.6)" }}>CodeBrief</span>
+          </div>
+          <p className="text-[10px]" style={{ color: "rgba(245,242,238,0.3)" }}>
+            {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+          </p>
+        </div>
+      </div>
+      <div className="flex gap-8 mt-4 pt-3" style={{ borderTop: "1px solid #333" }}>
+        <DataPoint label="Area" value={`${form.squareFootage} SF`} />
+        <DataPoint label="Stories" value={form.stories} />
+        {form.occupancyType && <DataPoint label="Occupancy" value={form.occupancyType.split(" ")[0]} />}
+        {form.lotSize && <DataPoint label="Lot" value={form.lotSize} />}
+      </div>
+    </div>
+  );
+}
+
 function DataPoint({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <p className="text-[8px] tracking-widest uppercase" style={{ color: "rgba(245,242,238,0.35)" }}>{label}</p>
       <p className="text-sm font-light" style={{ color: "#f5f2ee" }}>{value}</p>
-    </div>
-  );
-}
-
-function SampleReportPreview() {
-  const [expanded, setExpanded] = useState(false);
-
-  return (
-    <div className="mt-8">
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between px-5 py-3 transition-colors"
-        style={{ background: "var(--bg-warm)", border: "1px solid var(--border-light)" }}
-        onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-stone)")}
-        onMouseLeave={(e) => (e.currentTarget.style.background = "var(--bg-warm)")}
-      >
-        <div className="flex items-center gap-3">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.5">
-            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
-            See a sample report — Mixed-Use, Chicago, IL
-          </span>
-        </div>
-        <svg
-          width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2"
-          style={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}
-        >
-          <path d="M6 9l6 6 6-6" />
-        </svg>
-      </button>
-
-      {expanded && (
-        <div style={{ border: "1px solid var(--border-light)", borderTop: "none" }}>
-          {/* Sample Header */}
-          <div className="px-6 py-4" style={{ background: "var(--bg-dark)" }}>
-            <p className="text-[9px] font-semibold tracking-widest uppercase" style={{ color: "var(--accent-light)" }}>
-              Sample Code Analysis Report
-            </p>
-            <h3 className="text-base font-light mt-1" style={{ color: "#f5f2ee" }}>
-              Mixed-Use (Residential/Commercial)
-            </h3>
-            <p className="text-xs" style={{ color: "rgba(245,242,238,0.5)" }}>Chicago, Illinois</p>
-            <div className="flex gap-6 mt-3 pt-2" style={{ borderTop: "1px solid #333" }}>
-              <div>
-                <p className="text-[8px] tracking-widest uppercase" style={{ color: "rgba(245,242,238,0.35)" }}>Area</p>
-                <p className="text-xs font-light" style={{ color: "#f5f2ee" }}>45,000 SF</p>
-              </div>
-              <div>
-                <p className="text-[8px] tracking-widest uppercase" style={{ color: "rgba(245,242,238,0.35)" }}>Stories</p>
-                <p className="text-xs font-light" style={{ color: "#f5f2ee" }}>5</p>
-              </div>
-              <div>
-                <p className="text-[8px] tracking-widest uppercase" style={{ color: "rgba(245,242,238,0.35)" }}>Occupancy</p>
-                <p className="text-xs font-light" style={{ color: "#f5f2ee" }}>R-2 / M</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Sample Tables */}
-          <div className="px-6 py-5 brief-content" style={{ background: "#fff" }}>
-            <h2>Applicable Codes &amp; Editions</h2>
-            <table>
-              <thead>
-                <tr><th>Code</th><th>Edition</th><th>Local Amendments</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>Chicago Building Code</td><td>Title 14B (2019, based on 2018 IBC)</td><td>Effective August 1, 2020</td></tr>
-                <tr><td>Chicago Fire Code</td><td>Title 14F</td><td>Local amendments to IFC</td></tr>
-                <tr><td>Chicago Energy Code</td><td>Title 14N (2021 IECC)</td><td>Effective November 1, 2022</td></tr>
-                <tr><td>ADA / Illinois Accessibility</td><td>Per Title 14B-11</td><td>Effective December 1, 2019</td></tr>
-              </tbody>
-            </table>
-
-            <h2>Building Code Analysis</h2>
-            <table>
-              <thead>
-                <tr><th>Requirement</th><th>Code Reference</th><th>Project Compliance</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>Occupancy</td><td>Title 14B Ch. 3</td><td>R-2 (residential) over M (retail) — mixed occupancy</td></tr>
-                <tr><td>Construction Type</td><td>Title 14B Ch. 6</td><td>Type I-A or I-B required for 5 stories mixed-use</td></tr>
-                <tr><td>Allowable Height</td><td>Table 504.3</td><td>Type I-B: 11 stories / 160 ft — compliant</td></tr>
-                <tr><td>Allowable Area</td><td>Table 506.2</td><td>Base 36,000 SF × 3 (sprinkler) = 108,000 SF — compliant</td></tr>
-                <tr><td>Sprinkler Required</td><td>§903.2.8</td><td>Yes — R-2 &gt; 3 stories requires NFPA 13</td></tr>
-              </tbody>
-            </table>
-
-            <h2>Means of Egress</h2>
-            <table>
-              <thead>
-                <tr><th>Requirement</th><th>Code Reference</th><th>Calculation</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>Occupant Load</td><td>Table 1004.5</td><td>Retail: 8,000 SF ÷ 30 = 267 | Residential: 37,000 SF ÷ 200 = 185 | Total: 452</td></tr>
-                <tr><td>Number of Exits</td><td>Table 1006.3.1</td><td>452 occupants = minimum 2 exits per floor</td></tr>
-                <tr><td>Exit Width</td><td>§1005.1</td><td>452 × 0.2&quot;/person = 90.4&quot; min stair width</td></tr>
-                <tr><td>Travel Distance</td><td>Table 1017.2</td><td>R-2 sprinklered: 250 ft max</td></tr>
-              </tbody>
-            </table>
-
-            <h2>Risk Flags &amp; Additional Requirements</h2>
-            <ol>
-              <li><strong>Chicago Zoning Bonus</strong> — Affordable housing bonus may increase allowable FAR. Verify with Dept. of Planning.</li>
-              <li><strong>Transit-Oriented Development</strong> — If within 600 ft of L station, parking minimums may be reduced or eliminated.</li>
-              <li><strong>Flood Zone</strong> — Check FEMA maps for Chicago River/Lake Michigan proximity. May require elevated first floor.</li>
-              <li><strong>Historic District</strong> — If in landmark district, design review required. Facade restrictions apply.</li>
-              <li><strong>Green Roof/Stormwater</strong> — Chicago Green Roof Initiative may apply to buildings over 10,000 SF. Verify requirements.</li>
-            </ol>
-          </div>
-
-          {/* Sample Footer */}
-          <div className="px-6 py-2.5 flex items-center justify-between" style={{ background: "var(--bg-dark)" }}>
-            <span className="text-[9px] tracking-widest uppercase" style={{ color: "rgba(245,242,238,0.4)" }}>
-              Generated by CodeBrief
-            </span>
-            <span className="text-[9px]" style={{ color: "rgba(245,242,238,0.2)" }}>
-              Sample report — actual output includes all 12 sections
-            </span>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

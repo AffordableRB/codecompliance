@@ -1,6 +1,16 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { rateLimit } from "@/lib/rate-limit";
+import { sanitizeInput, validateInput } from "@/lib/sanitize";
 
 const anthropic = new Anthropic();
+
+const ALLOWED_ORIGINS = [
+  process.env.NEXT_PUBLIC_SITE_URL,
+  "https://codecompliance-delta.vercel.app",
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "http://localhost:3002",
+].filter(Boolean);
 
 interface ProjectInput {
   buildingType: string;
@@ -179,14 +189,42 @@ function buildUserPrompt(input: ProjectInput, searchResults: string): string {
 
 export async function POST(req: Request) {
   try {
-    const input: ProjectInput = await req.json();
+    // CORS check
+    const origin = req.headers.get("origin") || "";
+    if (origin && !ALLOWED_ORIGINS.includes(origin)) {
+      return Response.json({ error: "Forbidden" }, { status: 403 });
+    }
 
-    if (!input.buildingType || !input.location || !input.squareFootage || !input.stories) {
+    // Rate limiting by IP
+    const ip =
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      req.headers.get("x-real-ip") ||
+      "unknown";
+    const { allowed, remaining } = rateLimit(ip);
+    if (!allowed) {
       return Response.json(
-        { error: "Missing required fields: buildingType, location, squareFootage, stories" },
-        { status: 400 }
+        { error: "Rate limit exceeded. Please wait a minute before generating another brief." },
+        { status: 429, headers: { "Retry-After": "60" } }
       );
     }
+
+    // Sanitize and validate input
+    const rawInput = await req.json();
+    const sanitized = sanitizeInput(rawInput);
+    const validationError = validateInput(sanitized);
+    if (validationError) {
+      return Response.json({ error: validationError }, { status: 400 });
+    }
+    const input: ProjectInput = {
+      buildingType: sanitized.buildingType,
+      location: sanitized.location,
+      squareFootage: sanitized.squareFootage,
+      stories: sanitized.stories,
+      occupancyType: sanitized.occupancyType,
+      occupantLoad: sanitized.occupantLoad,
+      lotSize: sanitized.lotSize,
+      additionalNotes: sanitized.additionalNotes,
+    };
 
     // Phase 1: Web search — gather code data from public sources
     const queries = buildSearchQueries(input);
@@ -226,6 +264,10 @@ export async function POST(req: Request) {
         "Content-Type": "text/plain; charset=utf-8",
         "Transfer-Encoding": "chunked",
         "Cache-Control": "no-cache",
+        "X-RateLimit-Remaining": String(remaining),
+        ...(origin && ALLOWED_ORIGINS.includes(origin)
+          ? { "Access-Control-Allow-Origin": origin }
+          : {}),
       },
     });
   } catch (err) {

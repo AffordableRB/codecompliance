@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/lib/supabase-browser";
 import { marked } from "marked";
 import { REPORT_TYPES } from "@/lib/report-types";
+import { getFieldsForReports } from "@/lib/report-fields";
 
 /* ═══════════════════════════════════════════
    TYPES
@@ -170,11 +171,12 @@ export default function AppWorkspace() {
   const [savedBriefs, setSavedBriefs] = useState<SavedBrief[]>([]);
   const [activeBriefId, setActiveBriefId] = useState<string | null>(null);
 
-  // Wizard steps: 1=project details, 2=select reports, 3=generating, 4=results
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  // Wizard steps: 1=project, 2=select reports, 3=report-specific fields, 4=generating, 5=results
+  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
   const [substep, setSubstep] = useState<1 | 2 | 3 | 4>(1);
   const [form, setForm] = useState<ProjectInput>(initialForm);
   const [selectedReports, setSelectedReports] = useState<string[]>(["code-analysis"]);
+  const [extraFields, setExtraFields] = useState<Record<string, string>>({});
 
   // Generation
   const [streamText, setStreamText] = useState("");
@@ -202,7 +204,7 @@ export default function AppWorkspace() {
   // Research log animation
   const researchLog = getResearchLog(currentReportId, form.location);
   useEffect(() => {
-    if (step === 3 && !streamText) {
+    if (step === 4 && !streamText) {
       setResearchLogIndex(0);
       logInterval.current = setInterval(() => {
         setResearchLogIndex((prev) => prev < researchLog.length - 1 ? prev + 1 : prev);
@@ -226,13 +228,14 @@ export default function AppWorkspace() {
     setError("");
     setActiveBriefId(null);
     setSelectedReports(["code-analysis"]);
+    setExtraFields({});
   }
 
   function handleSelectBrief(brief: SavedBrief) {
     setActiveBriefId(brief.id);
     setCompletedBrief(brief.brief_content);
     setStreamText("");
-    setStep(4);
+    setStep(5);
     setError("");
     if (brief.input_json) setForm(brief.input_json);
     else setForm({ ...initialForm, buildingType: brief.building_type, location: brief.location, squareFootage: brief.square_footage, stories: brief.stories, occupancyType: brief.occupancy_type || "" });
@@ -247,7 +250,7 @@ export default function AppWorkspace() {
   async function handleGenerate() {
     if (!canSubmit || selectedReports.length === 0) return;
 
-    setStep(3);
+    setStep(4);
     setError("");
     setStreamText("");
     setCompletedBrief("");
@@ -255,15 +258,25 @@ export default function AppWorkspace() {
     setCurrentReportId(selectedReports[0]);
 
     try {
-      // For now, generate the first selected report
-      // TODO: sequential generation for multiple reports
       const reportId = selectedReports[0];
       setCurrentReportId(reportId);
+
+      // Merge extra fields into additionalNotes for the API
+      const extraContext = Object.entries(extraFields)
+        .filter(([, v]) => v && v !== "Auto-classify" && v !== "Not sure" && v !== "Unknown" && v !== "Not decided")
+        .map(([k, v]) => `${k}: ${v}`)
+        .join("; ");
+
+      const enrichedForm = {
+        ...form,
+        additionalNotes: [form.additionalNotes, extraContext].filter(Boolean).join("\n\n"),
+        reportType: reportId,
+      };
 
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, reportType: reportId }),
+        body: JSON.stringify(enrichedForm),
       });
 
       if (!res.ok) {
@@ -286,7 +299,7 @@ export default function AppWorkspace() {
 
       setCompletedBrief(accumulated);
       setStreamText("");
-      setStep(4);
+      setStep(5);
 
       if (user) {
         const { data } = await supabase
@@ -300,7 +313,7 @@ export default function AppWorkspace() {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
-      setStep(2);
+      setStep(3);
     }
   }
 
@@ -378,25 +391,26 @@ export default function AppWorkspace() {
             </button>
             {/* Step indicator */}
             <div className="flex items-center gap-1.5">
-              {[1, 2, 3, 4].map((s) => (
+              {[1, 2, 3, 4, 5].map((s) => (
                 <div key={s} className="flex items-center gap-1.5">
                   <div className="w-5 h-5 flex items-center justify-center text-[9px] font-bold" style={{
                     background: step >= s ? "var(--bg-dark)" : "var(--bg-warm)",
                     color: step >= s ? "var(--text-inverse)" : "var(--text-muted)",
                   }}>{s}</div>
-                  {s < 4 && <div className="w-4 h-px" style={{ background: step > s ? "var(--bg-dark)" : "var(--border-light)" }} />}
+                  {s < 5 && <div className="w-4 h-px" style={{ background: step > s ? "var(--bg-dark)" : "var(--border-light)" }} />}
                 </div>
               ))}
               <span className="ml-2 text-[9px] tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>
-                {step === 1 && "Project Details"}
-                {step === 2 && "Select Reports"}
-                {step === 3 && "Researching"}
-                {step === 4 && "Results"}
+                {step === 1 && "Project"}
+                {step === 2 && "Reports"}
+                {step === 3 && "Details"}
+                {step === 4 && "Researching"}
+                {step === 5 && "Results"}
               </span>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {step === 4 && (
+            {step === 5 && (
               <>
                 <button onClick={() => window.print()} className="text-[10px] tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>Export PDF</button>
                 <button onClick={handleNewBrief} className="px-3 py-1.5 text-[10px] font-medium tracking-widest uppercase" style={{ background: "var(--bg-dark)", color: "var(--text-inverse)" }}>New Brief</button>
@@ -640,23 +654,100 @@ export default function AppWorkspace() {
                     {selectedReports.length} report{selectedReports.length !== 1 ? "s" : ""} selected — {selectedReports.length} brief{selectedReports.length !== 1 ? "s" : ""} used
                   </span>
                   <button
-                    onClick={handleGenerate}
+                    onClick={() => setStep(3)}
                     disabled={selectedReports.length === 0}
                     className="px-6 py-2.5 text-[10px] font-semibold tracking-widest uppercase transition-opacity disabled:opacity-30"
                     style={{ background: "var(--bg-dark)", color: "var(--text-inverse)" }}
                   >
-                    Generate {selectedReports.length} Report{selectedReports.length !== 1 ? "s" : ""}
+                    Continue — Report Details
                   </button>
                 </div>
               </div>
             </div>
           )}
 
-          {/* ═══ STEP 3: RESEARCHING ═══ */}
-          {step === 3 && !streamText && (
+          {/* ═══ STEP 3: REPORT-SPECIFIC FIELDS ═══ */}
+          {step === 3 && (
+            <div className="max-w-2xl mx-auto px-6 py-16">
+              <div className="text-center mb-8">
+                <p className="text-[9px] font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--accent)" }}>Step 3 of 5</p>
+                <h1 className="text-2xl font-light tracking-tight mb-2" style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}>
+                  Report-specific details
+                </h1>
+                <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                  These fields improve accuracy for your selected reports. Leave blank if unsure.
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                {getFieldsForReports(selectedReports).map(({ reportId, reportName, fields }) => (
+                  <div key={reportId} style={{ background: "#fff", border: "1px solid var(--border-medium)" }}>
+                    <div className="px-5 py-2.5" style={{ background: "var(--bg-warm)", borderBottom: "1px solid var(--border-light)" }}>
+                      <p className="text-[9px] font-semibold tracking-widest uppercase" style={{ color: "var(--text-secondary)" }}>
+                        {reportName}
+                      </p>
+                    </div>
+                    <div className="px-5 py-4 space-y-3.5">
+                      {fields.map((field) => (
+                        <div key={field.key}>
+                          <label className="block text-[9px] font-semibold tracking-widest uppercase mb-1.5" style={{ color: "var(--text-muted)" }}>
+                            {field.label}{field.required && <span style={{ color: "var(--error)" }}> *</span>}
+                          </label>
+                          {field.type === "select" ? (
+                            <select
+                              value={extraFields[field.key] || ""}
+                              onChange={(e) => setExtraFields((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                              className="form-input"
+                            >
+                              <option value="">{field.options?.[0] || "Select..."}</option>
+                              {field.options?.slice(1).map((opt) => (
+                                <option key={opt} value={opt}>{opt}</option>
+                              ))}
+                            </select>
+                          ) : field.type === "textarea" ? (
+                            <textarea
+                              value={extraFields[field.key] || ""}
+                              onChange={(e) => setExtraFields((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                              rows={2}
+                              placeholder={field.placeholder}
+                              className="form-input"
+                            />
+                          ) : (
+                            <input
+                              type="text"
+                              value={extraFields[field.key] || ""}
+                              onChange={(e) => setExtraFields((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                              placeholder={field.placeholder}
+                              className="form-input"
+                            />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 flex items-center justify-between">
+                <button onClick={() => setStep(2)} className="text-[10px] tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>
+                  Back
+                </button>
+                <button
+                  onClick={handleGenerate}
+                  className="px-6 py-2.5 text-[10px] font-semibold tracking-widest uppercase"
+                  style={{ background: "var(--bg-dark)", color: "var(--text-inverse)" }}
+                >
+                  Generate {selectedReports.length} Report{selectedReports.length !== 1 ? "s" : ""}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ═══ STEP 4: RESEARCHING ═══ */}
+          {step === 4 && !streamText && (
             <div className="max-w-2xl mx-auto px-6 py-16">
               <div className="text-center mb-10">
-                <p className="text-[9px] font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--accent)" }}>Step 3 of 4</p>
+                <p className="text-[9px] font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--accent)" }}>Step 4 of 5</p>
                 <h1 className="text-2xl font-light tracking-tight mb-2" style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}>
                   Researching {form.location}
                 </h1>
@@ -720,8 +811,8 @@ export default function AppWorkspace() {
             </div>
           )}
 
-          {/* ═══ STEP 3 → 4: STREAMING ═══ */}
-          {step === 3 && streamText && (
+          {/* ═══ STEP 4 → 5: STREAMING ═══ */}
+          {step === 4 && streamText && (
             <div className="max-w-4xl mx-auto px-6 py-8">
               <div className="mb-4">
                 <span className="text-[9px] font-semibold tracking-widest uppercase" style={{ color: "var(--accent)" }}>
@@ -737,8 +828,8 @@ export default function AppWorkspace() {
             </div>
           )}
 
-          {/* ═══ STEP 4: RESULTS ═══ */}
-          {step === 4 && completedBrief && (
+          {/* ═══ STEP 5: RESULTS ═══ */}
+          {step === 5 && completedBrief && (
             <div ref={briefRef} className="max-w-4xl mx-auto px-6 py-8">
               <div className="mb-4 flex items-center justify-between">
                 <span className="text-[9px] font-semibold tracking-widest uppercase" style={{ color: "var(--accent)" }}>

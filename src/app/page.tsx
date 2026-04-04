@@ -415,22 +415,25 @@ export default function Home() {
                   <div>
                     <p className="section-label mb-5">Pre-Design Intelligence</p>
                     <h1
-                      className="text-4xl md:text-5xl font-light leading-tight tracking-tight mb-6"
-                      style={{ color: "#f5f2ee", letterSpacing: "-0.02em" }}
+                      className="text-4xl md:text-5xl leading-tight mb-6"
+                      style={{
+                        color: "#f5f2ee",
+                        fontFamily: "var(--font-serif-display), Georgia, serif",
+                        fontWeight: 400,
+                        letterSpacing: "-0.01em",
+                        lineHeight: 1.1,
+                      }}
                     >
-                      Code compliance briefs,
+                      Every applicable code.
                       <br />
-                      before you draw a line.
+                      One report.
                     </h1>
                     <p
                       className="text-base leading-relaxed mb-8 max-w-lg"
                       style={{ color: "rgba(245,242,238,0.55)", fontWeight: 300 }}
                     >
-                      Enter your project parameters. Get a professional building
-                      code analysis covering everything architects miss in
-                      pre-design — zoning, construction type, fire separation,
-                      egress, accessibility, energy code, and risk flags. With
-                      IBC section citations. In 60 seconds.
+                      The complete code analysis for your project. Including the
+                      requirements you didn&apos;t know to search for.
                     </p>
                     <div className="flex items-center gap-4">
                       <button
@@ -460,56 +463,37 @@ export default function Home() {
 
                   {/* Right — Product demo placeholder */}
                   <div
-                    className="relative"
+                    className="relative overflow-hidden"
                     style={{
-                      border: "1px solid rgba(245,242,238,0.1)",
-                      background: "rgba(245,242,238,0.03)",
-                      aspectRatio: "16/10",
+                      border: "1px solid rgba(245,242,238,0.12)",
+                      background: "#000",
                     }}
                   >
-                    {/* Placeholder for product demo GIF/recording */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                      <div
-                        className="w-10 h-10 flex items-center justify-center"
-                        style={{ border: "1px solid rgba(245,242,238,0.15)" }}
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          viewBox="0 0 20 20"
-                          fill="none"
-                        >
-                          <path
-                            d="M7 4l9 6-9 6V4z"
-                            stroke="rgba(245,242,238,0.3)"
-                            strokeWidth="1"
-                            fill="rgba(245,242,238,0.1)"
-                          />
-                        </svg>
-                      </div>
-                      <p
-                        className="text-[10px] tracking-widest uppercase"
-                        style={{ color: "rgba(245,242,238,0.2)" }}
-                      >
-                        Product demo — coming soon
-                      </p>
-                    </div>
-
+                    {/* Split-screen demo video */}
+                    <video
+                      src="/hero_demo.mp4"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      style={{ width: "100%", display: "block" }}
+                    />
                     {/* Corner decorations */}
                     <div
-                      className="absolute top-0 left-0 w-4 h-4"
-                      style={{ borderTop: "1px solid rgba(245,242,238,0.25)", borderLeft: "1px solid rgba(245,242,238,0.25)" }}
+                      className="absolute top-0 left-0 w-4 h-4 pointer-events-none"
+                      style={{ borderTop: "1px solid rgba(245,242,238,0.3)", borderLeft: "1px solid rgba(245,242,238,0.3)" }}
                     />
                     <div
-                      className="absolute top-0 right-0 w-4 h-4"
-                      style={{ borderTop: "1px solid rgba(245,242,238,0.25)", borderRight: "1px solid rgba(245,242,238,0.25)" }}
+                      className="absolute top-0 right-0 w-4 h-4 pointer-events-none"
+                      style={{ borderTop: "1px solid rgba(245,242,238,0.3)", borderRight: "1px solid rgba(245,242,238,0.3)" }}
                     />
                     <div
-                      className="absolute bottom-0 left-0 w-4 h-4"
-                      style={{ borderBottom: "1px solid rgba(245,242,238,0.25)", borderLeft: "1px solid rgba(245,242,238,0.25)" }}
+                      className="absolute bottom-0 left-0 w-4 h-4 pointer-events-none"
+                      style={{ borderBottom: "1px solid rgba(245,242,238,0.3)", borderLeft: "1px solid rgba(245,242,238,0.3)" }}
                     />
                     <div
-                      className="absolute bottom-0 right-0 w-4 h-4"
-                      style={{ borderBottom: "1px solid rgba(245,242,238,0.25)", borderRight: "1px solid rgba(245,242,238,0.25)" }}
+                      className="absolute bottom-0 right-0 w-4 h-4 pointer-events-none"
+                      style={{ borderBottom: "1px solid rgba(245,242,238,0.3)", borderRight: "1px solid rgba(245,242,238,0.3)" }}
                     />
                   </div>
                 </div>

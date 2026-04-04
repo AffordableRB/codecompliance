@@ -135,6 +135,15 @@ export const REPORT_FIELDS: Record<string, ReportField[]> = {
     { key: "seasonalConstraints", label: "Seasonal Construction Constraints", type: "select", options: ["None significant", "Cold weather — limited winter work", "Rainy season impacts", "Hurricane season", "Unknown"] },
     { key: "longLeadItems", label: "Known Long-Lead Items", type: "text", placeholder: "e.g., structural steel, elevator, switchgear, or none identified" },
   ],
+
+  "program-validation": [
+    { key: "lotSize", label: "Lot Size", type: "text", placeholder: "e.g., 10,000 SF or 0.25 acres", required: true },
+    { key: "programDescription", label: "Space Program / Owner's Requirements", type: "textarea", placeholder: "e.g., 40 residential units (avg 900 SF), ground floor retail 5,000 SF, fitness center 1,500 SF, lobby/amenity 2,000 SF, 60 parking spaces", required: true },
+    { key: "parkingStrategy", label: "Parking Strategy", type: "select", options: ["Surface parking", "Structured parking (above grade)", "Below-grade parking", "Mixed surface + structured", "No parking (transit-oriented)", "Not decided"] },
+    { key: "structuralSystem", label: "Anticipated Structural System", type: "select", options: ["Not decided", "Wood frame", "Steel frame", "Concrete", "Mass timber", "Hybrid"] },
+    { key: "zoningDistrict", label: "Known Zoning District (if any)", type: "text", placeholder: "e.g., C-MX-5, or leave blank" },
+    { key: "knownFAR", label: "Known FAR Limit (if any)", type: "text", placeholder: "e.g., 4.0, or leave blank to research" },
+  ],
 };
 
 export function getFieldsForReports(reportIds: string[]): { reportId: string; reportName: string; fields: ReportField[] }[] {
@@ -153,6 +162,7 @@ export function getFieldsForReports(reportIds: string[]): { reportId: string; re
     "accessibility-review": "Accessibility",
     "consultant-scoping": "Consultant Scoping",
     "project-schedule": "Project Schedule",
+    "program-validation": "Program Validation",
   };
 
   for (const id of reportIds) {

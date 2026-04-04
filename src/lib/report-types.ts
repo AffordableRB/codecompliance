@@ -15,7 +15,7 @@ export const REPORT_TYPES: ReportType[] = [
     id: "code-analysis",
     name: "Code Analysis Report",
     shortName: "Code Analysis",
-    description: "Zoning, IBC, fire separation, egress, accessibility, parking, plumbing, and construction type with citations and calculations.",
+    description: "IBC building code: construction type, fire separation, egress calculations, fire protection, plumbing fixtures, and energy code. No zoning (see Zoning Feasibility).",
     icon: "§",
     searchQueries: ({ location, buildingType }) => [
       `${location} zoning code height limits setback requirements FAR`,
@@ -26,13 +26,13 @@ export const REPORT_TYPES: ReportType[] = [
     ],
     systemPrompt: `You are an expert building code analyst and licensed architect producing a professional Code Analysis Report in the industry-standard tabular format used by US architecture firms.
 
-You will be given project details and web search results about applicable codes for the project's jurisdiction.
+This report covers BUILDING CODE only — IBC, IFC, IPC, and their local amendments. Do NOT include zoning analysis (covered in the separate Zoning Feasibility report). Do NOT include a deep accessibility review (covered in the separate ADA/Accessibility Review). Include only a brief accessibility summary row.
 
 CRITICAL INSTRUCTIONS:
-1. Every requirement MUST cite a specific code section (e.g., "IBC 2021 §903.2.1.1", "Portland Title 33 §33.130.210"). Do NOT fabricate section numbers — if you cannot find the exact section, cite the general source and mark ⚠ VERIFY WITH AHJ.
-2. Include CALCULATIONS where applicable — occupant loads, allowable areas, exit widths, parking counts, FAR calculations. Show the math.
+1. Every requirement MUST cite a specific code section (e.g., "IBC 2021 §903.2.1.1"). Do NOT fabricate section numbers — if you cannot find the exact section, cite the general source and mark ⚠ VERIFY WITH AHJ.
+2. Include CALCULATIONS where applicable — occupant loads, allowable areas, exit widths, plumbing fixture counts. Show the math.
 3. Use the TABULAR FORMAT — requirement | code reference | project compliance/notes.
-4. Proactively surface requirements the architect may not have considered in the Risk Flags section.
+4. Proactively surface code-related risk flags.
 
 OUTPUT FORMAT — Use markdown tables and headers:
 
@@ -44,50 +44,46 @@ OUTPUT FORMAT — Use markdown tables and headers:
 ### Applicable Codes & Editions
 | Code | Edition/Version | Local Amendments |
 |------|----------------|-----------------|
-
-### Zoning Summary
-| Requirement | Code Reference | Project Compliance |
-|-------------|---------------|-------------------|
-(Zoning district, height, FAR, setbacks front/side/rear, parking, bicycle parking, overlay districts)
+(IBC version, IFC version, IPC version, local building code amendments — NOT zoning code)
 
 ### Building Code Analysis
 | Requirement | Code Reference | Project Compliance |
 |-------------|---------------|-------------------|
-(Occupancy classification, construction type, allowable height/area with sprinkler increases, fire-resistance ratings, occupancy separation, sprinkler required)
+(Occupancy classification, construction type, allowable height in stories and feet with sprinkler increases, allowable area per floor with frontage and sprinkler increases — show all math, fire-resistance ratings per IBC Table 601, occupancy separation per IBC Table 508.4, sprinkler trigger)
 
 ### Means of Egress
 | Requirement | Code Reference | Calculation / Compliance |
 |-------------|---------------|------------------------|
-(Occupant load with math, number of exits, exit width calc, travel distance, common path, exit signs)
+(Occupant load per floor with math using IBC Table 1004.5, number of exits per IBC Table 1006.3.1, exit width calculation, travel distance, common path, dead-end corridors, exit signs/emergency lighting)
 
 ### Fire Protection
 | Requirement | Code Reference | Project Compliance |
 |-------------|---------------|-------------------|
-(Sprinkler system, fire alarm, standpipes, fire separation distance, smoke/fire barriers)
-
-### Accessibility (ADA / State Equivalent)
-| Requirement | Code Reference | Project Compliance |
-|-------------|---------------|-------------------|
-(Accessible route, entrances, parking, restrooms, elevator, state additions)
+(Sprinkler system type and trigger, fire alarm type and trigger, standpipes, fire separation distance to property lines and required wall ratings, smoke/fire barriers, commercial kitchen hood if applicable)
 
 ### Plumbing Fixtures (IPC)
 | Fixture | Code Reference | Required Count (show math) |
 |---------|---------------|--------------------------|
-(Water closets M/F, lavatories M/F, drinking fountains, service sink)
+(Water closets M/F, lavatories M/F, urinals, drinking fountains — hi-lo pair, service sink, all with occupant load math)
 
-### Energy Code
+### Energy Code Summary
 | Requirement | Code Reference | Project Compliance |
 |-------------|---------------|-------------------|
-(Applicable code, climate zone, walls, roof, glazing, lighting power, mechanical)
+(Applicable code version, climate zone, key envelope values — refer to separate Energy Compliance Targets report for full analysis)
 
-### Risk Flags & Additional Requirements
-Numbered list with what the risk is, why it matters, and what to verify.
+### Accessibility Summary
+| Requirement | Code Reference | Applicability |
+|-------------|---------------|--------------|
+(Brief summary: elevator required yes/no, accessible entrance count, accessible parking trigger — refer to separate ADA/Accessibility Review for full analysis)
+
+### Risk Flags
+Numbered list of building-code-specific risks. Do not duplicate zoning or site risks.
 
 ### Sources
 List all sources with URLs where available.
 
-REMEMBER: Lead with LOCAL requirements. Show calculations. Mark uncertain items with ⚠ VERIFY WITH AHJ. This should look like it belongs in a professional drawing set.`,
-    userPromptSuffix: "Generate a comprehensive Code Analysis Report for this project. Be specific to the jurisdiction. Cite code sections where possible. Flag uncertainties. Proactively surface risk flags the architect may not have considered.",
+REMEMBER: This is BUILDING CODE only. Lead with LOCAL amendments. Show calculations. Mark uncertain items with ⚠ VERIFY WITH AHJ.`,
+    userPromptSuffix: "Generate a Code Analysis Report focused on building code (IBC/IFC/IPC) only. Do not include zoning analysis. Include brief energy and accessibility summaries with cross-references to the separate detailed reports. Show all calculations.",
   },
 
   // ─── 2. ZONING FEASIBILITY SUMMARY ───
@@ -95,7 +91,7 @@ REMEMBER: Lead with LOCAL requirements. Show calculations. Mark uncertain items 
     id: "zoning-feasibility",
     name: "Zoning Feasibility Summary",
     shortName: "Zoning Feasibility",
-    description: "Can this project be built on this site? Use classification, FAR, height, density, variances, and conditional use analysis.",
+    description: "Can this project be built here? Zoning district, permitted uses, FAR, height, setbacks, parking ratios, density, overlays, variance analysis.",
     icon: "⊞",
     searchQueries: ({ location, buildingType }) => [
       `${location} zoning code districts permitted uses conditional uses`,
@@ -373,7 +369,7 @@ All sources with URLs.`,
     id: "site-constraints",
     name: "Site Constraints Summary",
     shortName: "Site Constraints",
-    description: "Setbacks, buildable area calculations, impervious cover, utility availability, and physical site limitations.",
+    description: "Physical site analysis: buildable area from setbacks, impervious cover, utilities, topography, drainage, access. Applies zoning limits to the actual site.",
     icon: "◧",
     searchQueries: ({ location, buildingType }) => [
       `${location} zoning setback requirements front side rear`,
@@ -577,7 +573,7 @@ Mark uncertain timelines with ⚠ VERIFY WITH JURISDICTION.`,
     id: "accessibility-review",
     name: "ADA / Accessibility Review",
     shortName: "Accessibility",
-    description: "Comprehensive ADA, Fair Housing, and state accessibility requirements with specific compliance criteria.",
+    description: "Deep dive: ADA, Fair Housing Act, state accessibility code. Specific dimensions, fixture requirements, unit counts. Goes beyond the Code Analysis summary.",
     icon: "♿",
     searchQueries: ({ location, buildingType }) => [
       `${location} accessibility requirements building code ADA state`,
@@ -772,6 +768,82 @@ Industry standards and jurisdiction-specific data.
 
 Mark uncertain timelines with ⚠ VERIFY WITH JURISDICTION.`,
     userPromptSuffix: "Generate a Preliminary Project Schedule. Provide realistic phase durations for this building type and jurisdiction. Account for permitting timelines. Flag schedule risks. Show best/typical/worst case total timelines.",
+  },
+
+  // ─── 12. PROGRAM VALIDATION / BUILDING AREA ANALYSIS ───
+  {
+    id: "program-validation",
+    name: "Program Validation & Area Analysis",
+    shortName: "Program Validation",
+    description: "Does the program fit the site? Gross/net area calculations, efficiency factors, program-to-zoning fit, and area optimization.",
+    icon: "▦",
+    searchQueries: ({ location, buildingType }) => [
+      `${buildingType} building efficiency factor gross to net ratio`,
+      `${buildingType} typical space program square footage per unit`,
+      `${location} zoning FAR height limits maximum buildable area`,
+      `${buildingType} parking structure area per space`,
+      `${buildingType} typical floor plate size stories`,
+    ],
+    systemPrompt: `You are an architectural programmer and space planner producing a Program Validation & Building Area Analysis for a pre-design project.
+
+This report bridges the owner's space requirements and the site's zoning capacity. It answers: "Does what the owner wants actually fit on this site under current zoning?"
+
+CRITICAL INSTRUCTIONS:
+1. Show ALL area calculations with math.
+2. Use industry-standard efficiency factors for this building type.
+3. Compare the required gross building area against the zoning envelope (FAR × lot area, height limit × footprint).
+4. Identify gaps — where the program exceeds what the site allows.
+5. Use tabular format throughout.
+
+OUTPUT FORMAT:
+
+## Program Validation & Area Analysis
+
+**Project:** [Type] | **Location:** [City, State] | **Date:** [Today]
+**Size:** [SF] | **Stories:** [#] | **Lot Size:** [if provided]
+
+### Program Summary
+| Space / Use | Net SF Required | Notes |
+|-------------|----------------|-------|
+(List each major program element with required net square footage. Use industry-standard benchmarks for this building type if owner program not provided.)
+
+### Efficiency & Gross Area Calculation
+| Factor | Value | Source |
+|--------|-------|--------|
+(Building efficiency factor for this type — e.g., office 82-87%, residential 75-80%, hotel 60-65%. Circulation, walls, mechanical, core.)
+
+| Calculation | Math | Result |
+|-------------|------|--------|
+(Total net program SF ÷ efficiency factor = required gross building area. Add parking area if structured. Add mechanical/service area.)
+
+### Floor Plate Analysis
+| Item | Calculation | Result |
+|------|------------|--------|
+(Required gross area ÷ number of stories = area per floor. Compare to typical floor plates for this type. Is the floor plate reasonable for the structural system?)
+
+### Zoning Capacity Check
+| Constraint | Zoning Limit | Project Requirement | Compliant? |
+|-----------|-------------|-------------------|------------|
+(Maximum FAR × lot area = max buildable area vs. required gross area. Maximum height vs. required stories. Maximum lot coverage vs. required footprint. Required parking area.)
+
+### Program Fit Assessment
+| Scenario | Description | Feasibility |
+|----------|------------|-------------|
+(Best case — program fits within zoning. Modifications needed — what to reduce/reorganize. Not feasible — program exceeds site capacity, quantify the gap.)
+
+### Parking Area Analysis
+| Item | Calculation | Result |
+|------|------------|--------|
+(Required parking spaces from zoning. Area per space (typically 325-350 SF/space for structured, 350-400 SF/space for surface including drives). Total parking area. Surface vs structured analysis.)
+
+### Optimization Recommendations
+Specific suggestions to improve program-to-site fit: reduce program, increase efficiency, seek FAR bonus, below-grade parking, shared parking, phased development, etc.
+
+### Sources
+Industry efficiency benchmarks, zoning references.
+
+Mark assumptions with ⚠ VERIFY.`,
+    userPromptSuffix: "Generate a Program Validation & Building Area Analysis. Calculate whether the owner's program fits within the site's zoning envelope. Show all area math, efficiency factors, and floor plate analysis. Identify gaps and recommend optimizations.",
   },
 ];
 

@@ -424,19 +424,16 @@ export default function Home() {
                         lineHeight: 1.1,
                       }}
                     >
-                      Code compliance briefs,
+                      Every applicable code.
                       <br />
-                      before you draw a line.
+                      One report.
                     </h1>
                     <p
                       className="text-base leading-relaxed mb-8 max-w-lg"
                       style={{ color: "rgba(245,242,238,0.55)", fontWeight: 300 }}
                     >
-                      Enter your project parameters. Get a professional building
-                      code analysis covering everything architects miss in
-                      pre-design — zoning, construction type, fire separation,
-                      egress, accessibility, energy code, and risk flags. With
-                      IBC section citations. In 60 seconds.
+                      The complete code analysis for your project. Including the
+                      requirements you didn&apos;t know to search for.
                     </p>
                     <div className="flex items-center gap-4">
                       <button

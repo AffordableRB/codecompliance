@@ -463,56 +463,37 @@ export default function Home() {
 
                   {/* Right — Product demo placeholder */}
                   <div
-                    className="relative"
+                    className="relative overflow-hidden"
                     style={{
-                      border: "1px solid rgba(245,242,238,0.1)",
-                      background: "rgba(245,242,238,0.03)",
-                      aspectRatio: "16/10",
+                      border: "1px solid rgba(245,242,238,0.12)",
+                      background: "#000",
                     }}
                   >
-                    {/* Placeholder for product demo GIF/recording */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                      <div
-                        className="w-10 h-10 flex items-center justify-center"
-                        style={{ border: "1px solid rgba(245,242,238,0.15)" }}
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          viewBox="0 0 20 20"
-                          fill="none"
-                        >
-                          <path
-                            d="M7 4l9 6-9 6V4z"
-                            stroke="rgba(245,242,238,0.3)"
-                            strokeWidth="1"
-                            fill="rgba(245,242,238,0.1)"
-                          />
-                        </svg>
-                      </div>
-                      <p
-                        className="text-[10px] tracking-widest uppercase"
-                        style={{ color: "rgba(245,242,238,0.2)" }}
-                      >
-                        Product demo — coming soon
-                      </p>
-                    </div>
-
+                    {/* Split-screen demo video */}
+                    <video
+                      src="/hero_demo.mp4"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      style={{ width: "100%", display: "block" }}
+                    />
                     {/* Corner decorations */}
                     <div
-                      className="absolute top-0 left-0 w-4 h-4"
-                      style={{ borderTop: "1px solid rgba(245,242,238,0.25)", borderLeft: "1px solid rgba(245,242,238,0.25)" }}
+                      className="absolute top-0 left-0 w-4 h-4 pointer-events-none"
+                      style={{ borderTop: "1px solid rgba(245,242,238,0.3)", borderLeft: "1px solid rgba(245,242,238,0.3)" }}
                     />
                     <div
-                      className="absolute top-0 right-0 w-4 h-4"
-                      style={{ borderTop: "1px solid rgba(245,242,238,0.25)", borderRight: "1px solid rgba(245,242,238,0.25)" }}
+                      className="absolute top-0 right-0 w-4 h-4 pointer-events-none"
+                      style={{ borderTop: "1px solid rgba(245,242,238,0.3)", borderRight: "1px solid rgba(245,242,238,0.3)" }}
                     />
                     <div
-                      className="absolute bottom-0 left-0 w-4 h-4"
-                      style={{ borderBottom: "1px solid rgba(245,242,238,0.25)", borderLeft: "1px solid rgba(245,242,238,0.25)" }}
+                      className="absolute bottom-0 left-0 w-4 h-4 pointer-events-none"
+                      style={{ borderBottom: "1px solid rgba(245,242,238,0.3)", borderLeft: "1px solid rgba(245,242,238,0.3)" }}
                     />
                     <div
-                      className="absolute bottom-0 right-0 w-4 h-4"
-                      style={{ borderBottom: "1px solid rgba(245,242,238,0.25)", borderRight: "1px solid rgba(245,242,238,0.25)" }}
+                      className="absolute bottom-0 right-0 w-4 h-4 pointer-events-none"
+                      style={{ borderBottom: "1px solid rgba(245,242,238,0.3)", borderRight: "1px solid rgba(245,242,238,0.3)" }}
                     />
                   </div>
                 </div>

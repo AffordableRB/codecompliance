@@ -16,6 +16,8 @@ interface ProjectInput {
   location: string;
   squareFootage: string;
   stories: string;
+  buildingHeight: string;
+  constructionType: string;
   occupancyType: string;
   occupantLoad: string;
   lotSize: string;
@@ -59,7 +61,8 @@ const OCCUPANCY_TYPES = [
 
 const initialForm: ProjectInput = {
   buildingType: "", location: "", squareFootage: "", stories: "",
-  occupancyType: "", occupantLoad: "", lotSize: "", additionalNotes: "",
+  buildingHeight: "", constructionType: "", occupancyType: "", occupantLoad: "",
+  lotSize: "", additionalNotes: "",
 };
 
 /* ═══════════════════════════════════════════
@@ -505,12 +508,12 @@ export default function AppWorkspace() {
                       {form.buildingType} — {form.location}
                     </p>
                     <h1 className="text-3xl font-light tracking-tight mb-8" style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}>
-                      How big is the project?
+                      Size &amp; structure
                     </h1>
-                    <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="grid grid-cols-2 gap-4 mb-4">
                       <div>
                         <label className="block text-[9px] font-semibold tracking-widest uppercase mb-2 text-left" style={{ color: "var(--text-muted)" }}>
-                          Gross Area (SF)
+                          Gross Area (SF) *
                         </label>
                         <input
                           type="text"
@@ -523,16 +526,50 @@ export default function AppWorkspace() {
                       </div>
                       <div>
                         <label className="block text-[9px] font-semibold tracking-widest uppercase mb-2 text-left" style={{ color: "var(--text-muted)" }}>
-                          Stories Above Grade
+                          Stories Above Grade *
                         </label>
                         <input
                           type="text"
                           value={form.stories}
                           onChange={(e) => update("stories", e.target.value)}
-                          onKeyDown={(e) => { if (e.key === "Enter" && form.squareFootage && form.stories) setSubstep(4); }}
                           placeholder="e.g., 4"
                           className="form-input text-center text-lg py-3"
                         />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                      <div>
+                        <label className="block text-[9px] font-semibold tracking-widest uppercase mb-2 text-left" style={{ color: "var(--text-muted)" }}>
+                          Building Height (feet)
+                        </label>
+                        <input
+                          type="text"
+                          value={form.buildingHeight}
+                          onChange={(e) => update("buildingHeight", e.target.value)}
+                          placeholder="e.g., 52 ft (or leave blank)"
+                          className="form-input text-center py-2.5"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[9px] font-semibold tracking-widest uppercase mb-2 text-left" style={{ color: "var(--text-muted)" }}>
+                          Construction Type
+                        </label>
+                        <select
+                          value={form.constructionType}
+                          onChange={(e) => update("constructionType", e.target.value)}
+                          className="form-input py-2.5"
+                        >
+                          <option value="">Not sure — analyze</option>
+                          <option value="Type I-A (noncombustible, highest fire rating)">Type I-A</option>
+                          <option value="Type I-B (noncombustible)">Type I-B</option>
+                          <option value="Type II-A (noncombustible, 1-hour)">Type II-A</option>
+                          <option value="Type II-B (noncombustible, unrated)">Type II-B</option>
+                          <option value="Type III-A (exterior noncombustible, 1-hour interior)">Type III-A</option>
+                          <option value="Type III-B (exterior noncombustible, unrated interior)">Type III-B</option>
+                          <option value="Type IV (heavy timber)">Type IV</option>
+                          <option value="Type V-A (wood frame, 1-hour)">Type V-A</option>
+                          <option value="Type V-B (wood frame, unrated)">Type V-B</option>
+                        </select>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">

@@ -18,6 +18,8 @@ export function sanitizeInput(input: Record<string, string>): Record<string, str
     location: cleanField(input.location || "", MAX_FIELD_LENGTH),
     squareFootage: cleanField(input.squareFootage || "", 20),
     stories: cleanField(input.stories || "", 10),
+    buildingHeight: cleanField(input.buildingHeight || "", 20),
+    constructionType: cleanField(input.constructionType || "", MAX_FIELD_LENGTH),
     occupancyType: cleanField(input.occupancyType || "", MAX_FIELD_LENGTH),
     occupantLoad: cleanField(input.occupantLoad || "", 20),
     lotSize: cleanField(input.lotSize || "", MAX_FIELD_LENGTH),

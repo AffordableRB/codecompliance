@@ -18,6 +18,8 @@ interface ProjectInput {
   location: string;
   squareFootage: string;
   stories: string;
+  buildingHeight: string;
+  constructionType: string;
   occupancyType: string;
   occupantLoad: string;
   lotSize: string;
@@ -43,6 +45,8 @@ function buildUserPrompt(
     `- Total Square Footage: ${input.squareFootage}`,
     `- Number of Stories: ${input.stories}`,
   ];
+  if (input.buildingHeight) parts.push(`- Building Height: ${input.buildingHeight}`);
+  if (input.constructionType) parts.push(`- Construction Type: ${input.constructionType}`);
   if (input.occupancyType) parts.push(`- Occupancy Type: ${input.occupancyType}`);
   if (input.occupantLoad) parts.push(`- Estimated Occupant Load: ${input.occupantLoad}`);
   if (input.lotSize) parts.push(`- Lot Size: ${input.lotSize}`);
@@ -95,6 +99,8 @@ export async function POST(req: Request) {
       location: sanitized.location,
       squareFootage: sanitized.squareFootage,
       stories: sanitized.stories,
+      buildingHeight: sanitized.buildingHeight || "",
+      constructionType: sanitized.constructionType || "",
       occupancyType: sanitized.occupancyType,
       occupantLoad: sanitized.occupantLoad,
       lotSize: sanitized.lotSize,

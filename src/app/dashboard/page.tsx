@@ -1,319 +1,531 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase-browser";
 import { useAuth } from "@/lib/auth-context";
-import { PLANS } from "@/lib/stripe";
-import type { PlanKey } from "@/lib/stripe";
+import { supabase } from "@/lib/supabase-browser";
+import { marked } from "marked";
 
 interface Brief {
   id: string;
+  created_at: string;
   building_type: string;
   location: string;
   square_footage: string;
   stories: string;
+  occupancy_type: string | null;
   brief_content: string;
-  created_at: string;
 }
 
 interface Profile {
-  plan: PlanKey;
+  plan: string;
+  briefs_used: number;
+  briefs_limit: number;
   stripe_customer_id: string | null;
 }
 
+const PLAN_LIMITS: Record<string, number> = {
+  free: 2,
+  solo: 15,
+  firm: 999,
+  enterprise: 999,
+};
+
+const PLAN_LABELS: Record<string, string> = {
+  free: "Free",
+  solo: "Solo",
+  firm: "Firm",
+  enterprise: "Enterprise",
+};
+
 export default function DashboardPage() {
-  const { user, loading: authLoading, signOut } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [briefs, setBriefs] = useState<Brief[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [usageCount, setUsageCount] = useState(0);
-  const [expandedBrief, setExpandedBrief] = useState<string | null>(null);
-  const [upgradeLoading, setUpgradeLoading] = useState(false);
-
-  const loadData = useCallback(async () => {
-    if (!user) return;
-
-    const [briefsRes, profileRes] = await Promise.all([
-      supabase
-        .from("briefs")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(50),
-      supabase.from("profiles").select("*").eq("id", user.id).single(),
-    ]);
-
-    if (briefsRes.data) setBriefs(briefsRes.data);
-    if (profileRes.data) setProfile(profileRes.data);
-
-    // Count this month's usage
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
-
-    const { count } = await supabase
-      .from("briefs")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .gte("created_at", startOfMonth.toISOString());
-
-    setUsageCount(count || 0);
-  }, [user]);
+  const [dataLoading, setDataLoading] = useState(true);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push("/login");
-      return;
-    }
-    if (user) loadData();
-  }, [user, authLoading, router, loadData]);
+    if (!authLoading && !user) router.push("/login");
+  }, [user, authLoading, router]);
 
-  async function handleUpgrade(plan: "solo" | "firm" | "enterprise") {
-    setUpgradeLoading(true);
-    try {
-      const res = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan }),
-      });
-      const { url } = await res.json();
-      if (url) window.location.href = url;
-    } catch (err) {
-      console.error("Checkout error:", err);
+  useEffect(() => {
+    if (!user) return;
+
+    async function loadData() {
+      setDataLoading(true);
+      const [briefsRes, profileRes] = await Promise.all([
+        supabase
+          .from("briefs")
+          .select("id, created_at, building_type, location, square_footage, stories, occupancy_type, brief_content")
+          .eq("user_id", user!.id)
+          .order("created_at", { ascending: false })
+          .limit(20),
+        supabase
+          .from("profiles")
+          .select("plan, briefs_used, briefs_limit, stripe_customer_id")
+          .eq("id", user!.id)
+          .single(),
+      ]);
+
+      if (briefsRes.data) setBriefs(briefsRes.data);
+      if (profileRes.data) setProfile(profileRes.data);
+      setDataLoading(false);
     }
-    setUpgradeLoading(false);
+
+    loadData();
+  }, [user]);
+
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+    router.push("/");
   }
 
-  if (authLoading) {
+  async function handleUpgrade(plan: string) {
+    const res = await fetch("/api/create-checkout-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ plan }),
+    });
+    const data = await res.json();
+    if (data.url) window.location.href = data.url;
+  }
+
+  if (authLoading || dataLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-500">Loading...</p>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: "var(--bg-base)" }}
+      >
+        <div className="flex flex-col items-center gap-4">
+          <div
+            className="w-8 h-8 border border-t-transparent animate-spin"
+            style={{ borderColor: "var(--border-medium)", borderTopColor: "var(--text-primary)" }}
+          />
+          <p className="text-xs tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>
+            Loading
+          </p>
+        </div>
       </div>
     );
   }
 
   if (!user) return null;
 
-  const plan: PlanKey = profile?.plan || "free";
-  const planConfig = PLANS[plan];
-  const limit = planConfig.briefsPerMonth;
-  const isUnlimited = limit === -1;
+  const plan = profile?.plan || "free";
+  const used = profile?.briefs_used || 0;
+  const limit = profile?.briefs_limit || PLAN_LIMITS[plan] || 2;
+  const usagePct = limit >= 999 ? 100 : Math.min(100, (used / limit) * 100);
+  const usageColor =
+    usagePct >= 90 ? "#8b1a1a" : usagePct >= 70 ? "#92400e" : "var(--text-primary)";
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <a href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-4 h-4 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-              </div>
-              <span className="text-lg font-bold text-gray-900">CodeBrief</span>
-            </a>
-          </div>
-          <div className="flex items-center gap-4">
+    <div className="min-h-screen flex flex-col" style={{ background: "var(--bg-base)" }}>
+      {/* NAV */}
+      <nav
+        className="sticky top-0 z-50"
+        style={{ background: "#111111", borderBottom: "1px solid #222222" }}
+      >
+        <div className="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
+          <a href="/" className="flex items-center gap-3">
+            <div
+              className="w-7 h-7 flex items-center justify-center"
+              style={{ border: "1px solid rgba(245,242,238,0.3)" }}
+            >
+              <span className="text-[10px] font-bold tracking-tight" style={{ color: "#f5f2ee" }}>CB</span>
+            </div>
+            <span
+              className="text-sm font-medium tracking-widest uppercase"
+              style={{ color: "#f5f2ee", letterSpacing: "0.12em" }}
+            >
+              CodeBrief
+            </span>
+          </a>
+
+          <div className="flex items-center gap-5">
+            <span className="text-xs" style={{ color: "rgba(245,242,238,0.35)" }}>
+              {user.email}
+            </span>
             <a
-              href="/"
-              className="text-sm text-blue-600 hover:underline font-medium"
+              href="/#generate"
+              className="px-4 py-2 text-xs font-medium tracking-widest uppercase transition-colors"
+              style={{ background: "#f5f2ee", color: "#111111" }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "#e5e0d8")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "#f5f2ee")}
             >
               New Brief
             </a>
-            <span className="text-xs text-gray-400">{user.email}</span>
             <button
-              onClick={signOut}
-              className="text-xs text-gray-500 hover:text-gray-700"
+              onClick={handleSignOut}
+              className="text-xs tracking-wide transition-colors"
+              style={{ color: "rgba(245,242,238,0.35)" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(245,242,238,0.7)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(245,242,238,0.35)")}
             >
-              Sign Out
+              Sign out
             </button>
           </div>
         </div>
-      </header>
+      </nav>
 
-      <main className="max-w-5xl mx-auto px-4 py-8">
-        {/* Usage + Plan */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-              Current Plan
-            </p>
-            <p className="text-2xl font-bold text-gray-900">
-              {planConfig.name}
-            </p>
-            <p className="text-sm text-gray-500 mt-1">
-              {plan === "free"
-                ? "Free — 2 briefs/month"
-                : `$${planConfig.price}/month`}
-            </p>
-          </div>
+      <main className="flex-1 max-w-7xl mx-auto px-8 py-12 w-full">
+        {/* Page heading */}
+        <div className="mb-10">
+          <p className="section-label mb-2">Account</p>
+          <h1
+            className="text-2xl font-light tracking-tight"
+            style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}
+          >
+            Dashboard
+          </h1>
+        </div>
 
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-              Briefs This Month
-            </p>
-            <p className="text-2xl font-bold text-gray-900">
-              {usageCount}
-              {!isUnlimited && (
-                <span className="text-base font-normal text-gray-400">
-                  {" "}
-                  / {limit}
-                </span>
-              )}
-            </p>
-            {!isUnlimited && (
-              <div className="mt-2 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-blue-600 rounded-full transition-all"
-                  style={{
-                    width: `${Math.min((usageCount / limit) * 100, 100)}%`,
-                  }}
-                />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* LEFT COLUMN — Plan + Upgrade */}
+          <div className="lg:col-span-1 space-y-5">
+            {/* Plan card */}
+            <div
+              style={{
+                background: "#ffffff",
+                border: "1px solid var(--border-medium)",
+                borderTop: "2px solid var(--text-primary)",
+              }}
+            >
+              <div className="px-6 py-5">
+                <p
+                  className="text-[9px] font-semibold tracking-widest uppercase mb-3"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  Current Plan
+                </p>
+                <div className="flex items-baseline gap-2 mb-4">
+                  <span
+                    className="text-xl font-light tracking-tight"
+                    style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}
+                  >
+                    {PLAN_LABELS[plan] || plan}
+                  </span>
+                  <span
+                    className="text-[9px] font-semibold tracking-widest uppercase px-2 py-0.5"
+                    style={{
+                      background: plan === "free" ? "var(--bg-warm)" : "#111111",
+                      color: plan === "free" ? "var(--text-muted)" : "#f5f2ee",
+                    }}
+                  >
+                    {plan}
+                  </span>
+                </div>
+
+                {/* Usage */}
+                <div className="mb-1 flex items-center justify-between">
+                  <p className="text-[9px] tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>
+                    Briefs used
+                  </p>
+                  <p
+                    className="text-[10px] font-medium"
+                    style={{ color: usageColor }}
+                  >
+                    {limit >= 999 ? `${used} / Unlimited` : `${used} / ${limit}`}
+                  </p>
+                </div>
+                {limit < 999 && (
+                  <div
+                    className="w-full h-1 overflow-hidden"
+                    style={{ background: "var(--bg-stone)" }}
+                  >
+                    <div
+                      className="h-full transition-all"
+                      style={{
+                        width: `${usagePct}%`,
+                        background: usageColor,
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Upgrade card */}
+            {plan === "free" && (
+              <div
+                style={{
+                  background: "#111111",
+                  border: "1px solid #222",
+                  borderTop: "2px solid #333",
+                }}
+              >
+                <div className="px-6 py-5">
+                  <p
+                    className="text-[9px] font-semibold tracking-widest uppercase mb-3"
+                    style={{ color: "#b5a898" }}
+                  >
+                    Upgrade
+                  </p>
+                  <div className="space-y-3">
+                    {[
+                      { key: "solo", label: "Solo", price: "$49/mo", briefs: "15 briefs" },
+                      { key: "firm", label: "Firm", price: "$99/mo", briefs: "Unlimited + 5 users", popular: true },
+                      { key: "enterprise", label: "Enterprise", price: "$199/mo", briefs: "Unlimited + priority" },
+                    ].map((p) => (
+                      <button
+                        key={p.key}
+                        onClick={() => handleUpgrade(p.key)}
+                        className="w-full flex items-center justify-between px-4 py-3 text-left transition-colors"
+                        style={{
+                          background: p.popular ? "rgba(245,242,238,0.06)" : "transparent",
+                          border: "1px solid rgba(245,242,238,0.1)",
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(245,242,238,0.1)")}
+                        onMouseLeave={(e) => (e.currentTarget.style.background = p.popular ? "rgba(245,242,238,0.06)" : "transparent")}
+                      >
+                        <div>
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <span className="text-xs font-medium" style={{ color: "#f5f2ee" }}>{p.label}</span>
+                            {p.popular && (
+                              <span
+                                className="text-[8px] font-semibold tracking-widest uppercase px-1.5 py-0.5"
+                                style={{ background: "#b5a898", color: "#111111" }}
+                              >
+                                Popular
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-[10px]" style={{ color: "rgba(245,242,238,0.35)" }}>{p.briefs}</span>
+                        </div>
+                        <span className="text-xs font-medium" style={{ color: "rgba(245,242,238,0.6)" }}>{p.price}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {plan !== "free" && (
+              <div
+                style={{
+                  background: "var(--bg-warm)",
+                  border: "1px solid var(--border-light)",
+                }}
+              >
+                <div className="px-6 py-5">
+                  <p
+                    className="text-[9px] font-semibold tracking-widest uppercase mb-2"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    Subscription
+                  </p>
+                  <p className="text-xs mb-4" style={{ color: "var(--text-secondary)", fontWeight: 300 }}>
+                    Manage billing, invoices, and plan changes.
+                  </p>
+                  <button
+                    onClick={() => handleUpgrade("portal")}
+                    className="text-xs font-medium tracking-widest uppercase transition-colors"
+                    style={{ color: "var(--text-primary)" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "var(--accent)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
+                  >
+                    Manage Billing &rarr;
+                  </button>
+                </div>
               </div>
             )}
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-              Total Briefs
-            </p>
-            <p className="text-2xl font-bold text-gray-900">{briefs.length}</p>
-            {plan === "free" && (
-              <button
-                onClick={() => handleUpgrade("solo")}
-                disabled={upgradeLoading}
-                className="mt-2 text-xs bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors"
+          {/* RIGHT COLUMN — Brief history */}
+          <div className="lg:col-span-2">
+            <div
+              style={{
+                background: "#ffffff",
+                border: "1px solid var(--border-medium)",
+                borderTop: "2px solid var(--text-primary)",
+              }}
+            >
+              {/* Header */}
+              <div
+                className="px-6 py-4 flex items-center justify-between"
+                style={{ borderBottom: "1px solid var(--border-light)" }}
               >
-                Upgrade to Solo — $49/mo
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Pricing (for free users) */}
-        {plan === "free" && (
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-6 mb-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">
-              Upgrade for more briefs
-            </h3>
-            <p className="text-sm text-gray-600 mb-4">
-              Free tier includes 2 briefs per month. Upgrade anytime.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {(["solo", "firm", "enterprise"] as const).map((key) => (
-                <div
-                  key={key}
-                  className="bg-white rounded-lg border border-gray-200 p-4"
+                <p
+                  className="text-[9px] font-semibold tracking-widest uppercase"
+                  style={{ color: "var(--text-muted)" }}
                 >
-                  <p className="font-semibold text-gray-900">
-                    {PLANS[key].name}
+                  Brief History
+                </p>
+                <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+                  {briefs.length} {briefs.length === 1 ? "brief" : "briefs"}
+                </span>
+              </div>
+
+              {briefs.length === 0 ? (
+                <div className="px-6 py-16 text-center">
+                  <p className="text-sm mb-1" style={{ color: "var(--text-secondary)", fontWeight: 300 }}>
+                    No briefs yet.
                   </p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">
-                    ${PLANS[key].price}
-                    <span className="text-sm font-normal text-gray-400">
-                      /mo
-                    </span>
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {PLANS[key].briefsPerMonth === -1
-                      ? "Unlimited briefs"
-                      : `${PLANS[key].briefsPerMonth} briefs/month`}
-                    {key === "firm" && " + 5 users"}
-                    {key === "enterprise" && " + priority support"}
-                  </p>
-                  <button
-                    onClick={() => handleUpgrade(key)}
-                    disabled={upgradeLoading}
-                    className="mt-3 w-full text-xs font-medium px-3 py-1.5 rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-50 transition-colors"
+                  <a
+                    href="/#generate"
+                    className="text-xs font-medium tracking-widest uppercase transition-colors"
+                    style={{ color: "var(--text-primary)" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "var(--accent)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
                   >
-                    Upgrade
-                  </button>
+                    Generate your first brief &rarr;
+                  </a>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Brief History */}
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Your Briefs
-          </h3>
-
-          {briefs.length === 0 ? (
-            <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
-              <p className="text-gray-500 mb-3">No briefs generated yet.</p>
-              <a
-                href="/"
-                className="inline-block px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Generate Your First Brief
-              </a>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {briefs.map((brief) => (
-                <div
-                  key={brief.id}
-                  className="bg-white rounded-xl border border-gray-200 overflow-hidden"
-                >
-                  <button
-                    onClick={() =>
-                      setExpandedBrief(
-                        expandedBrief === brief.id ? null : brief.id
-                      )
-                    }
-                    className="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors text-left"
-                  >
-                    <div>
-                      <p className="font-medium text-gray-900">
-                        {brief.building_type} — {brief.location}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        {brief.square_footage} SF | {brief.stories} stories |{" "}
-                        {new Date(brief.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <svg
-                      className={`w-4 h-4 text-gray-400 transition-transform ${expandedBrief === brief.id ? "rotate-180" : ""}`}
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      viewBox="0 0 24 24"
+              ) : (
+                <div>
+                  {briefs.map((brief, i) => (
+                    <div
+                      key={brief.id}
+                      style={{
+                        borderBottom: i < briefs.length - 1 ? "1px solid var(--border-light)" : "none",
+                      }}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </button>
+                      {/* Row */}
+                      <button
+                        onClick={() =>
+                          setExpandedId(expandedId === brief.id ? null : brief.id)
+                        }
+                        className="w-full flex items-start justify-between px-6 py-4 text-left transition-colors"
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.background = "var(--bg-warm)")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.background = "transparent")
+                        }
+                      >
+                        <div className="flex items-start gap-4 flex-1 min-w-0">
+                          {/* Icon */}
+                          <div
+                            className="w-7 h-7 flex items-center justify-center flex-shrink-0 mt-0.5"
+                            style={{ border: "1px solid var(--border-light)", background: "var(--bg-warm)" }}
+                          >
+                            <svg className="w-3.5 h-3.5" viewBox="0 0 14 14" fill="none">
+                              <rect x="2" y="1" width="10" height="12" rx="0" stroke="var(--text-muted)" strokeWidth="1" />
+                              <path d="M4 4h6M4 6.5h6M4 9h4" stroke="var(--text-muted)" strokeWidth="0.8" strokeLinecap="round" />
+                            </svg>
+                          </div>
+                          <div className="min-w-0">
+                            <p
+                              className="text-sm font-medium truncate mb-0.5"
+                              style={{ color: "var(--text-primary)" }}
+                            >
+                              {brief.building_type}
+                            </p>
+                            <p
+                              className="text-xs truncate"
+                              style={{ color: "var(--text-muted)", fontWeight: 300 }}
+                            >
+                              {brief.location}
+                              {brief.square_footage && ` · ${brief.square_footage} SF`}
+                              {brief.stories && ` · ${brief.stories} stories`}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4 flex-shrink-0 ml-4">
+                          <span
+                            className="text-[10px]"
+                            style={{ color: "var(--text-muted)" }}
+                          >
+                            {new Date(brief.created_at).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
+                          </span>
+                          <span
+                            className="text-sm font-light transition-transform"
+                            style={{
+                              color: "var(--text-muted)",
+                              transform: expandedId === brief.id ? "rotate(45deg)" : "none",
+                            }}
+                          >
+                            +
+                          </span>
+                        </div>
+                      </button>
 
-                  {expandedBrief === brief.id && (
-                    <div className="px-5 pb-5 border-t border-gray-100">
-                      <div className="mt-4 text-sm text-gray-700 whitespace-pre-wrap leading-relaxed max-h-96 overflow-y-auto">
-                        {brief.brief_content}
-                      </div>
+                      {/* Expanded report */}
+                      {expandedId === brief.id && (
+                        <div
+                          style={{
+                            borderTop: "1px solid var(--border-light)",
+                            background: "var(--bg-base)",
+                          }}
+                        >
+                          {/* Report header */}
+                          <div className="px-6 py-4 flex items-center justify-between" style={{ background: "#111111" }}>
+                            <div>
+                              <p
+                                className="text-[8px] font-bold tracking-[0.2em] uppercase mb-1"
+                                style={{ color: "#b5a898" }}
+                              >
+                                Code Analysis Report
+                              </p>
+                              <p className="text-sm font-light" style={{ color: "#f5f2ee" }}>
+                                {brief.building_type} — {brief.location}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => window.print()}
+                              className="px-3 py-1.5 text-[9px] font-medium tracking-widest uppercase transition-colors"
+                              style={{ border: "1px solid rgba(245,242,238,0.15)", color: "rgba(245,242,238,0.5)" }}
+                              onMouseEnter={(e) => (e.currentTarget.style.color = "#f5f2ee")}
+                              onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(245,242,238,0.5)")}
+                            >
+                              Export PDF
+                            </button>
+                          </div>
+
+                          {/* Content */}
+                          <div className="px-6 py-6">
+                            <div
+                              className="brief-content"
+                              dangerouslySetInnerHTML={{
+                                __html: marked.parse(brief.brief_content, { async: false }) as string,
+                              }}
+                            />
+                          </div>
+
+                          {/* Footer */}
+                          <div
+                            className="px-6 py-3 flex items-center justify-between"
+                            style={{ background: "#111111" }}
+                          >
+                            <span className="text-[9px] tracking-widest uppercase" style={{ color: "rgba(245,242,238,0.3)" }}>
+                              Generated by CodeBrief
+                            </span>
+                            <span className="text-[9px]" style={{ color: "rgba(245,242,238,0.2)" }}>
+                              codebrief.ai
+                            </span>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
-          )}
+          </div>
         </div>
       </main>
+
+      {/* Footer */}
+      <footer
+        style={{
+          background: "var(--bg-warm)",
+          borderTop: "1px solid var(--border-light)",
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-8 py-5 flex items-center justify-between">
+          <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+            &copy; {new Date().getFullYear()} CodeBrief
+          </span>
+          <span className="text-[11px]" style={{ color: "var(--border-medium)" }}>
+            Pre-design code intelligence for architects
+          </span>
+        </div>
+      </footer>
     </div>
   );
 }

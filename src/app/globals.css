@@ -2,26 +2,27 @@
 
 /* ═══════════════════════════════════════════
    DESIGN TOKENS — Architecture Aesthetic
-   Warm off-white ground, near-black type,
+   Warm linen/parchment ground, near-black type,
    muted stone accent. No gradients. No radius.
+   Palette: drafting paper, trace paper, raw linen.
    ═══════════════════════════════════════════ */
 
 :root {
-  /* Ground */
-  --bg-base:    #faf8f5;
-  --bg-warm:    #f5f2ee;
-  --bg-stone:   #ede9e3;
-  --bg-dark:    #111111;
+  /* Ground — warm linen / parchment */
+  --bg-base:    #f7f3ec;   /* parchment — main page ground */
+  --bg-warm:    #f0eade;   /* linen — card surfaces, alt rows */
+  --bg-stone:   #e6ddd0;   /* trace paper — dividers, hover states */
+  --bg-dark:    #111111;   /* near-black — nav, hero, dark panels */
 
   /* Text */
-  --text-primary:   #1a1a1a;
-  --text-secondary: #4a4a4a;
-  --text-muted:     #888888;
-  --text-inverse:   #f5f2ee;
+  --text-primary:   #1c1a17;
+  --text-secondary: #4a4540;
+  --text-muted:     #8a8078;
+  --text-inverse:   #f0ead8;
 
   /* Borders */
-  --border-light:  #e5e0d8;
-  --border-medium: #ccc7be;
+  --border-light:  #ddd5c8;   /* warm light border */
+  --border-medium: #c8bfb2;   /* warm mid border */
   --border-dark:   #333333;
 
   /* Accent — muted warm stone / desaturated bronze */

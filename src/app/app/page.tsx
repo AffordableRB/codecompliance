@@ -477,16 +477,31 @@ export default function AppWorkspace() {
           {/* ═══ FORM MODE ═══ */}
           {mode === "form" && (
             <div className="max-w-2xl mx-auto px-6 py-12">
-              <div className="text-center mb-10">
+              <div className="text-center mb-8">
                 <h1
                   className="text-2xl font-light tracking-tight mb-2"
                   style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}
                 >
-                  New code analysis
+                  Every applicable code. One report.
                 </h1>
-                <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                  Enter your project parameters to generate a comprehensive code compliance brief.
+                <p className="text-sm mb-6" style={{ color: "var(--text-muted)" }}>
+                  Enter your project — get a complete code analysis including the requirements you didn&apos;t know to search for.
                 </p>
+
+                {/* Value Strip */}
+                <div className="flex items-center justify-center gap-5 flex-wrap">
+                  {[
+                    { num: "20,000+", label: "US Jurisdictions" },
+                    { num: "12", label: "Code Domains" },
+                    { num: "60s", label: "Delivery" },
+                    { num: "IBC", label: "Citations & Math" },
+                  ].map((stat) => (
+                    <div key={stat.label} className="flex items-center gap-2">
+                      <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{stat.num}</span>
+                      <span className="text-[9px] tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>{stat.label}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <form onSubmit={handleGenerate}>
@@ -566,6 +581,9 @@ export default function AppWorkspace() {
                   </div>
                 )}
               </form>
+
+              {/* Sample Report Preview */}
+              <SampleReportPreview />
             </div>
           )}
 
@@ -705,6 +723,128 @@ function DataPoint({ label, value }: { label: string; value: string }) {
     <div>
       <p className="text-[8px] tracking-widest uppercase" style={{ color: "rgba(245,242,238,0.35)" }}>{label}</p>
       <p className="text-sm font-light" style={{ color: "#f5f2ee" }}>{value}</p>
+    </div>
+  );
+}
+
+function SampleReportPreview() {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div className="mt-8">
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center justify-between px-5 py-3 transition-colors"
+        style={{ background: "var(--bg-warm)", border: "1px solid var(--border-light)" }}
+        onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-stone)")}
+        onMouseLeave={(e) => (e.currentTarget.style.background = "var(--bg-warm)")}
+      >
+        <div className="flex items-center gap-3">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.5">
+            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
+            See a sample report — Mixed-Use, Chicago, IL
+          </span>
+        </div>
+        <svg
+          width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2"
+          style={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}
+        >
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+
+      {expanded && (
+        <div style={{ border: "1px solid var(--border-light)", borderTop: "none" }}>
+          {/* Sample Header */}
+          <div className="px-6 py-4" style={{ background: "var(--bg-dark)" }}>
+            <p className="text-[9px] font-semibold tracking-widest uppercase" style={{ color: "var(--accent-light)" }}>
+              Sample Code Analysis Report
+            </p>
+            <h3 className="text-base font-light mt-1" style={{ color: "#f5f2ee" }}>
+              Mixed-Use (Residential/Commercial)
+            </h3>
+            <p className="text-xs" style={{ color: "rgba(245,242,238,0.5)" }}>Chicago, Illinois</p>
+            <div className="flex gap-6 mt-3 pt-2" style={{ borderTop: "1px solid #333" }}>
+              <div>
+                <p className="text-[8px] tracking-widest uppercase" style={{ color: "rgba(245,242,238,0.35)" }}>Area</p>
+                <p className="text-xs font-light" style={{ color: "#f5f2ee" }}>45,000 SF</p>
+              </div>
+              <div>
+                <p className="text-[8px] tracking-widest uppercase" style={{ color: "rgba(245,242,238,0.35)" }}>Stories</p>
+                <p className="text-xs font-light" style={{ color: "#f5f2ee" }}>5</p>
+              </div>
+              <div>
+                <p className="text-[8px] tracking-widest uppercase" style={{ color: "rgba(245,242,238,0.35)" }}>Occupancy</p>
+                <p className="text-xs font-light" style={{ color: "#f5f2ee" }}>R-2 / M</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Sample Tables */}
+          <div className="px-6 py-5 brief-content" style={{ background: "#fff" }}>
+            <h2>Applicable Codes &amp; Editions</h2>
+            <table>
+              <thead>
+                <tr><th>Code</th><th>Edition</th><th>Local Amendments</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Chicago Building Code</td><td>Title 14B (2019, based on 2018 IBC)</td><td>Effective August 1, 2020</td></tr>
+                <tr><td>Chicago Fire Code</td><td>Title 14F</td><td>Local amendments to IFC</td></tr>
+                <tr><td>Chicago Energy Code</td><td>Title 14N (2021 IECC)</td><td>Effective November 1, 2022</td></tr>
+                <tr><td>ADA / Illinois Accessibility</td><td>Per Title 14B-11</td><td>Effective December 1, 2019</td></tr>
+              </tbody>
+            </table>
+
+            <h2>Building Code Analysis</h2>
+            <table>
+              <thead>
+                <tr><th>Requirement</th><th>Code Reference</th><th>Project Compliance</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Occupancy</td><td>Title 14B Ch. 3</td><td>R-2 (residential) over M (retail) — mixed occupancy</td></tr>
+                <tr><td>Construction Type</td><td>Title 14B Ch. 6</td><td>Type I-A or I-B required for 5 stories mixed-use</td></tr>
+                <tr><td>Allowable Height</td><td>Table 504.3</td><td>Type I-B: 11 stories / 160 ft — compliant</td></tr>
+                <tr><td>Allowable Area</td><td>Table 506.2</td><td>Base 36,000 SF × 3 (sprinkler) = 108,000 SF — compliant</td></tr>
+                <tr><td>Sprinkler Required</td><td>§903.2.8</td><td>Yes — R-2 &gt; 3 stories requires NFPA 13</td></tr>
+              </tbody>
+            </table>
+
+            <h2>Means of Egress</h2>
+            <table>
+              <thead>
+                <tr><th>Requirement</th><th>Code Reference</th><th>Calculation</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Occupant Load</td><td>Table 1004.5</td><td>Retail: 8,000 SF ÷ 30 = 267 | Residential: 37,000 SF ÷ 200 = 185 | Total: 452</td></tr>
+                <tr><td>Number of Exits</td><td>Table 1006.3.1</td><td>452 occupants = minimum 2 exits per floor</td></tr>
+                <tr><td>Exit Width</td><td>§1005.1</td><td>452 × 0.2&quot;/person = 90.4&quot; min stair width</td></tr>
+                <tr><td>Travel Distance</td><td>Table 1017.2</td><td>R-2 sprinklered: 250 ft max</td></tr>
+              </tbody>
+            </table>
+
+            <h2>Risk Flags &amp; Additional Requirements</h2>
+            <ol>
+              <li><strong>Chicago Zoning Bonus</strong> — Affordable housing bonus may increase allowable FAR. Verify with Dept. of Planning.</li>
+              <li><strong>Transit-Oriented Development</strong> — If within 600 ft of L station, parking minimums may be reduced or eliminated.</li>
+              <li><strong>Flood Zone</strong> — Check FEMA maps for Chicago River/Lake Michigan proximity. May require elevated first floor.</li>
+              <li><strong>Historic District</strong> — If in landmark district, design review required. Facade restrictions apply.</li>
+              <li><strong>Green Roof/Stormwater</strong> — Chicago Green Roof Initiative may apply to buildings over 10,000 SF. Verify requirements.</li>
+            </ol>
+          </div>
+
+          {/* Sample Footer */}
+          <div className="px-6 py-2.5 flex items-center justify-between" style={{ background: "var(--bg-dark)" }}>
+            <span className="text-[9px] tracking-widest uppercase" style={{ color: "rgba(245,242,238,0.4)" }}>
+              Generated by CodeBrief
+            </span>
+            <span className="text-[9px]" style={{ color: "rgba(245,242,238,0.2)" }}>
+              Sample report — actual output includes all 12 sections
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

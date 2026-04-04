@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/lib/supabase-browser";
 import { marked } from "marked";
+import { REPORT_TYPES, DEFAULT_REPORT_TYPE } from "@/lib/report-types";
 
 /* ═══════════════════════════════════════════
    TYPES
@@ -118,6 +119,7 @@ export default function AppWorkspace() {
 
   // Form state
   const [form, setForm] = useState<ProjectInput>(initialForm);
+  const [selectedReport, setSelectedReport] = useState(DEFAULT_REPORT_TYPE);
   const [mode, setMode] = useState<"form" | "generating" | "viewing">("form");
 
   // Generation state
@@ -218,7 +220,7 @@ export default function AppWorkspace() {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, reportType: selectedReport }),
       });
 
       if (!res.ok) {
@@ -504,6 +506,47 @@ export default function AppWorkspace() {
                 </div>
               </div>
 
+              {/* Report Type Selector */}
+              <div className="mb-6">
+                <p className="text-[9px] font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--text-muted)" }}>
+                  Select Report Type
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {REPORT_TYPES.map((rt) => (
+                    <button
+                      key={rt.id}
+                      type="button"
+                      onClick={() => setSelectedReport(rt.id)}
+                      className="text-left px-3 py-2.5 transition-colors"
+                      style={{
+                        background: selectedReport === rt.id ? "var(--bg-dark)" : "#fff",
+                        color: selectedReport === rt.id ? "var(--text-inverse)" : "var(--text-primary)",
+                        border: selectedReport === rt.id ? "1px solid var(--bg-dark)" : "1px solid var(--border-medium)",
+                      }}
+                      onMouseEnter={(e) => {
+                        if (selectedReport !== rt.id) e.currentTarget.style.background = "var(--bg-warm)";
+                      }}
+                      onMouseLeave={(e) => {
+                        if (selectedReport !== rt.id) e.currentTarget.style.background = "#fff";
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs">{rt.icon}</span>
+                        <span className="text-[11px] font-medium">{rt.shortName}</span>
+                      </div>
+                      <p
+                        className="text-[9px] mt-1 leading-relaxed"
+                        style={{
+                          color: selectedReport === rt.id ? "rgba(245,242,238,0.5)" : "var(--text-muted)",
+                        }}
+                      >
+                        {rt.description.slice(0, 80)}{rt.description.length > 80 ? "..." : ""}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <form onSubmit={handleGenerate}>
                 <div style={{ background: "#fff", border: "1px solid var(--border-medium)" }}>
                   {/* Form Header */}
@@ -562,7 +605,7 @@ export default function AppWorkspace() {
                   {/* Submit Bar */}
                   <div className="px-6 py-3 flex items-center justify-between" style={{ background: "var(--bg-warm)", borderTop: "1px solid var(--border-light)" }}>
                     <span className="text-[9px]" style={{ color: "var(--text-muted)" }}>
-                      IBC · IFC · ADA · IECC · IPC · Local amendments
+                      {REPORT_TYPES.find((r) => r.id === selectedReport)?.shortName || "Code Analysis"}
                     </span>
                     <button
                       type="submit"
@@ -570,7 +613,7 @@ export default function AppWorkspace() {
                       className="px-5 py-2 text-[10px] font-semibold tracking-widest uppercase transition-opacity disabled:opacity-30"
                       style={{ background: "var(--bg-dark)", color: "var(--text-inverse)" }}
                     >
-                      Generate
+                      Generate {REPORT_TYPES.find((r) => r.id === selectedReport)?.shortName || "Report"}
                     </button>
                   </div>
                 </div>
@@ -628,7 +671,7 @@ export default function AppWorkspace() {
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="text-[9px] font-semibold tracking-widest uppercase" style={{ color: "var(--accent-light)" }}>
-                        Code Analysis Report
+                        {REPORT_TYPES.find((r) => r.id === selectedReport)?.name || "Code Analysis Report"}
                       </p>
                       <h2 className="text-lg font-light tracking-tight mt-1" style={{ color: "#f5f2ee", letterSpacing: "-0.02em" }}>
                         {form.buildingType}

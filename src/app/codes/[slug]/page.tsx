@@ -2,44 +2,14 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
-import type { CityCodeData } from "../page";
+
 
 /* ═══════════════════════════════════════════
    PLACEHOLDER DATA — slot in Supabase query
    ═══════════════════════════════════════════ */
 
-const CITY_DETAIL_DATA: Record<string, CityCodeData & {
-  county?: string;
-  population?: string;
-  zoningOrdinanceUrl?: string;
-  permitPortalUrl?: string;
-  ahj?: string;
-  ahjPhone?: string;
-  ahjEmail?: string;
-  notes?: string;
-  // Zoning
-  maxFar?: string;
-  maxHeight?: string;
-  setbackFront?: string;
-  setbackSide?: string;
-  setbackRear?: string;
-  parkingRatio?: string;
-  // Permits
-  buildingPermitFee?: string;
-  planReviewTime?: string;
-  inspectionProcess?: string;
-  // Utilities
-  electricUtility?: string;
-  gasUtility?: string;
-  waterUtility?: string;
-  // Environmental
-  floodZone?: string;
-  seismicZone?: string;
-  windSpeed?: string;
-  snowLoad?: string;
-  // Sources
-  sources?: { label: string; url: string; date: string }[];
-}> = {
+interface CityDetailRecord { slug: string; city: string; state: string; stateCode: string; ibcVersion: string; ifcVersion: string; ieccVersion: string; adaAdopted: boolean; zoningType: string; permitTimeline: string; lastUpdated: string; county?: string; population?: string; zoningOrdinanceUrl?: string; permitPortalUrl?: string; ahj?: string; ahjPhone?: string; ahjEmail?: string; notes?: string; maxFar?: string; maxHeight?: string; setbackFront?: string; setbackSide?: string; setbackRear?: string; parkingRatio?: string; buildingPermitFee?: string; planReviewTime?: string; inspectionProcess?: string; electricUtility?: string; gasUtility?: string; waterUtility?: string; floodZone?: string; seismicZone?: string; windSpeed?: string; snowLoad?: string; sources?: { label: string; url: string; date: string }[]; }
+const CITY_DETAIL_DATA: Record<string, CityDetailRecord> = {
   "chicago-il": {
     slug: "chicago-il",
     city: "Chicago",

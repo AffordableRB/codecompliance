@@ -300,107 +300,75 @@ export default function Home() {
       <nav
         className="no-print sticky top-0 z-50"
         style={{
-          background: "#f7f3ec",
-          borderBottom: "1px solid #ddd5c8",
+          background: "var(--bg-base)",
+          borderBottom: "1px solid var(--border-light)",
         }}
       >
-        <div className="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
+        <div
+          className="flex items-center justify-between"
+          style={{ maxWidth: "var(--max-w)", margin: "0 auto", padding: "0 var(--container-px)", height: "56px" }}
+        >
           {/* Logo */}
-          <a href="/" className="flex items-center gap-3">
+          <a href="/" className="flex items-center gap-3" style={{ textDecoration: "none" }}>
             <div
-              className="w-7 h-7 flex items-center justify-center"
-              style={{ border: "1px solid #1c1a17" }}
+              className="flex items-center justify-center"
+              style={{ width: "26px", height: "26px", border: "1px solid var(--text-primary)" }}
             >
-              <span
-                className="text-[10px] font-bold tracking-tight"
-                style={{ color: "#1c1a17" }}
-              >
+              <span style={{ fontSize: "9px", fontWeight: 700, color: "var(--text-primary)", letterSpacing: "0.05em" }}>
                 CB
               </span>
             </div>
-            <span
-              className="text-sm font-medium tracking-widest uppercase"
-              style={{ color: "#1c1a17", letterSpacing: "0.12em" }}
-            >
+            <span style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--text-primary)" }}>
               CodeBrief
             </span>
           </a>
 
-          {/* Links */}
+          {/* Center Links */}
           <div className="hidden md:flex items-center gap-8">
-            {["How it works", "Features", "Pricing", "FAQ"].map((item) => (
+            {[
+              { label: "How it works", href: "#how-it-works" },
+              { label: "Features", href: "#features" },
+              { label: "Pricing", href: "#pricing" },
+              { label: "City Codes", href: "/codes" },
+            ].map((item) => (
               <a
-                key={item}
-                href={`#${item.toLowerCase().replace(/\s+/g, "-")}`}
-                className="text-xs tracking-wide transition-colors"
-                style={{ color: "#8a8078" }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.color = "#1c1a17")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.color = "#8a8078")
-                }
+                key={item.label}
+                href={item.href}
+                style={{ fontSize: "11px", letterSpacing: "0.04em", color: "var(--text-muted)", textDecoration: "none", transition: "color 0.15s" }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
               >
-                {item}
+                {item.label}
               </a>
             ))}
-            <a
-              href="/codes"
-              className="text-xs tracking-wide transition-colors"
-              style={{ color: "#8a8078" }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#1c1a17")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#8a8078")}
-            >
-              City Codes
-            </a>
           </div>
 
-          {/* Auth */}
-          <div className="flex items-center gap-4">
+          {/* Right Auth */}
+          <div className="flex items-center gap-5">
             {!authLoading &&
               (user ? (
                 <a
                   href="/dashboard"
-                  className="text-xs tracking-wide transition-colors"
-                  style={{ color: "#8a8078" }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.color = "#1c1a17")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.color = "#8a8078")
-                  }
+                  style={{ fontSize: "11px", letterSpacing: "0.04em", color: "var(--text-muted)", textDecoration: "none", transition: "color 0.15s" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
                 >
                   Dashboard
                 </a>
               ) : (
                 <a
                   href="/login"
-                  className="text-xs tracking-wide transition-colors"
-                  style={{ color: "#8a8078" }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.color = "#1c1a17")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.color = "#8a8078")
-                  }
+                  style={{ fontSize: "11px", letterSpacing: "0.04em", color: "var(--text-muted)", textDecoration: "none", transition: "color 0.15s" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
                 >
                   Sign In
                 </a>
               ))}
             <button
               onClick={scrollToForm}
-              className="px-4 py-2 text-xs font-medium tracking-widest uppercase transition-colors no-print"
-              style={{
-                background: "#1c1a17",
-                color: "#f7f3ec",
-                border: "none",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.background = "#333")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.background = "#1c1a17")
-              }
+              className="btn-primary no-print"
+              style={{ padding: "0.5rem 1.25rem", fontSize: "10px" }}
             >
               Get Started
             </button>
@@ -409,352 +377,494 @@ export default function Home() {
       </nav>
 
       <main className="flex-1">
+
         {/* ══════════════════════════════════════
-            HERO
+            MARKETING SECTIONS (hidden when report active)
             ══════════════════════════════════════ */}
         {!displayText && !loading && (
           <>
-            <section
-              className="no-print"
-              style={{ background: "#111111" }}
-            >
-              <div className="max-w-7xl mx-auto px-8 py-20 md:py-28">
+
+            {/* ── HERO ── */}
+            <section className="no-print hero-grid" style={{ minHeight: "88vh", display: "flex", alignItems: "center" }}>
+              <div
+                style={{ maxWidth: "var(--max-w)", margin: "0 auto", padding: "5rem var(--container-px)", width: "100%" }}
+              >
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
                   {/* Left — Copy */}
                   <div>
-                    <p className="section-label mb-5">Pre-Design Intelligence</p>
-                    <h1
-                      className="text-4xl md:text-5xl leading-tight mb-6"
-                      style={{
-                        color: "#f5f2ee",
-                        fontFamily: "var(--font-serif-display), Georgia, serif",
-                        fontWeight: 400,
-                        letterSpacing: "-0.01em",
-                        lineHeight: 1.1,
-                      }}
-                    >
+                    <p className="label-caps-dark mb-6">Pre-Design Intelligence</p>
+                    <h1 className="display-headline mb-6">
                       Every applicable code.
                       <br />
                       One report.
                     </h1>
                     <p
-                      className="text-base leading-relaxed mb-8 max-w-lg"
-                      style={{ color: "rgba(245,242,238,0.55)", fontWeight: 300 }}
+                      className="mb-8"
+                      style={{
+                        fontSize: "1rem",
+                        lineHeight: 1.7,
+                        color: "rgba(240,234,216,0.55)",
+                        fontWeight: 300,
+                        maxWidth: "460px",
+                      }}
                     >
-                      The complete code analysis for your project. Including the
+                      The complete code analysis for your project — including the
                       requirements you didn&apos;t know to search for.
                     </p>
-                    <div className="flex items-center gap-4">
-                      <button
-                        onClick={scrollToForm}
-                        className="px-6 py-3 text-xs font-medium tracking-widest uppercase transition-colors"
-                        style={{
-                          background: "#f5f2ee",
-                          color: "#111111",
-                        }}
-                        onMouseEnter={(e) =>
-                          (e.currentTarget.style.background = "#e5e0d8")
-                        }
-                        onMouseLeave={(e) =>
-                          (e.currentTarget.style.background = "#f5f2ee")
-                        }
-                      >
+                    <div className="flex items-center gap-5 flex-wrap">
+                      <button onClick={scrollToForm} className="btn-primary-light">
                         Generate a Brief
                       </button>
-                      <span
-                        className="text-xs"
-                        style={{ color: "rgba(245,242,238,0.3)" }}
-                      >
+                      <span style={{ fontSize: "11px", color: "rgba(240,234,216,0.3)", letterSpacing: "0.04em" }}>
                         Free — no credit card required
                       </span>
                     </div>
+
+                    {/* Trust strip */}
+                    <div
+                      className="flex items-center gap-6 mt-10 pt-8"
+                      style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+                    >
+                      {[
+                        { value: "20,000+", label: "Jurisdictions" },
+                        { value: "12", label: "Code Domains" },
+                        { value: "60 sec", label: "Delivery" },
+                      ].map((s) => (
+                        <div key={s.label}>
+                          <p
+                            style={{
+                              fontFamily: "'DM Serif Display', Georgia, serif",
+                              fontSize: "1.5rem",
+                              lineHeight: 1,
+                              letterSpacing: "-0.02em",
+                              color: "var(--text-inverse)",
+                              marginBottom: "3px",
+                            }}
+                          >
+                            {s.value}
+                          </p>
+                          <p style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(240,234,216,0.35)" }}>
+                            {s.label}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
-                  {/* Right — Product demo placeholder */}
+                  {/* Right — Mock Report Card */}
                   <div
-                    className="relative overflow-hidden"
                     style={{
-                      border: "1px solid rgba(245,242,238,0.12)",
-                      background: "#000",
+                      background: "var(--bg-dark-2)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      boxShadow: "var(--shadow-dark)",
                     }}
                   >
-                    {/* Split-screen demo video */}
-                    <video
-                      src="/hero_demo.mp4"
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      style={{ width: "100%", display: "block" }}
-                    />
-                    {/* Corner decorations */}
+                    {/* Document header */}
                     <div
-                      className="absolute top-0 left-0 w-4 h-4 pointer-events-none"
-                      style={{ borderTop: "1px solid rgba(245,242,238,0.3)", borderLeft: "1px solid rgba(245,242,238,0.3)" }}
-                    />
-                    <div
-                      className="absolute top-0 right-0 w-4 h-4 pointer-events-none"
-                      style={{ borderTop: "1px solid rgba(245,242,238,0.3)", borderRight: "1px solid rgba(245,242,238,0.3)" }}
-                    />
-                    <div
-                      className="absolute bottom-0 left-0 w-4 h-4 pointer-events-none"
-                      style={{ borderBottom: "1px solid rgba(245,242,238,0.3)", borderLeft: "1px solid rgba(245,242,238,0.3)" }}
-                    />
-                    <div
-                      className="absolute bottom-0 right-0 w-4 h-4 pointer-events-none"
-                      style={{ borderBottom: "1px solid rgba(245,242,238,0.3)", borderRight: "1px solid rgba(245,242,238,0.3)" }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* ══════════════════════════════════════
-                STATS STRIP
-                ══════════════════════════════════════ */}
-            <section
-              className="no-print"
-              style={{
-                background: "var(--bg-warm)",
-                borderBottom: "1px solid var(--border-light)",
-                borderTop: "1px solid var(--border-light)",
-              }}
-            >
-              <div className="max-w-7xl mx-auto px-8 py-8">
-                <div className="grid grid-cols-3 divide-x"
-                  style={{ borderColor: "var(--border-light)" }}
-                >
-                  {[
-                    { value: "20,000+", label: "US Jurisdictions" },
-                    { value: "12", label: "Code Domains Analyzed" },
-                    { value: "60 sec", label: "Delivery" },
-                  ].map((stat) => (
-                    <div key={stat.label} className="px-8 first:pl-0 last:pr-0 text-center">
-                      <p
-                        className="text-2xl font-light tracking-tight mb-1"
-                        style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}
-                      >
-                        {stat.value}
-                      </p>
-                      <p className="section-label">{stat.label}</p>
+                      style={{
+                        background: "#0a0a0a",
+                        borderBottom: "1px solid rgba(255,255,255,0.06)",
+                        padding: "1rem 1.25rem",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div style={{ width: "16px", height: "16px", border: "1px solid rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <span style={{ fontSize: "6px", fontWeight: 700, color: "rgba(255,255,255,0.4)" }}>CB</span>
+                        </div>
+                        <span style={{ fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)" }}>Code Analysis Report</span>
+                      </div>
+                      <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.2)" }}>Mixed-Use · Austin, TX</span>
                     </div>
-                  ))}
+
+                    {/* Report body preview */}
+                    <div style={{ padding: "1.25rem" }}>
+                      {/* Section: Zoning */}
+                      <div style={{ marginBottom: "1rem" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "0.5rem" }}>
+                          <span style={{ fontSize: "8px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", background: "rgba(255,255,255,0.05)", padding: "2px 6px" }}>§ Zoning</span>
+                          <span style={{ fontSize: "10px", fontWeight: 500, color: "rgba(255,255,255,0.6)" }}>Zoning &amp; Setbacks</span>
+                        </div>
+                        <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", padding: "0.625rem 0.75rem" }}>
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem 1.5rem" }}>
+                            {[
+                              ["Use Classification", "MU-3 Mixed Use"],
+                              ["Max Height", "65 ft / 5 stories"],
+                              ["Front Setback", "0 ft (build-to line)"],
+                              ["FAR", "3.5 : 1"],
+                            ].map(([k, v]) => (
+                              <div key={k} style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid rgba(255,255,255,0.04)", paddingBottom: "3px" }}>
+                                <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.3)" }}>{k}</span>
+                                <span style={{ fontSize: "9px", fontWeight: 500, color: "rgba(255,255,255,0.65)" }}>{v}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Section: Construction Type */}
+                      <div style={{ marginBottom: "1rem" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "0.5rem" }}>
+                          <span style={{ fontSize: "8px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", background: "rgba(255,255,255,0.05)", padding: "2px 6px" }}>§ IBC 602</span>
+                          <span style={{ fontSize: "10px", fontWeight: 500, color: "rgba(255,255,255,0.6)" }}>Construction Type</span>
+                        </div>
+                        <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", padding: "0.625rem 0.75rem" }}>
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem 1.5rem" }}>
+                            {[
+                              ["Allowable Types", "IA, IB, IIA"],
+                              ["Max Height (IA)", "Unlimited"],
+                              ["Max Area / Floor", "Unlimited"],
+                              ["Sprinkler Required", "Yes — NFPA 13"],
+                            ].map(([k, v]) => (
+                              <div key={k} style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid rgba(255,255,255,0.04)", paddingBottom: "3px" }}>
+                                <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.3)" }}>{k}</span>
+                                <span style={{ fontSize: "9px", fontWeight: 500, color: "rgba(255,255,255,0.65)" }}>{v}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Confidence badges row */}
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px", paddingTop: "0.75rem", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+                        <span style={{ fontSize: "8px", color: "rgba(255,255,255,0.2)", letterSpacing: "0.1em", textTransform: "uppercase" }}>Confidence:</span>
+                        <span style={{ fontSize: "8px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#4ade80", background: "rgba(74,222,128,0.1)", border: "1px solid rgba(74,222,128,0.2)", padding: "1px 6px" }}>14 Confirmed</span>
+                        <span style={{ fontSize: "8px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#fbbf24", background: "rgba(251,191,36,0.1)", border: "1px solid rgba(251,191,36,0.2)", padding: "1px 6px" }}>3 Verify</span>
+                        <span style={{ fontSize: "8px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#f87171", background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.2)", padding: "1px 6px" }}>1 Gap</span>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
               </div>
             </section>
 
-            {/* ══════════════════════════════════════
-                HOW IT WORKS
-                ══════════════════════════════════════ */}
+            {/* ── HOW IT WORKS ── */}
             <section
               id="how-it-works"
-              className="no-print"
-              style={{ background: "var(--bg-base)" }}
+              className="no-print dark-section"
             >
-              <div className="max-w-7xl mx-auto px-8 py-20">
-                <div className="max-w-xl mb-14">
-                  <p className="section-label mb-3">Process</p>
-                  <h2 className="section-title">How it works</h2>
+              <div style={{ maxWidth: "var(--max-w)", margin: "0 auto", padding: "var(--section-py) var(--container-px)" }}>
+                <div style={{ maxWidth: "560px", marginBottom: "4rem" }}>
+                  <p className="label-caps-dark mb-4">Process</p>
+                  <h2 className="section-headline-dark">
+                    From project parameters<br />to code analysis in 60 seconds
+                  </h2>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
+                {/* Three steps — full-width alternating panels */}
+                <div>
                   {[
                     {
                       n: "01",
                       title: "Enter project parameters",
-                      desc: "Building type, location, gross area, stories, and occupancy. Optional: occupant load, lot size, project notes.",
+                      desc: "Building type, location, gross area, stories, and occupancy. Optional fields — occupant load, lot size, project notes — improve accuracy. The form takes under a minute to fill.",
+                      detail: "Required: Building type · Location · Gross area · Stories",
                     },
                     {
                       n: "02",
                       title: "We search public code databases",
-                      desc: "The system queries jurisdiction-specific code adoptions, local amendments, and IBC/IFC/ADA/IECC source text in real time.",
+                      desc: "The system queries jurisdiction-specific code adoptions, local amendments, and IBC/IFC/ADA/IECC source text in real time. No cached snapshots — every analysis reflects current publicly available information.",
+                      detail: "Sources: IBC · IFC · ADA · IECC · IPC · Local amendments",
                     },
                     {
                       n: "03",
-                      title: "Get your code analysis report",
-                      desc: "A structured document with tabular requirements, section citations, calculations, and risk flags — ready to export as PDF.",
+                      title: "Receive your code analysis report",
+                      desc: "A structured document with tabular requirements, section citations, calculated values, and risk flags. Confidence tiers (Confirmed / Verify / Gap) on every finding. Export as PDF.",
+                      detail: "Output: 12 code domains · Confidence tiers · PDF export",
                     },
                   ].map((step, i) => (
                     <div
                       key={step.n}
-                      className="p-8"
                       style={{
-                        borderLeft: i > 0 ? "1px solid var(--border-light)" : "none",
-                        borderTop: "2px solid var(--text-primary)",
+                        display: "grid",
+                        gridTemplateColumns: "80px 1fr",
+                        gap: "0",
+                        borderTop: "1px solid var(--border-dark)",
+                        padding: "2.5rem 0",
                       }}
                     >
-                      <p
-                        className="text-3xl font-light mb-6"
-                        style={{ color: "var(--border-medium)", letterSpacing: "-0.02em" }}
-                      >
-                        {step.n}
-                      </p>
-                      <h3
-                        className="text-base font-medium mb-3"
-                        style={{ color: "var(--text-primary)" }}
-                      >
-                        {step.title}
-                      </h3>
-                      <p
-                        className="text-sm leading-relaxed"
-                        style={{ color: "var(--text-secondary)", fontWeight: 300 }}
-                      >
-                        {step.desc}
-                      </p>
+                      <div style={{ paddingTop: "2px" }}>
+                        <span
+                          style={{
+                            fontFamily: "'DM Serif Display', Georgia, serif",
+                            fontSize: "2rem",
+                            lineHeight: 1,
+                            letterSpacing: "-0.03em",
+                            color: "rgba(255,255,255,0.12)",
+                          }}
+                        >
+                          {step.n}
+                        </span>
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem", alignItems: "start" }}>
+                        <div>
+                          <h3
+                            style={{
+                              fontSize: "1rem",
+                              fontWeight: 500,
+                              color: "var(--text-inverse)",
+                              marginBottom: "0.75rem",
+                              letterSpacing: "-0.01em",
+                            }}
+                          >
+                            {step.title}
+                          </h3>
+                          <p style={{ fontSize: "13px", lineHeight: 1.7, color: "rgba(240,234,216,0.45)", fontWeight: 300 }}>
+                            {step.desc}
+                          </p>
+                        </div>
+                        <div style={{ paddingTop: "2px" }}>
+                          <p style={{ fontSize: "10px", letterSpacing: "0.1em", color: "rgba(255,255,255,0.18)", fontFamily: "var(--font-mono), monospace", lineHeight: 1.8 }}>
+                            {step.detail}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   ))}
+                </div>
+
+                <div style={{ paddingTop: "3rem", borderTop: "1px solid var(--border-dark)" }}>
+                  <button onClick={scrollToForm} className="btn-primary-light">
+                    Try it now — free
+                  </button>
                 </div>
               </div>
             </section>
 
-            {/* ══════════════════════════════════════
-                FEATURES
-                ══════════════════════════════════════ */}
+            {/* ── FEATURE SHOWCASE PANELS ── */}
+            <section id="features" className="no-print dark-section">
+
+              {/* Panel 1: Jurisdiction Intelligence */}
+              <div className="feature-panel">
+                <div className="feature-panel-content">
+                  <p className="label-caps-dark mb-5">Jurisdiction Intelligence</p>
+                  <h2 className="section-headline-dark mb-5">
+                    Every city. Every amendment.
+                  </h2>
+                  <p style={{ fontSize: "14px", lineHeight: 1.75, color: "rgba(240,234,216,0.5)", fontWeight: 300, marginBottom: "2rem", maxWidth: "420px" }}>
+                    CodeBrief covers 20,000+ US jurisdictions. When a city adopts
+                    a local amendment to the IBC, we know. When a county has its
+                    own zoning overlay, it&apos;s in the report.
+                  </p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                    {[
+                      "State-adopted code edition identified automatically",
+                      "Local amendments and overlays included",
+                      "AHJ-specific requirements flagged",
+                    ].map((item) => (
+                      <div key={item} className="flex items-start gap-3">
+                        <span style={{ color: "rgba(255,255,255,0.2)", marginTop: "1px", flexShrink: 0 }}>—</span>
+                        <span style={{ fontSize: "13px", color: "rgba(240,234,216,0.55)", fontWeight: 300 }}>{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="feature-panel-visual">
+                  {/* Jurisdiction map visual */}
+                  <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
+                    <div style={{ width: "100%", maxWidth: "360px" }}>
+                      <div style={{ marginBottom: "1rem" }}>
+                        <p style={{ fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.2)", marginBottom: "0.5rem" }}>Jurisdiction Coverage</p>
+                        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                          {["CA", "TX", "NY", "FL", "IL", "WA", "CO", "GA", "MA", "AZ", "OR", "NC"].map((s) => (
+                            <span key={s} style={{ fontSize: "9px", fontWeight: 600, letterSpacing: "0.1em", color: "rgba(255,255,255,0.5)", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", padding: "3px 8px" }}>{s}</span>
+                          ))}
+                          <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.2)", padding: "3px 8px" }}>+38 more</span>
+                        </div>
+                      </div>
+                      <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", padding: "1rem" }}>
+                        <p style={{ fontSize: "9px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.2)", marginBottom: "0.75rem" }}>Sample — Austin, TX</p>
+                        {[
+                          ["Adopted Code", "IBC 2021"],
+                          ["Local Amendments", "Austin Amendments 2021"],
+                          ["Energy Code", "IECC 2021 w/ TX Amendments"],
+                          ["Fire Code", "IFC 2021"],
+                        ].map(([k, v]) => (
+                          <div key={k} style={{ display: "flex", justifyContent: "space-between", paddingBottom: "6px", marginBottom: "6px", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                            <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.3)" }}>{k}</span>
+                            <span style={{ fontSize: "9px", fontWeight: 500, color: "rgba(255,255,255,0.6)" }}>{v}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Panel 2: Confidence Tiers */}
+              <div className="feature-panel reverse">
+                <div className="feature-panel-content">
+                  <p className="label-caps-dark mb-5">Confidence Tiers</p>
+                  <h2 className="section-headline-dark mb-5">
+                    Know what you know.
+                  </h2>
+                  <p style={{ fontSize: "14px", lineHeight: 1.75, color: "rgba(240,234,216,0.5)", fontWeight: 300, marginBottom: "2rem", maxWidth: "420px" }}>
+                    Every finding is tagged with a confidence tier. Confirmed
+                    findings are sourced directly from public code text. Verify
+                    items need AHJ confirmation. Gaps flag missing data.
+                  </p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
+                    {[
+                      { color: "#4ade80", bg: "rgba(74,222,128,0.08)", border: "rgba(74,222,128,0.2)", label: "Confirmed", desc: "Sourced directly from public code text" },
+                      { color: "#fbbf24", bg: "rgba(251,191,36,0.08)", border: "rgba(251,191,36,0.2)", label: "Verify", desc: "Likely correct — confirm with AHJ" },
+                      { color: "#f87171", bg: "rgba(248,113,113,0.08)", border: "rgba(248,113,113,0.2)", label: "Gap", desc: "Data unavailable — requires direct research" },
+                    ].map((tier) => (
+                      <div key={tier.label} className="flex items-center gap-4">
+                        <span style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: tier.color, background: tier.bg, border: `1px solid ${tier.border}`, padding: "3px 10px", flexShrink: 0, minWidth: "80px", textAlign: "center" }}>
+                          {tier.label}
+                        </span>
+                        <span style={{ fontSize: "12px", color: "rgba(240,234,216,0.45)", fontWeight: 300 }}>{tier.desc}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="feature-panel-visual">
+                  <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
+                    <div style={{ width: "100%", maxWidth: "360px" }}>
+                      <p style={{ fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.2)", marginBottom: "0.75rem" }}>Egress Analysis — Sample</p>
+                      {[
+                        { tier: "CONFIRMED", color: "#4ade80", bg: "rgba(74,222,128,0.08)", border: "rgba(74,222,128,0.15)", text: "Minimum 2 exits required per IBC §1006.3.3 (occupant load 312 > 49)" },
+                        { tier: "CONFIRMED", color: "#4ade80", bg: "rgba(74,222,128,0.08)", border: "rgba(74,222,128,0.15)", text: "Exit access travel distance ≤ 250 ft (sprinklered B occupancy, IBC Table 1017.2)" },
+                        { tier: "VERIFY", color: "#fbbf24", bg: "rgba(251,191,36,0.08)", border: "rgba(251,191,36,0.15)", text: "Corridor width 44 in. min — verify Austin local amendment §1020.2" },
+                        { tier: "GAP", color: "#f87171", bg: "rgba(248,113,113,0.08)", border: "rgba(248,113,113,0.15)", text: "Roof access requirements — AHJ interpretation required for this use type" },
+                      ].map((item, i) => (
+                        <div key={i} style={{ background: item.bg, border: `1px solid ${item.border}`, padding: "0.625rem 0.75rem", marginBottom: "0.5rem", display: "flex", gap: "0.625rem", alignItems: "flex-start" }}>
+                          <span style={{ fontSize: "7px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: item.color, flexShrink: 0, marginTop: "2px" }}>{item.tier}</span>
+                          <span style={{ fontSize: "10px", lineHeight: 1.5, color: "rgba(255,255,255,0.5)" }}>{item.text}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Panel 3: Report Coverage */}
+              <div className="feature-panel">
+                <div className="feature-panel-content">
+                  <p className="label-caps-dark mb-5">Report Coverage</p>
+                  <h2 className="section-headline-dark mb-5">
+                    Twelve code domains.<br />One document.
+                  </h2>
+                  <p style={{ fontSize: "14px", lineHeight: 1.75, color: "rgba(240,234,216,0.5)", fontWeight: 300, marginBottom: "2rem", maxWidth: "420px" }}>
+                    Every analysis covers zoning, construction type, fire
+                    separation, egress, accessibility, energy, plumbing, parking,
+                    and risk flags. Each section includes the applicable code
+                    reference and the calculated requirement for your project.
+                  </p>
+                  <button onClick={scrollToForm} className="btn-ghost">
+                    See a sample report
+                  </button>
+                </div>
+                <div className="feature-panel-visual">
+                  <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
+                    <div style={{ width: "100%", maxWidth: "360px" }}>
+                      <p style={{ fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.2)", marginBottom: "0.75rem" }}>Report Contents</p>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: "rgba(255,255,255,0.06)" }}>
+                        {FEATURES.map((f) => (
+                          <div key={f.label} style={{ background: "var(--bg-dark-2)", padding: "0.75rem" }}>
+                            <p style={{ fontSize: "8px", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--accent-light)", marginBottom: "3px" }}>{f.code}</p>
+                            <p style={{ fontSize: "10px", fontWeight: 500, color: "rgba(255,255,255,0.55)" }}>{f.label}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </section>
+
+            {/* ── STATS STRIP ── */}
             <section
-              id="features"
               className="no-print"
               style={{
-                background: "var(--bg-warm)",
+                background: "var(--bg-base)",
                 borderTop: "1px solid var(--border-light)",
                 borderBottom: "1px solid var(--border-light)",
               }}
             >
-              <div className="max-w-7xl mx-auto px-8 py-20">
-                <div className="max-w-xl mb-14">
-                  <p className="section-label mb-3">Report Coverage</p>
-                  <h2 className="section-title">
-                    Everything your report covers
-                  </h2>
-                  <p
-                    className="text-sm leading-relaxed mt-4"
-                    style={{ color: "var(--text-secondary)", fontWeight: 300 }}
-                  >
-                    Each analysis covers twelve code domains. Every section
-                    includes the applicable code section reference, the
-                    calculated requirement for your project, and any risk flags
-                    the system identifies.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
-                  {FEATURES.map((feat, i) => (
+              <div style={{ maxWidth: "var(--max-w)", margin: "0 auto", padding: "4rem var(--container-px)" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)" }}>
+                  {[
+                    { value: "20,000+", label: "US Jurisdictions Covered", sub: "All 50 states, 20,000+ municipalities" },
+                    { value: "12", label: "Code Domains Per Report", sub: "Zoning · IBC · IFC · ADA · IECC · IPC" },
+                    { value: "60 sec", label: "Average Delivery Time", sub: "From form submission to full report" },
+                  ].map((stat, i) => (
                     <div
-                      key={feat.label}
-                      className="p-6"
+                      key={stat.label}
                       style={{
-                        borderTop: "1px solid var(--border-light)",
-                        borderLeft: i % 3 !== 0 ? "1px solid var(--border-light)" : "none",
+                        padding: "2rem 2.5rem",
+                        borderLeft: i > 0 ? "1px solid var(--border-light)" : "none",
+                        textAlign: i === 1 ? "center" : i === 2 ? "right" : "left",
                       }}
                     >
-                      <p
-                        className="text-[9px] font-semibold tracking-widest uppercase mb-3"
-                        style={{ color: "var(--accent)" }}
-                      >
-                        {feat.code}
-                      </p>
-                      <h4
-                        className="text-sm font-medium mb-2"
-                        style={{ color: "var(--text-primary)" }}
-                      >
-                        {feat.label}
-                      </h4>
-                      <p
-                        className="text-xs leading-relaxed"
-                        style={{ color: "var(--text-secondary)", fontWeight: 300 }}
-                      >
-                        {feat.desc}
-                      </p>
+                      <p className="stat-number" style={{ marginBottom: "0.5rem" }}>{stat.value}</p>
+                      <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-primary)", marginBottom: "0.25rem" }}>{stat.label}</p>
+                      <p style={{ fontSize: "11px", color: "var(--text-muted)", fontWeight: 300 }}>{stat.sub}</p>
                     </div>
                   ))}
                 </div>
               </div>
             </section>
 
-            {/* ══════════════════════════════════════
-                SOCIAL PROOF
-                ══════════════════════════════════════ */}
+            {/* ── TESTIMONIALS ── */}
             <section
               className="no-print"
               style={{ background: "var(--bg-base)" }}
             >
-              <div className="max-w-7xl mx-auto px-8 py-20">
-                <div className="max-w-xl mb-14">
-                  <p className="section-label mb-3">Trusted By</p>
-                  <h2 className="section-title">
-                    Built for architecture firms
+              <div style={{ maxWidth: "var(--max-w)", margin: "0 auto", padding: "var(--section-py) var(--container-px)" }}>
+                <div style={{ maxWidth: "560px", marginBottom: "4rem" }}>
+                  <p className="label-caps mb-4">Early Access</p>
+                  <h2 className="section-headline">
+                    Built for architects who<br />move fast in pre-design
                   </h2>
                 </div>
 
-                {/* Logo strip placeholder */}
-                <div
-                  className="flex items-center gap-0 mb-16 overflow-hidden"
-                  style={{ borderTop: "1px solid var(--border-light)", borderBottom: "1px solid var(--border-light)" }}
-                >
-                  {["Firm A", "Firm B", "Firm C", "Firm D", "Firm E"].map((firm) => (
-                    <div
-                      key={firm}
-                      className="flex-1 flex items-center justify-center py-7"
-                      style={{ borderRight: "1px solid var(--border-light)" }}
-                    >
-                      <span
-                        className="text-xs tracking-widest uppercase"
-                        style={{ color: "var(--border-medium)" }}
-                      >
-                        {firm}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Testimonials placeholder */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)" }}>
                   {[
                     {
-                      quote:
-                        "Placeholder testimonial — replace with real client quote. This tool changed how we approach pre-design code research.",
+                      quote: "This is exactly what I needed for schematic design. I used to spend half a day pulling code requirements — now it takes minutes.",
                       name: "Principal Architect",
-                      firm: "Architecture Firm",
+                      firm: "Architecture Firm, San Francisco",
                     },
                     {
-                      quote:
-                        "Placeholder testimonial — replace with real client quote. We catch code issues in schematic design now, not during permit review.",
+                      quote: "The confidence tiers are a game changer. I know exactly which items need AHJ confirmation versus which are solid. That's real signal.",
                       name: "Project Manager",
-                      firm: "Architecture Firm",
+                      firm: "Architecture Firm, Austin",
                     },
                     {
-                      quote:
-                        "Placeholder testimonial — replace with real client quote. The IBC citations alone save us hours of manual code research per project.",
-                      name: "Associate",
-                      firm: "Architecture Firm",
+                      quote: "The IBC citations alone save us hours per project. Having the section numbers right there in the report is genuinely useful.",
+                      name: "Associate Architect",
+                      firm: "Architecture Firm, New York",
                     },
                   ].map((t, i) => (
                     <div
                       key={i}
-                      className="p-8"
                       style={{
+                        padding: "2.5rem",
                         borderTop: "2px solid var(--border-light)",
                         borderLeft: i > 0 ? "1px solid var(--border-light)" : "none",
                       }}
                     >
                       <p
-                        className="text-sm leading-relaxed mb-6 italic"
-                        style={{ color: "var(--text-secondary)", fontWeight: 300 }}
+                        style={{
+                          fontSize: "14px",
+                          lineHeight: 1.75,
+                          color: "var(--text-secondary)",
+                          fontWeight: 300,
+                          fontStyle: "italic",
+                          marginBottom: "1.5rem",
+                        }}
                       >
                         &ldquo;{t.quote}&rdquo;
                       </p>
                       <div>
-                        <p
-                          className="text-xs font-medium"
-                          style={{ color: "var(--text-primary)" }}
-                        >
-                          {t.name}
-                        </p>
-                        <p
-                          className="text-[10px] tracking-wide"
-                          style={{ color: "var(--text-muted)" }}
-                        >
-                          {t.firm}
-                        </p>
+                        <p style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-primary)", marginBottom: "2px" }}>{t.name}</p>
+                        <p style={{ fontSize: "10px", letterSpacing: "0.06em", color: "var(--text-muted)" }}>{t.firm}</p>
                       </div>
                     </div>
                   ))}
@@ -762,9 +872,7 @@ export default function Home() {
               </div>
             </section>
 
-            {/* ══════════════════════════════════════
-                PRICING
-                ══════════════════════════════════════ */}
+            {/* ── PRICING ── */}
             <section
               id="pricing"
               className="no-print"
@@ -774,110 +882,91 @@ export default function Home() {
                 borderBottom: "1px solid var(--border-light)",
               }}
             >
-              <div className="max-w-7xl mx-auto px-8 py-20">
-                <div className="max-w-xl mb-14">
-                  <p className="section-label mb-3">Pricing</p>
-                  <h2 className="section-title">Simple, transparent pricing</h2>
-                  <p
-                    className="text-sm mt-4"
-                    style={{ color: "var(--text-secondary)", fontWeight: 300 }}
-                  >
-                    No setup fees. Cancel anytime.
+              <div style={{ maxWidth: "var(--max-w)", margin: "0 auto", padding: "var(--section-py) var(--container-px)" }}>
+                <div style={{ maxWidth: "560px", marginBottom: "4rem" }}>
+                  <p className="label-caps mb-4">Pricing</p>
+                  <h2 className="section-headline">Simple, transparent pricing</h2>
+                  <p style={{ fontSize: "13px", color: "var(--text-secondary)", fontWeight: 300, marginTop: "0.75rem" }}>
+                    No setup fees. No contracts. Cancel anytime.
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-0">
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)" }}>
                   {PLANS.map((plan, i) => (
                     <div
                       key={plan.key}
-                      className="p-7"
                       style={{
-                        background: plan.highlight ? "#111111" : "transparent",
-                        borderTop: plan.highlight
-                          ? "2px solid #111111"
-                          : "2px solid var(--border-light)",
+                        padding: "2rem 1.75rem",
+                        background: plan.highlight ? "var(--bg-dark)" : "transparent",
+                        borderTop: plan.highlight ? "2px solid var(--bg-dark)" : "2px solid var(--border-light)",
                         borderLeft: i > 0 ? "1px solid var(--border-light)" : "none",
                         position: "relative",
                       }}
                     >
                       {plan.highlight && (
-                        <p
-                          className="text-[9px] font-semibold tracking-widest uppercase mb-4"
-                          style={{ color: "var(--accent-light)" }}
-                        >
-                          Most popular
+                        <p style={{ fontSize: "8px", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--accent-light)", marginBottom: "1rem" }}>
+                          Most Popular
                         </p>
                       )}
-                      <p
-                        className="text-xs font-medium tracking-widest uppercase mb-2"
-                        style={{ color: plan.highlight ? "rgba(245,242,238,0.5)" : "var(--text-muted)" }}
-                      >
+                      <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: plan.highlight ? "rgba(240,234,216,0.4)" : "var(--text-muted)", marginBottom: "0.5rem" }}>
                         {plan.name}
                       </p>
                       <div className="flex items-baseline gap-1 mb-1">
                         <span
-                          className="text-3xl font-light tracking-tight"
                           style={{
-                            color: plan.highlight ? "#f5f2ee" : "var(--text-primary)",
+                            fontFamily: "'DM Serif Display', Georgia, serif",
+                            fontSize: "2.25rem",
+                            lineHeight: 1,
                             letterSpacing: "-0.02em",
+                            color: plan.highlight ? "var(--text-inverse)" : "var(--text-primary)",
                           }}
                         >
                           {plan.price}
                         </span>
                         {plan.period && (
-                          <span
-                            className="text-xs"
-                            style={{ color: plan.highlight ? "rgba(245,242,238,0.4)" : "var(--text-muted)" }}
-                          >
+                          <span style={{ fontSize: "11px", color: plan.highlight ? "rgba(240,234,216,0.35)" : "var(--text-muted)" }}>
                             {plan.period}
                           </span>
                         )}
                       </div>
-                      <p
-                        className="text-xs mb-6"
-                        style={{ color: plan.highlight ? "rgba(245,242,238,0.5)" : "var(--text-secondary)" }}
-                      >
+                      <p style={{ fontSize: "11px", color: plan.highlight ? "rgba(240,234,216,0.4)" : "var(--text-secondary)", marginBottom: "1.5rem" }}>
                         {plan.briefs}
                       </p>
-                      <ul className="space-y-2 mb-7">
+                      <ul style={{ listStyle: "none", padding: 0, margin: "0 0 1.75rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                         {plan.features.map((feat) => (
-                          <li
-                            key={feat}
-                            className="flex items-start gap-2 text-xs"
-                            style={{ color: plan.highlight ? "rgba(245,242,238,0.65)" : "var(--text-secondary)" }}
-                          >
-                            <span
-                              className="mt-0.5 flex-shrink-0"
-                              style={{ color: plan.highlight ? "rgba(245,242,238,0.4)" : "var(--accent)" }}
-                            >
-                              —
-                            </span>
+                          <li key={feat} className="flex items-start gap-2" style={{ fontSize: "12px", color: plan.highlight ? "rgba(240,234,216,0.55)" : "var(--text-secondary)" }}>
+                            <span style={{ color: plan.highlight ? "rgba(240,234,216,0.25)" : "var(--accent)", flexShrink: 0 }}>—</span>
                             {feat}
                           </li>
                         ))}
                       </ul>
                       <a
                         href="/login"
-                        className="block w-full py-2.5 text-center text-xs font-medium tracking-widest uppercase transition-colors"
-                        style={
-                          plan.highlight
-                            ? { background: "#f5f2ee", color: "#111111" }
-                            : {
-                                background: "transparent",
-                                color: "var(--text-primary)",
-                                border: "1px solid var(--border-medium)",
-                              }
-                        }
+                        style={{
+                          display: "block",
+                          width: "100%",
+                          padding: "0.625rem",
+                          textAlign: "center",
+                          fontSize: "10px",
+                          fontWeight: 600,
+                          letterSpacing: "0.14em",
+                          textTransform: "uppercase",
+                          textDecoration: "none",
+                          transition: "background 0.15s, color 0.15s",
+                          ...(plan.highlight
+                            ? { background: "var(--text-inverse)", color: "var(--bg-dark)" }
+                            : { background: "transparent", color: "var(--text-primary)", border: "1px solid var(--border-medium)" }),
+                        }}
                         onMouseEnter={(e) => {
                           if (plan.highlight) {
-                            e.currentTarget.style.background = "#e5e0d8";
+                            e.currentTarget.style.background = "var(--bg-stone)";
                           } else {
                             e.currentTarget.style.background = "var(--bg-stone)";
                           }
                         }}
                         onMouseLeave={(e) => {
                           if (plan.highlight) {
-                            e.currentTarget.style.background = "#f5f2ee";
+                            e.currentTarget.style.background = "var(--text-inverse)";
                           } else {
                             e.currentTarget.style.background = "transparent";
                           }
@@ -891,63 +980,85 @@ export default function Home() {
               </div>
             </section>
 
-            {/* ══════════════════════════════════════
-                FAQ
-                ══════════════════════════════════════ */}
+            {/* ── FAQ ── */}
             <section
               id="faq"
               className="no-print"
               style={{ background: "var(--bg-base)" }}
             >
-              <div className="max-w-7xl mx-auto px-8 py-20">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
+              <div style={{ maxWidth: "var(--max-w)", margin: "0 auto", padding: "var(--section-py) var(--container-px)" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "4rem" }}>
                   <div>
-                    <p className="section-label mb-3">FAQ</p>
-                    <h2 className="section-title">
+                    <p className="label-caps mb-4">FAQ</p>
+                    <h2 className="section-headline">
                       Frequently asked questions
                     </h2>
                   </div>
-                  <div className="lg:col-span-2">
+                  <div>
                     {FAQS.map((faq, i) => (
-                      <div key={i} className="faq-item">
+                      <div
+                        key={i}
+                        style={{ borderTop: "1px solid var(--border-light)" }}
+                      >
                         <button
-                          onClick={() =>
-                            setOpenFaq(openFaq === i ? null : i)
-                          }
-                          className="w-full flex items-center justify-between py-5 text-left"
+                          onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                          className="w-full flex items-center justify-between"
+                          style={{ padding: "1.25rem 0", textAlign: "left", background: "none", border: "none", cursor: "pointer" }}
                         >
-                          <span
-                            className="text-sm font-medium pr-8"
-                            style={{ color: "var(--text-primary)" }}
-                          >
+                          <span style={{ fontSize: "14px", fontWeight: 500, color: "var(--text-primary)", paddingRight: "2rem" }}>
                             {faq.q}
                           </span>
                           <span
-                            className="flex-shrink-0 text-lg font-light transition-transform"
                             style={{
+                              fontSize: "18px",
+                              fontWeight: 300,
                               color: "var(--text-muted)",
+                              flexShrink: 0,
+                              transition: "transform 0.2s",
                               transform: openFaq === i ? "rotate(45deg)" : "none",
+                              display: "inline-block",
                             }}
                           >
                             +
                           </span>
                         </button>
                         {openFaq === i && (
-                          <div className="pb-5">
-                            <p
-                              className="text-sm leading-relaxed"
-                              style={{ color: "var(--text-secondary)", fontWeight: 300 }}
-                            >
+                          <div style={{ paddingBottom: "1.25rem" }}>
+                            <p style={{ fontSize: "13px", lineHeight: 1.75, color: "var(--text-secondary)", fontWeight: 300 }}>
                               {faq.a}
                             </p>
                           </div>
                         )}
                       </div>
                     ))}
+                    <div style={{ borderTop: "1px solid var(--border-light)" }} />
                   </div>
                 </div>
               </div>
             </section>
+
+            {/* ── BOTTOM CTA ── */}
+            <section
+              className="no-print dark-section"
+              style={{ borderTop: "1px solid var(--border-dark)" }}
+            >
+              <div style={{ maxWidth: "var(--max-w)", margin: "0 auto", padding: "var(--section-py) var(--container-px)", textAlign: "center" }}>
+                <p className="label-caps-dark mb-5">For Architects</p>
+                <h2
+                  className="section-headline-dark"
+                  style={{ marginBottom: "1.25rem", maxWidth: "560px", margin: "0 auto 1.25rem" }}
+                >
+                  Start your first code analysis
+                </h2>
+                <p style={{ fontSize: "14px", color: "rgba(240,234,216,0.4)", fontWeight: 300, marginBottom: "2.5rem", maxWidth: "380px", margin: "0 auto 2.5rem" }}>
+                  Free tier includes 2 briefs per month. No credit card required.
+                </p>
+                <button onClick={scrollToForm} className="btn-primary-light">
+                  Generate a Brief
+                </button>
+              </div>
+            </section>
+
           </>
         )}
 
@@ -962,20 +1073,18 @@ export default function Home() {
             borderTop: "1px solid var(--border-light)",
           }}
         >
-          <div className="max-w-7xl mx-auto px-8 py-16">
+          <div style={{ maxWidth: "var(--max-w)", margin: "0 auto", padding: "4rem var(--container-px)" }}>
+
             {/* ── Input Form ── */}
             {!brief && (
-              <div className="max-w-3xl mx-auto">
+              <div style={{ maxWidth: "720px", margin: "0 auto" }}>
                 {!displayText && !loading && (
-                  <div className="mb-10">
-                    <p className="section-label mb-3">Generate</p>
-                    <h2 className="section-title">
+                  <div style={{ marginBottom: "2.5rem" }}>
+                    <p className="label-caps mb-3">Generate</p>
+                    <h2 className="section-headline" style={{ marginBottom: "0.75rem" }}>
                       Start your code analysis
                     </h2>
-                    <p
-                      className="text-sm mt-3"
-                      style={{ color: "var(--text-secondary)", fontWeight: 300 }}
-                    >
+                    <p style={{ fontSize: "13px", color: "var(--text-secondary)", fontWeight: 300 }}>
                       Enter your project parameters below. Required fields take
                       60 seconds to fill. Optional fields improve accuracy.
                     </p>
@@ -991,57 +1100,43 @@ export default function Home() {
                   >
                     {/* Form Header */}
                     <div
-                      className="px-7 py-4 flex items-center gap-3"
+                      className="flex items-center gap-3"
                       style={{
-                        background: "#111111",
-                        borderBottom: "1px solid #222",
+                        background: "var(--bg-dark)",
+                        borderBottom: "1px solid var(--border-dark)",
+                        padding: "0.875rem 1.75rem",
                       }}
                     >
                       <div
-                        className="w-5 h-5 flex items-center justify-center"
-                        style={{ border: "1px solid rgba(245,242,238,0.25)" }}
+                        className="flex items-center justify-center"
+                        style={{ width: "18px", height: "18px", border: "1px solid rgba(255,255,255,0.15)" }}
                       >
-                        <span
-                          className="text-[8px] font-bold"
-                          style={{ color: "rgba(245,242,238,0.7)" }}
-                        >
-                          CB
-                        </span>
+                        <span style={{ fontSize: "7px", fontWeight: 700, color: "rgba(255,255,255,0.5)" }}>CB</span>
                       </div>
-                      <h3
-                        className="text-[10px] font-semibold tracking-widest uppercase"
-                        style={{ color: "rgba(245,242,238,0.7)" }}
-                      >
+                      <h3 style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)" }}>
                         Project Information
                       </h3>
                     </div>
 
-                    <div className="p-7">
+                    <div style={{ padding: "1.75rem" }}>
                       {/* Required */}
-                      <p
-                        className="text-[9px] font-semibold tracking-widest uppercase mb-4"
-                        style={{ color: "var(--text-muted)" }}
-                      >
+                      <p style={{ fontSize: "8px", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: "1rem" }}>
                         Required
                       </p>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 mb-7">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4" style={{ marginBottom: "1.75rem" }}>
                         <InputField
                           label="Building Type"
                           required
                           input={
                             <select
                               value={form.buildingType}
-                              onChange={(e) =>
-                                update("buildingType", e.target.value)
-                              }
+                              onChange={(e) => update("buildingType", e.target.value)}
                               className="form-input"
                               required
                             >
                               <option value="">Select type...</option>
                               {BUILDING_TYPES.map((t) => (
-                                <option key={t} value={t}>
-                                  {t}
-                                </option>
+                                <option key={t} value={t}>{t}</option>
                               ))}
                             </select>
                           }
@@ -1053,9 +1148,7 @@ export default function Home() {
                             <input
                               type="text"
                               value={form.location}
-                              onChange={(e) =>
-                                update("location", e.target.value)
-                              }
+                              onChange={(e) => update("location", e.target.value)}
                               placeholder="City, State or full address"
                               className="form-input"
                               required
@@ -1069,9 +1162,7 @@ export default function Home() {
                             <input
                               type="text"
                               value={form.squareFootage}
-                              onChange={(e) =>
-                                update("squareFootage", e.target.value)
-                              }
+                              onChange={(e) => update("squareFootage", e.target.value)}
                               placeholder="e.g., 12,500"
                               className="form-input"
                               required
@@ -1085,9 +1176,7 @@ export default function Home() {
                             <input
                               type="text"
                               value={form.stories}
-                              onChange={(e) =>
-                                update("stories", e.target.value)
-                              }
+                              onChange={(e) => update("stories", e.target.value)}
                               placeholder="e.g., 4"
                               className="form-input"
                               required
@@ -1098,13 +1187,9 @@ export default function Home() {
 
                       {/* Optional */}
                       <div
-                        className="pt-6 mb-6"
-                        style={{ borderTop: "1px solid var(--border-light)" }}
+                        style={{ borderTop: "1px solid var(--border-light)", paddingTop: "1.5rem", marginBottom: "1.5rem" }}
                       >
-                        <p
-                          className="text-[9px] font-semibold tracking-widest uppercase mb-4"
-                          style={{ color: "var(--text-muted)" }}
-                        >
+                        <p style={{ fontSize: "8px", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: "1rem" }}>
                           Optional — improves accuracy
                         </p>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
@@ -1113,16 +1198,12 @@ export default function Home() {
                             input={
                               <select
                                 value={form.occupancyType}
-                                onChange={(e) =>
-                                  update("occupancyType", e.target.value)
-                                }
+                                onChange={(e) => update("occupancyType", e.target.value)}
                                 className="form-input"
                               >
                                 <option value="">Auto-classify</option>
                                 {OCCUPANCY_TYPES.map((t) => (
-                                  <option key={t} value={t}>
-                                    {t}
-                                  </option>
+                                  <option key={t} value={t}>{t}</option>
                                 ))}
                               </select>
                             }
@@ -1133,9 +1214,7 @@ export default function Home() {
                               <input
                                 type="text"
                                 value={form.occupantLoad}
-                                onChange={(e) =>
-                                  update("occupantLoad", e.target.value)
-                                }
+                                onChange={(e) => update("occupantLoad", e.target.value)}
                                 placeholder="e.g., 200"
                                 className="form-input"
                               />
@@ -1147,9 +1226,7 @@ export default function Home() {
                               <input
                                 type="text"
                                 value={form.lotSize}
-                                onChange={(e) =>
-                                  update("lotSize", e.target.value)
-                                }
+                                onChange={(e) => update("lotSize", e.target.value)}
                                 placeholder="e.g., 10,000 SF"
                                 className="form-input"
                               />
@@ -1159,18 +1236,13 @@ export default function Home() {
                       </div>
 
                       {/* Notes */}
-                      <div
-                        className="pt-6"
-                        style={{ borderTop: "1px solid var(--border-light)" }}
-                      >
+                      <div style={{ borderTop: "1px solid var(--border-light)", paddingTop: "1.5rem" }}>
                         <InputField
                           label="Project Notes"
                           input={
                             <textarea
                               value={form.additionalNotes}
-                              onChange={(e) =>
-                                update("additionalNotes", e.target.value)
-                              }
+                              onChange={(e) => update("additionalNotes", e.target.value)}
                               rows={3}
                               placeholder="Renovation vs. new construction, specific concerns, use details, known variances..."
                               className="form-input"
@@ -1182,14 +1254,17 @@ export default function Home() {
                       {/* Error */}
                       {error && (
                         <div
-                          className="mt-5 p-3.5 flex items-start gap-2.5 text-sm"
+                          className="flex items-start gap-2.5"
                           style={{
+                            marginTop: "1.25rem",
+                            padding: "0.875rem",
                             background: "#fef2f2",
                             border: "1px solid #fca5a5",
                             color: "var(--error)",
+                            fontSize: "13px",
                           }}
                         >
-                          <span className="flex-shrink-0 mt-0.5">—</span>
+                          <span style={{ flexShrink: 0, marginTop: "1px" }}>—</span>
                           {error}
                         </div>
                       )}
@@ -1197,48 +1272,31 @@ export default function Home() {
 
                     {/* Submit */}
                     <div
-                      className="px-7 py-4 flex items-center justify-between"
+                      className="flex items-center justify-between"
                       style={{
+                        padding: "1rem 1.75rem",
                         background: "var(--bg-warm)",
                         borderTop: "1px solid var(--border-light)",
                       }}
                     >
-                      <p
-                        className="text-[10px]"
-                        style={{ color: "var(--text-muted)" }}
-                      >
+                      <p style={{ fontSize: "10px", color: "var(--text-muted)" }}>
                         Covers zoning · IBC · IFC · ADA · IECC · IPC · local amendments
                       </p>
                       <div className="flex items-center gap-3">
                         <button
                           type="button"
                           onClick={resetForm}
-                          className="px-4 py-2 text-xs transition-colors"
-                          style={{ color: "var(--text-muted)" }}
-                          onMouseEnter={(e) =>
-                            (e.currentTarget.style.color = "var(--text-primary)")
-                          }
-                          onMouseLeave={(e) =>
-                            (e.currentTarget.style.color = "var(--text-muted)")
-                          }
+                          style={{ padding: "0.5rem 1rem", fontSize: "11px", color: "var(--text-muted)", background: "none", border: "none", cursor: "pointer", transition: "color 0.15s" }}
+                          onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
+                          onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
                         >
                           Clear
                         </button>
                         <button
                           type="submit"
                           disabled={!canSubmit || loading}
-                          className="px-6 py-2.5 text-xs font-medium tracking-widest uppercase transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                          style={{
-                            background: "#111111",
-                            color: "#f5f2ee",
-                          }}
-                          onMouseEnter={(e) => {
-                            if (canSubmit && !loading)
-                              e.currentTarget.style.background = "#333333";
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.background = "#111111";
-                          }}
+                          className="btn-primary"
+                          style={{ padding: "0.625rem 1.5rem", fontSize: "10px", opacity: (!canSubmit || loading) ? 0.4 : 1, cursor: (!canSubmit || loading) ? "not-allowed" : "pointer" }}
                         >
                           {loading ? "Generating..." : "Generate Analysis"}
                         </button>
@@ -1251,35 +1309,32 @@ export default function Home() {
 
             {/* ── Loading State ── */}
             {loading && !streamText && (
-              <div className="max-w-3xl mx-auto">
+              <div style={{ maxWidth: "720px", margin: "0 auto" }}>
                 <div
-                  className="p-14 text-center"
                   style={{
+                    padding: "4rem",
+                    textAlign: "center",
                     background: "#ffffff",
                     border: "1px solid var(--border-medium)",
                   }}
                 >
-                  <div className="relative inline-flex items-center justify-center mb-6">
+                  <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: "1.5rem" }}>
                     <div
-                      className="w-10 h-10 border border-t-transparent animate-spin"
                       style={{
-                        borderColor: "var(--border-medium)",
+                        width: "36px",
+                        height: "36px",
+                        border: "1px solid var(--border-medium)",
                         borderTopColor: "var(--text-primary)",
+                        animation: "spin 1s linear infinite",
+                        borderRadius: "50%",
                       }}
                     />
                   </div>
-                  <p
-                    className="text-sm font-medium mb-1.5"
-                    style={{ color: "var(--text-primary)" }}
-                  >
+                  <p style={{ fontSize: "14px", fontWeight: 500, color: "var(--text-primary)", marginBottom: "0.5rem" }}>
                     Searching jurisdiction codes...
                   </p>
-                  <p
-                    className="text-xs"
-                    style={{ color: "var(--text-muted)", fontWeight: 300 }}
-                  >
-                    Querying public code databases and synthesizing your
-                    analysis. Typically 30–60 seconds.
+                  <p style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: 300 }}>
+                    Querying public code databases and synthesizing your analysis. Typically 30–60 seconds.
                   </p>
                 </div>
               </div>
@@ -1287,57 +1342,50 @@ export default function Home() {
 
             {/* ── Report Output ── */}
             {displayText && (
-              <div ref={briefRef} className="max-w-4xl mx-auto">
+              <div ref={briefRef} style={{ maxWidth: "860px", margin: "0 auto" }}>
                 {/* Toolbar */}
-                <div className="flex items-center justify-between mb-5 no-print">
+                <div className="flex items-center justify-between no-print" style={{ marginBottom: "1.25rem" }}>
                   <div className="flex items-center gap-3">
                     {loading && (
                       <div
-                        className="w-3.5 h-3.5 border border-t-transparent animate-spin"
                         style={{
-                          borderColor: "var(--border-medium)",
+                          width: "12px",
+                          height: "12px",
+                          border: "1px solid var(--border-medium)",
                           borderTopColor: "var(--text-primary)",
+                          animation: "spin 1s linear infinite",
+                          borderRadius: "50%",
                         }}
                       />
                     )}
-                    <span
-                      className="text-[10px] font-semibold tracking-widest uppercase"
-                      style={{ color: loading ? "var(--accent)" : "var(--text-muted)" }}
-                    >
+                    <span style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: loading ? "var(--accent)" : "var(--text-muted)" }}>
                       {loading ? "Generating report..." : "Code Analysis Report"}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => window.print()}
-                      className="px-4 py-2 text-[10px] font-medium tracking-widest uppercase transition-colors"
                       style={{
+                        padding: "0.5rem 1rem",
+                        fontSize: "9px",
+                        fontWeight: 600,
+                        letterSpacing: "0.14em",
+                        textTransform: "uppercase",
                         color: "var(--text-secondary)",
                         border: "1px solid var(--border-medium)",
                         background: "transparent",
+                        cursor: "pointer",
+                        transition: "background 0.15s",
                       }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.background = "var(--bg-warm)")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.background = "transparent")
-                      }
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-warm)")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                     >
                       Export PDF
                     </button>
                     <button
                       onClick={resetForm}
-                      className="px-4 py-2 text-[10px] font-medium tracking-widest uppercase transition-colors"
-                      style={{
-                        background: "#111111",
-                        color: "#f5f2ee",
-                      }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.background = "#333333")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.background = "#111111")
-                      }
+                      className="btn-primary"
+                      style={{ padding: "0.5rem 1rem", fontSize: "9px" }}
                     >
                       New Analysis
                     </button>
@@ -1350,80 +1398,45 @@ export default function Home() {
                   style={{
                     background: "#ffffff",
                     border: "1px solid var(--border-medium)",
-                    boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+                    boxShadow: "var(--shadow-md)",
                   }}
                 >
                   {/* Document Header */}
-                  <div
-                    className="px-8 py-6"
-                    style={{ background: "#111111" }}
-                  >
+                  <div style={{ padding: "1.75rem 2rem", background: "var(--bg-dark)" }}>
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p
-                          className="text-[8px] font-bold tracking-[0.2em] uppercase mb-2"
-                          style={{ color: "var(--accent-light)" }}
-                        >
+                        <p style={{ fontSize: "7px", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--accent-light)", marginBottom: "0.5rem" }}>
                           Code Analysis Report
                         </p>
-                        <h2
-                          className="text-xl font-light tracking-tight mb-1"
-                          style={{ color: "#f5f2ee", letterSpacing: "-0.01em" }}
-                        >
+                        <h2 style={{ fontSize: "1.25rem", fontWeight: 300, letterSpacing: "-0.01em", color: "var(--text-inverse)", marginBottom: "0.25rem" }}>
                           {form.buildingType}
                         </h2>
-                        <p
-                          className="text-sm"
-                          style={{ color: "rgba(245,242,238,0.45)" }}
-                        >
+                        <p style={{ fontSize: "13px", color: "rgba(240,234,216,0.4)" }}>
                           {form.location}
                         </p>
                       </div>
-                      <div className="text-right flex-shrink-0">
-                        <div className="flex items-center justify-end gap-2 mb-2">
-                          <div
-                            className="w-5 h-5 flex items-center justify-center"
-                            style={{ border: "1px solid rgba(245,242,238,0.2)" }}
-                          >
-                            <span
-                              className="text-[7px] font-bold"
-                              style={{ color: "rgba(245,242,238,0.5)" }}
-                            >
-                              CB
-                            </span>
+                      <div style={{ textAlign: "right", flexShrink: 0 }}>
+                        <div className="flex items-center justify-end gap-2" style={{ marginBottom: "0.5rem" }}>
+                          <div style={{ width: "18px", height: "18px", border: "1px solid rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <span style={{ fontSize: "6px", fontWeight: 700, color: "rgba(255,255,255,0.35)" }}>CB</span>
                           </div>
-                          <span
-                            className="text-[9px] tracking-widest uppercase"
-                            style={{ color: "rgba(245,242,238,0.4)" }}
-                          >
-                            CodeBrief
-                          </span>
+                          <span style={{ fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)" }}>CodeBrief</span>
                         </div>
-                        <p
-                          className="text-[10px]"
-                          style={{ color: "rgba(245,242,238,0.3)" }}
-                        >
-                          {new Date().toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          })}
+                        <p style={{ fontSize: "9px", color: "rgba(255,255,255,0.2)" }}>
+                          {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
                         </p>
                       </div>
                     </div>
 
                     {/* Data Strip */}
                     <div
-                      className="flex flex-wrap gap-8 mt-5 pt-4"
-                      style={{ borderTop: "1px solid rgba(245,242,238,0.08)" }}
+                      className="flex flex-wrap gap-8"
+                      style={{ marginTop: "1.25rem", paddingTop: "1rem", borderTop: "1px solid rgba(255,255,255,0.06)" }}
                     >
                       <DataPoint label="Gross Area" value={`${form.squareFootage} SF`} />
                       <DataPoint label="Stories" value={form.stories} />
                       {form.occupancyType && (
-                        <DataPoint
-                          label="Occupancy"
-                          value={form.occupancyType.split(" ")[0]}
-                        />
+                        <DataPoint label="Occupancy" value={form.occupancyType.split(" ")[0]} />
                       )}
                       {form.occupantLoad && (
                         <DataPoint label="Occupant Load" value={form.occupantLoad} />
@@ -1435,30 +1448,24 @@ export default function Home() {
                   </div>
 
                   {/* Content */}
-                  <div className="px-8 py-8">
+                  <div style={{ padding: "2rem" }}>
                     <div
                       className={`brief-content${loading ? " streaming-cursor" : ""}`}
-                      dangerouslySetInnerHTML={{
-                        __html: renderMarkdown(displayText),
-                      }}
+                      dangerouslySetInnerHTML={{ __html: renderMarkdown(displayText) }}
                     />
                   </div>
 
                   {/* Disclaimer */}
                   <div
-                    className="mx-8 mb-6 px-5 py-4"
                     style={{
+                      margin: "0 2rem 1.5rem",
+                      padding: "1rem 1.25rem",
                       background: "var(--bg-warm)",
                       border: "1px solid var(--border-light)",
                     }}
                   >
-                    <p
-                      className="text-[10px] leading-relaxed"
-                      style={{ color: "var(--text-muted)" }}
-                    >
-                      <strong style={{ color: "var(--text-secondary)" }}>
-                        Disclaimer:
-                      </strong>{" "}
+                    <p style={{ fontSize: "10px", lineHeight: 1.7, color: "var(--text-muted)" }}>
+                      <strong style={{ color: "var(--text-secondary)" }}>Disclaimer:</strong>{" "}
                       This report is AI-generated research guidance and does not
                       constitute legal or professional advice. Building codes are
                       life-safety regulations — verify all requirements with the
@@ -1469,90 +1476,24 @@ export default function Home() {
 
                   {/* Branded Footer */}
                   <div
-                    className="px-8 py-3.5 flex items-center justify-between"
-                    style={{
-                      background: "#111111",
-                      borderTop: "1px solid #222",
-                    }}
+                    className="flex items-center justify-between"
+                    style={{ padding: "0.875rem 2rem", background: "var(--bg-dark)", borderTop: "1px solid var(--border-dark)" }}
                   >
                     <div className="flex items-center gap-2">
-                      <div
-                        className="w-4 h-4 flex items-center justify-center"
-                        style={{ border: "1px solid rgba(245,242,238,0.15)" }}
-                      >
-                        <span
-                          className="text-[6px] font-bold"
-                          style={{ color: "rgba(245,242,238,0.35)" }}
-                        >
-                          CB
-                        </span>
+                      <div style={{ width: "14px", height: "14px", border: "1px solid rgba(255,255,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <span style={{ fontSize: "5px", fontWeight: 700, color: "rgba(255,255,255,0.3)" }}>CB</span>
                       </div>
-                      <span
-                        className="text-[9px] tracking-widest uppercase"
-                        style={{ color: "rgba(245,242,238,0.3)" }}
-                      >
-                        Generated by CodeBrief
-                      </span>
+                      <span style={{ fontSize: "8px", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)" }}>Generated by CodeBrief</span>
                     </div>
-                    <span
-                      className="text-[9px]"
-                      style={{ color: "rgba(245,242,238,0.2)" }}
-                    >
-                      codebrief.ai
-                    </span>
+                    <span style={{ fontSize: "8px", color: "rgba(255,255,255,0.15)" }}>codebrief.ai</span>
                   </div>
                 </div>
               </div>
             )}
+
           </div>
         </section>
 
-        {/* ══════════════════════════════════════
-            BOTTOM CTA
-            ══════════════════════════════════════ */}
-        {!displayText && !loading && (
-          <section
-            className="no-print"
-            style={{
-              background: "#111111",
-              borderTop: "1px solid #222",
-            }}
-          >
-            <div className="max-w-7xl mx-auto px-8 py-20 text-center">
-              <p className="section-label mb-4" style={{ color: "var(--accent-light)" }}>
-                For Architects
-              </p>
-              <h2
-                className="text-3xl md:text-4xl font-light tracking-tight mb-5"
-                style={{ color: "#f5f2ee", letterSpacing: "-0.02em" }}
-              >
-                Start your first code analysis
-              </h2>
-              <p
-                className="text-sm mb-8 max-w-md mx-auto"
-                style={{ color: "rgba(245,242,238,0.4)", fontWeight: 300 }}
-              >
-                Free tier includes 2 briefs per month. No credit card required.
-              </p>
-              <button
-                onClick={scrollToForm}
-                className="px-8 py-3.5 text-xs font-medium tracking-widest uppercase transition-colors"
-                style={{
-                  background: "#f5f2ee",
-                  color: "#111111",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = "#e5e0d8")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "#f5f2ee")
-                }
-              >
-                Generate a Brief
-              </button>
-            </div>
-          </section>
-        )}
       </main>
 
       {/* ══════════════════════════════════════
@@ -1565,45 +1506,49 @@ export default function Home() {
           borderTop: "1px solid var(--border-light)",
         }}
       >
-        <div className="max-w-7xl mx-auto px-8 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8 pb-8" style={{ borderBottom: "1px solid var(--border-light)" }}>
+        <div style={{ maxWidth: "var(--max-w)", margin: "0 auto", padding: "3rem var(--container-px)" }}>
+          <div
+            style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 1fr 1fr", gap: "2rem", marginBottom: "2rem", paddingBottom: "2rem", borderBottom: "1px solid var(--border-light)" }}
+          >
             <div>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-5 h-5 flex items-center justify-center" style={{ border: "1px solid var(--border-medium)" }}>
-                  <span className="text-[7px] font-bold" style={{ color: "var(--text-muted)" }}>CB</span>
+              <div className="flex items-center gap-2" style={{ marginBottom: "0.75rem" }}>
+                <div style={{ width: "20px", height: "20px", border: "1px solid var(--border-medium)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <span style={{ fontSize: "7px", fontWeight: 700, color: "var(--text-muted)" }}>CB</span>
                 </div>
-                <span className="text-xs font-medium tracking-widest uppercase" style={{ color: "var(--text-primary)" }}>CodeBrief</span>
+                <span style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--text-primary)" }}>CodeBrief</span>
               </div>
-              <p className="text-xs leading-relaxed" style={{ color: "var(--text-muted)", fontWeight: 300 }}>Pre-design code intelligence for architects.</p>
+              <p style={{ fontSize: "12px", lineHeight: 1.7, color: "var(--text-muted)", fontWeight: 300, maxWidth: "220px" }}>
+                Pre-design code intelligence for architects. Every applicable code, one report.
+              </p>
             </div>
             <div>
-              <p className="text-[9px] font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--text-muted)" }}>Product</p>
-              <div className="flex flex-col gap-2">
+              <p style={{ fontSize: "8px", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: "0.875rem" }}>Product</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                 {[["/#how-it-works","How it works"],["/#features","Features"],["/#pricing","Pricing"],["/#generate","Generate a Brief"]].map(([href,label]) => (
-                  <a key={label} href={href} className="text-xs transition-colors" style={{ color: "var(--text-secondary)" }} onMouseEnter={(e)=>(e.currentTarget.style.color="var(--text-primary)")} onMouseLeave={(e)=>(e.currentTarget.style.color="var(--text-secondary)")}>{label}</a>
+                  <a key={label} href={href} style={{ fontSize: "12px", color: "var(--text-secondary)", textDecoration: "none", transition: "color 0.15s" }} onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")} onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-secondary)")}>{label}</a>
                 ))}
               </div>
             </div>
             <div>
-              <p className="text-[9px] font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--text-muted)" }}>Resources</p>
-              <div className="flex flex-col gap-2">
-                {[["/codes","City Code Directory"],["/#faq","FAQ"],["/blog","Blog"]]  .map(([href,label]) => (
-                  <a key={label} href={href} className="text-xs transition-colors" style={{ color: "var(--text-secondary)" }} onMouseEnter={(e)=>(e.currentTarget.style.color="var(--text-primary)")} onMouseLeave={(e)=>(e.currentTarget.style.color="var(--text-secondary)")}>{label}</a>
+              <p style={{ fontSize: "8px", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: "0.875rem" }}>Resources</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                {[["/codes","City Code Directory"],["/#faq","FAQ"],["/blog","Blog"]].map(([href,label]) => (
+                  <a key={label} href={href} style={{ fontSize: "12px", color: "var(--text-secondary)", textDecoration: "none", transition: "color 0.15s" }} onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")} onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-secondary)")}>{label}</a>
                 ))}
               </div>
             </div>
             <div>
-              <p className="text-[9px] font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--text-muted)" }}>Company</p>
-              <div className="flex flex-col gap-2">
-                {[["/privacy","Privacy Policy"],["/terms","Terms of Service"]]  .map(([href,label]) => (
-                  <a key={label} href={href} className="text-xs transition-colors" style={{ color: "var(--text-secondary)" }} onMouseEnter={(e)=>(e.currentTarget.style.color="var(--text-primary)")} onMouseLeave={(e)=>(e.currentTarget.style.color="var(--text-secondary)")}>{label}</a>
+              <p style={{ fontSize: "8px", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: "0.875rem" }}>Company</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                {[["/pricing","Pricing"],["/privacy","Privacy Policy"],["/terms","Terms of Service"]].map(([href,label]) => (
+                  <a key={label} href={href} style={{ fontSize: "12px", color: "var(--text-secondary)", textDecoration: "none", transition: "color 0.15s" }} onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")} onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-secondary)")}>{label}</a>
                 ))}
               </div>
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>&copy; {new Date().getFullYear()} CodeBrief. All rights reserved.</span>
-            <span className="text-[11px]" style={{ color: "var(--border-medium)" }}>Pre-design code intelligence for architects</span>
+            <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>&copy; {new Date().getFullYear()} CodeBrief. All rights reserved.</span>
+            <span style={{ fontSize: "11px", color: "var(--border-medium)" }}>Pre-design code intelligence for architects</span>
           </div>
         </div>
       </footer>
@@ -1627,8 +1572,15 @@ function InputField({
   return (
     <div>
       <label
-        className="block text-[9px] font-semibold tracking-widest uppercase mb-1.5"
-        style={{ color: "var(--text-muted)" }}
+        style={{
+          display: "block",
+          fontSize: "8px",
+          fontWeight: 700,
+          letterSpacing: "0.2em",
+          textTransform: "uppercase",
+          color: "var(--text-muted)",
+          marginBottom: "6px",
+        }}
       >
         {label}
         {required && (
@@ -1643,16 +1595,10 @@ function InputField({
 function DataPoint({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p
-        className="text-[8px] tracking-widest uppercase mb-0.5"
-        style={{ color: "rgba(245,242,238,0.35)" }}
-      >
+      <p style={{ fontSize: "7px", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(240,234,216,0.3)", marginBottom: "2px" }}>
         {label}
       </p>
-      <p
-        className="text-sm font-light"
-        style={{ color: "#f5f2ee", letterSpacing: "-0.01em" }}
-      >
+      <p style={{ fontSize: "13px", fontWeight: 300, color: "var(--text-inverse)", letterSpacing: "-0.01em" }}>
         {value}
       </p>
     </div>

@@ -552,93 +552,107 @@ export default function Home() {
             {/* ── HOW IT WORKS ── */}
             <section
               id="how-it-works"
-              className="no-print dark-section"
+              className="no-print"
+              style={{ background: "var(--bg-base)" }}
             >
               <div style={{ maxWidth: "var(--max-w)", margin: "0 auto", padding: "var(--section-py) var(--container-px)" }}>
-                <div style={{ maxWidth: "560px", marginBottom: "4rem" }}>
-                  <p className="label-caps-dark mb-4">Process</p>
-                  <h2 className="section-headline-dark">
-                    From project parameters<br />to code analysis in 60 seconds
+
+                {/* Section header */}
+                <div style={{ textAlign: "center", marginBottom: "5rem" }}>
+                  <p className="label-caps mb-4">How It Works</p>
+                  <h2 className="section-headline">
+                    From parameters to report<br />in under 60 seconds
                   </h2>
                 </div>
 
-                {/* Three steps — full-width alternating panels */}
-                <div>
-                  {[
-                    {
-                      n: "01",
-                      title: "Enter project parameters",
-                      desc: "Building type, location, gross area, stories, and occupancy. Optional fields — occupant load, lot size, project notes — improve accuracy. The form takes under a minute to fill.",
-                      detail: "Required: Building type · Location · Gross area · Stories",
-                    },
-                    {
-                      n: "02",
-                      title: "We search public code databases",
-                      desc: "The system queries jurisdiction-specific code adoptions, local amendments, and IBC/IFC/ADA/IECC source text in real time. No cached snapshots — every analysis reflects current publicly available information.",
-                      detail: "Sources: IBC · IFC · ADA · IECC · IPC · Local amendments",
-                    },
-                    {
-                      n: "03",
-                      title: "Receive your code analysis report",
-                      desc: "A structured document with tabular requirements, section citations, calculated values, and risk flags. Confidence tiers (Confirmed / Verify / Gap) on every finding. Export as PDF.",
-                      detail: "Output: 12 code domains · Confidence tiers · PDF export",
-                    },
-                  ].map((step, i) => (
-                    <div
-                      key={step.n}
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "80px 1fr",
-                        gap: "0",
-                        borderTop: "1px solid var(--border-dark)",
-                        padding: "2.5rem 0",
-                      }}
-                    >
-                      <div style={{ paddingTop: "2px" }}>
-                        <span
-                          style={{
-                            fontFamily: "'DM Serif Display', Georgia, serif",
-                            fontSize: "2rem",
-                            lineHeight: 1,
-                            letterSpacing: "-0.03em",
-                            color: "rgba(255,255,255,0.12)",
-                          }}
-                        >
-                          {step.n}
-                        </span>
-                      </div>
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem", alignItems: "start" }}>
-                        <div>
-                          <h3
-                            style={{
-                              fontSize: "1rem",
-                              fontWeight: 500,
-                              color: "var(--text-inverse)",
-                              marginBottom: "0.75rem",
-                              letterSpacing: "-0.01em",
-                            }}
-                          >
-                            {step.title}
-                          </h3>
-                          <p style={{ fontSize: "13px", lineHeight: 1.7, color: "rgba(240,234,216,0.45)", fontWeight: 300 }}>
-                            {step.desc}
-                          </p>
-                        </div>
-                        <div style={{ paddingTop: "2px" }}>
-                          <p style={{ fontSize: "10px", letterSpacing: "0.1em", color: "rgba(255,255,255,0.18)", fontFamily: "var(--font-mono), monospace", lineHeight: 1.8 }}>
-                            {step.detail}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                {/* Step 1 — image left, text right */}
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "5rem",
+                    alignItems: "center",
+                    marginBottom: "6rem",
+                    paddingBottom: "6rem",
+                    borderBottom: "1px solid var(--border-light)",
+                  }}
+                >
+                  <div style={{ borderRadius: "4px", overflow: "hidden", boxShadow: "var(--shadow-xl)", border: "1px solid var(--border-light)" }}>
+                    <img src="/step1-form.png" alt="Enter project parameters" style={{ width: "100%", display: "block" }} />
+                  </div>
+                  <div>
+                    <p style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--accent)", marginBottom: "1rem" }}>Step 01</p>
+                    <h3 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "clamp(1.5rem, 2.5vw, 2rem)", lineHeight: 1.1, letterSpacing: "-0.02em", color: "var(--text-primary)", marginBottom: "1.25rem" }}>
+                      Enter your project parameters
+                    </h3>
+                    <p style={{ fontSize: "1rem", lineHeight: 1.75, color: "var(--text-secondary)", marginBottom: "1.5rem" }}>
+                      Building type, location, gross area, stories, and occupancy. Optional fields — occupant load, lot size, project notes — improve accuracy. The form takes under a minute to fill.
+                    </p>
+                    <p style={{ fontSize: "11px", letterSpacing: "0.1em", color: "var(--text-muted)", fontFamily: "var(--font-mono), monospace" }}>
+                      Required: Building type · Location · Gross area · Stories
+                    </p>
+                  </div>
                 </div>
 
-                <div style={{ paddingTop: "3rem", borderTop: "1px solid var(--border-dark)" }}>
-                  <button onClick={scrollToForm} className="btn-primary-light">
-                    Try it now — free
-                  </button>
+                {/* Step 2 — text left, image right */}
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "5rem",
+                    alignItems: "center",
+                    marginBottom: "6rem",
+                    paddingBottom: "6rem",
+                    borderBottom: "1px solid var(--border-light)",
+                  }}
+                >
+                  <div>
+                    <p style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--accent)", marginBottom: "1rem" }}>Step 02</p>
+                    <h3 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "clamp(1.5rem, 2.5vw, 2rem)", lineHeight: 1.1, letterSpacing: "-0.02em", color: "var(--text-primary)", marginBottom: "1.25rem" }}>
+                      We search public code databases
+                    </h3>
+                    <p style={{ fontSize: "1rem", lineHeight: 1.75, color: "var(--text-secondary)", marginBottom: "1.5rem" }}>
+                      The system queries jurisdiction-specific code adoptions, local amendments, and IBC/IFC/ADA/IECC source text in real time. No cached snapshots — every analysis reflects current publicly available information.
+                    </p>
+                    <p style={{ fontSize: "11px", letterSpacing: "0.1em", color: "var(--text-muted)", fontFamily: "var(--font-mono), monospace" }}>
+                      Sources: IBC · IFC · ADA · IECC · IPC · Local amendments
+                    </p>
+                  </div>
+                  <div style={{ borderRadius: "4px", overflow: "hidden", boxShadow: "var(--shadow-xl)", border: "1px solid var(--border-light)" }}>
+                    <img src="/step2-search.png" alt="Code database search" style={{ width: "100%", display: "block" }} />
+                  </div>
                 </div>
+
+                {/* Step 3 — image left, text right */}
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "5rem",
+                    alignItems: "center",
+                    marginBottom: "3rem",
+                  }}
+                >
+                  <div style={{ borderRadius: "4px", overflow: "hidden", boxShadow: "var(--shadow-xl)", border: "1px solid var(--border-light)" }}>
+                    <img src="/step3-report.png" alt="Code analysis report" style={{ width: "100%", display: "block" }} />
+                  </div>
+                  <div>
+                    <p style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--accent)", marginBottom: "1rem" }}>Step 03</p>
+                    <h3 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "clamp(1.5rem, 2.5vw, 2rem)", lineHeight: 1.1, letterSpacing: "-0.02em", color: "var(--text-primary)", marginBottom: "1.25rem" }}>
+                      Receive your code analysis report
+                    </h3>
+                    <p style={{ fontSize: "1rem", lineHeight: 1.75, color: "var(--text-secondary)", marginBottom: "1.5rem" }}>
+                      A structured document with tabular requirements, section citations, calculated values, and risk flags. Confidence tiers (Confirmed / Verify / Gap) on every finding. Export as PDF.
+                    </p>
+                    <p style={{ fontSize: "11px", letterSpacing: "0.1em", color: "var(--text-muted)", fontFamily: "var(--font-mono), monospace", marginBottom: "2rem" }}>
+                      Output: 12 code domains · Confidence tiers · PDF export
+                    </p>
+                    <button onClick={scrollToForm} className="btn-primary">
+                      Try it now — free
+                    </button>
+                  </div>
+                </div>
+
               </div>
             </section>
 

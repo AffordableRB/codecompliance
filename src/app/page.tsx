@@ -300,7 +300,8 @@ export default function Home() {
       <nav
         className="no-print sticky top-0 z-50"
         style={{
-          background: "var(--bg-base)",
+          background: "rgba(235,232,226,0.95)",
+          backdropFilter: "blur(12px)",
           borderBottom: "1px solid var(--border-light)",
         }}
       >
@@ -385,66 +386,70 @@ export default function Home() {
           <>
 
             {/* ── HERO ── */}
-            <section className="no-print hero-grid" style={{ minHeight: "88vh", display: "flex", alignItems: "center" }}>
+            <section className="no-print hero-grid" style={{ minHeight: "88vh", display: "flex", alignItems: "center", position: "relative" }}>
               <div
-                style={{ maxWidth: "var(--max-w)", margin: "0 auto", padding: "5rem var(--container-px)", width: "100%" }}
+                style={{ maxWidth: "var(--max-w)", margin: "0 auto", padding: "5rem var(--container-px)", width: "100%", position: "relative", zIndex: 1 }}
               >
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
                   {/* Left — Copy */}
                   <div>
-                    <p className="label-caps-dark mb-6">Pre-Design Intelligence</p>
                     <h1 className="display-headline mb-6">
-                      Every applicable code.
+                      EVERY APPLICABLE{" "}<span className="display-headline-accent">CODE.</span>
                       <br />
-                      One report.
+                      ONE{" "}<span className="display-headline-accent">REPORT.</span>
                     </h1>
                     <p
                       className="mb-8"
                       style={{
-                        fontSize: "1rem",
-                        lineHeight: 1.7,
-                        color: "rgba(240,234,216,0.55)",
-                        fontWeight: 300,
-                        maxWidth: "460px",
+                        fontSize: "1.0625rem",
+                        lineHeight: 1.65,
+                        color: "var(--text-secondary)",
+                        fontWeight: 400,
+                        maxWidth: "480px",
                       }}
                     >
                       The complete code analysis for your project — including the
                       requirements you didn&apos;t know to search for.
                     </p>
                     <div className="flex items-center gap-5 flex-wrap">
-                      <button onClick={scrollToForm} className="btn-primary-light">
-                        Generate a Brief
+                      <button onClick={scrollToForm} className="btn-primary" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
+                        GET STARTED <span style={{ fontSize: "1rem" }}>→</span>
                       </button>
-                      <span style={{ fontSize: "11px", color: "rgba(240,234,216,0.3)", letterSpacing: "0.04em" }}>
-                        Free — no credit card required
-                      </span>
                     </div>
 
-                    {/* Trust strip */}
+                    {/* Trust strip — Civils.ai style: big numbers, dividers */}
                     <div
-                      className="flex items-center gap-6 mt-10 pt-8"
-                      style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+                      className="flex items-start gap-0 mt-12 pt-0"
+                      style={{ borderTop: "none" }}
                     >
                       {[
-                        { value: "20,000+", label: "Jurisdictions" },
-                        { value: "12", label: "Code Domains" },
-                        { value: "60 sec", label: "Delivery" },
-                      ].map((s) => (
-                        <div key={s.label}>
+                        { value: "20,000", suffix: "+", label: "US JURISDICTIONS" },
+                        { value: "12", suffix: "", label: "CODE DOMAINS" },
+                        { value: "60", suffix: "sec", label: "AVERAGE DELIVERY" },
+                      ].map((s, i) => (
+                        <div
+                          key={s.label}
+                          style={{
+                            paddingRight: i < 2 ? "2.5rem" : "0",
+                            marginRight: i < 2 ? "2.5rem" : "0",
+                            borderRight: i < 2 ? "1px solid var(--border-medium)" : "none",
+                          }}
+                        >
                           <p
                             style={{
-                              fontFamily: "'DM Serif Display', Georgia, serif",
-                              fontSize: "1.5rem",
+                              fontFamily: "var(--font-sans), 'Inter', sans-serif",
+                              fontSize: "clamp(2.5rem, 4vw, 3.5rem)",
                               lineHeight: 1,
-                              letterSpacing: "-0.02em",
-                              color: "var(--text-inverse)",
-                              marginBottom: "3px",
+                              fontWeight: 900,
+                              letterSpacing: "-0.03em",
+                              color: "var(--text-primary)",
+                              marginBottom: "4px",
                             }}
                           >
-                            {s.value}
+                            {s.value}<span style={{ fontSize: "60%", fontWeight: 700 }}>{s.suffix}</span>
                           </p>
-                          <p style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(240,234,216,0.35)" }}>
+                          <p style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", fontWeight: 600 }}>
                             {s.label}
                           </p>
                         </div>
@@ -452,32 +457,34 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* Right — Mock Report Card */}
+                  {/* Right — Mock Report Card (light, floating) */}
                   <div
                     style={{
-                      background: "var(--bg-dark-2)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      boxShadow: "var(--shadow-dark)",
+                      background: "#ffffff",
+                      border: "1px solid var(--border-light)",
+                      boxShadow: "var(--shadow-xl)",
+                      borderRadius: "4px",
+                      overflow: "hidden",
                     }}
                   >
                     {/* Document header */}
                     <div
                       style={{
-                        background: "#0a0a0a",
+                        background: "#1c1a17",
                         borderBottom: "1px solid rgba(255,255,255,0.06)",
-                        padding: "1rem 1.25rem",
+                        padding: "0.875rem 1.25rem",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
                       }}
                     >
                       <div className="flex items-center gap-2">
-                        <div style={{ width: "16px", height: "16px", border: "1px solid rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <span style={{ fontSize: "6px", fontWeight: 700, color: "rgba(255,255,255,0.4)" }}>CB</span>
+                        <div style={{ width: "16px", height: "16px", border: "1px solid rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <span style={{ fontSize: "6px", fontWeight: 700, color: "rgba(255,255,255,0.5)" }}>CB</span>
                         </div>
-                        <span style={{ fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)" }}>Code Analysis Report</span>
+                        <span style={{ fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)" }}>Code Analysis Report</span>
                       </div>
-                      <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.2)" }}>Mixed-Use · Austin, TX</span>
+                      <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.3)" }}>Mixed-Use · Austin, TX</span>
                     </div>
 
                     {/* Report body preview */}
@@ -485,10 +492,10 @@ export default function Home() {
                       {/* Section: Zoning */}
                       <div style={{ marginBottom: "1rem" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "0.5rem" }}>
-                          <span style={{ fontSize: "8px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", background: "rgba(255,255,255,0.05)", padding: "2px 6px" }}>§ Zoning</span>
-                          <span style={{ fontSize: "10px", fontWeight: 500, color: "rgba(255,255,255,0.6)" }}>Zoning &amp; Setbacks</span>
+                          <span style={{ fontSize: "8px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--text-muted)", background: "var(--bg-warm)", padding: "2px 6px", border: "1px solid var(--border-light)" }}>§ Zoning</span>
+                          <span style={{ fontSize: "10px", fontWeight: 600, color: "var(--text-primary)" }}>Zoning &amp; Setbacks</span>
                         </div>
-                        <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", padding: "0.625rem 0.75rem" }}>
+                        <div style={{ background: "var(--bg-warm)", border: "1px solid var(--border-light)", padding: "0.625rem 0.75rem" }}>
                           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem 1.5rem" }}>
                             {[
                               ["Use Classification", "MU-3 Mixed Use"],
@@ -496,9 +503,9 @@ export default function Home() {
                               ["Front Setback", "0 ft (build-to line)"],
                               ["FAR", "3.5 : 1"],
                             ].map(([k, v]) => (
-                              <div key={k} style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid rgba(255,255,255,0.04)", paddingBottom: "3px" }}>
-                                <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.3)" }}>{k}</span>
-                                <span style={{ fontSize: "9px", fontWeight: 500, color: "rgba(255,255,255,0.65)" }}>{v}</span>
+                              <div key={k} style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid var(--border-light)", paddingBottom: "3px" }}>
+                                <span style={{ fontSize: "9px", color: "var(--text-muted)" }}>{k}</span>
+                                <span style={{ fontSize: "9px", fontWeight: 600, color: "var(--text-primary)" }}>{v}</span>
                               </div>
                             ))}
                           </div>
@@ -508,10 +515,10 @@ export default function Home() {
                       {/* Section: Construction Type */}
                       <div style={{ marginBottom: "1rem" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "0.5rem" }}>
-                          <span style={{ fontSize: "8px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.25)", background: "rgba(255,255,255,0.05)", padding: "2px 6px" }}>§ IBC 602</span>
-                          <span style={{ fontSize: "10px", fontWeight: 500, color: "rgba(255,255,255,0.6)" }}>Construction Type</span>
+                          <span style={{ fontSize: "8px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--text-muted)", background: "var(--bg-warm)", padding: "2px 6px", border: "1px solid var(--border-light)" }}>§ IBC 602</span>
+                          <span style={{ fontSize: "10px", fontWeight: 600, color: "var(--text-primary)" }}>Construction Type</span>
                         </div>
-                        <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", padding: "0.625rem 0.75rem" }}>
+                        <div style={{ background: "var(--bg-warm)", border: "1px solid var(--border-light)", padding: "0.625rem 0.75rem" }}>
                           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem 1.5rem" }}>
                             {[
                               ["Allowable Types", "IA, IB, IIA"],
@@ -529,11 +536,11 @@ export default function Home() {
                       </div>
 
                       {/* Confidence badges row */}
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px", paddingTop: "0.75rem", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-                        <span style={{ fontSize: "8px", color: "rgba(255,255,255,0.2)", letterSpacing: "0.1em", textTransform: "uppercase" }}>Confidence:</span>
-                        <span style={{ fontSize: "8px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#4ade80", background: "rgba(74,222,128,0.1)", border: "1px solid rgba(74,222,128,0.2)", padding: "1px 6px" }}>14 Confirmed</span>
-                        <span style={{ fontSize: "8px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#fbbf24", background: "rgba(251,191,36,0.1)", border: "1px solid rgba(251,191,36,0.2)", padding: "1px 6px" }}>3 Verify</span>
-                        <span style={{ fontSize: "8px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#f87171", background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.2)", padding: "1px 6px" }}>1 Gap</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px", paddingTop: "0.75rem", borderTop: "1px solid var(--border-light)" }}>
+                        <span style={{ fontSize: "8px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase" }}>Confidence:</span>
+                        <span style={{ fontSize: "8px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#166534", background: "#dcfce7", border: "1px solid #bbf7d0", padding: "1px 6px" }}>14 Confirmed</span>
+                        <span style={{ fontSize: "8px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#92400e", background: "#fef3c7", border: "1px solid #fde68a", padding: "1px 6px" }}>3 Verify</span>
+                        <span style={{ fontSize: "8px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#991b1b", background: "#fee2e2", border: "1px solid #fecaca", padding: "1px 6px" }}>1 Gap</span>
                       </div>
                     </div>
                   </div>

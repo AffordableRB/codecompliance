@@ -344,6 +344,15 @@ export default function Home() {
                 {item}
               </a>
             ))}
+            <a
+              href="/codes"
+              className="text-xs tracking-wide transition-colors"
+              style={{ color: "#8a8078" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#1c1a17")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#8a8078")}
+            >
+              City Codes
+            </a>
           </div>
 
           {/* Auth */}
@@ -1556,32 +1565,46 @@ export default function Home() {
           borderTop: "1px solid var(--border-light)",
         }}
       >
-        <div className="max-w-7xl mx-auto px-8 py-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div
-              className="w-5 h-5 flex items-center justify-center"
-              style={{ border: "1px solid var(--border-medium)" }}
-            >
-              <span
-                className="text-[7px] font-bold"
-                style={{ color: "var(--text-muted)" }}
-              >
-                CB
-              </span>
+        <div className="max-w-7xl mx-auto px-8 py-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8 pb-8" style={{ borderBottom: "1px solid var(--border-light)" }}>
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-5 h-5 flex items-center justify-center" style={{ border: "1px solid var(--border-medium)" }}>
+                  <span className="text-[7px] font-bold" style={{ color: "var(--text-muted)" }}>CB</span>
+                </div>
+                <span className="text-xs font-medium tracking-widest uppercase" style={{ color: "var(--text-primary)" }}>CodeBrief</span>
+              </div>
+              <p className="text-xs leading-relaxed" style={{ color: "var(--text-muted)", fontWeight: 300 }}>Pre-design code intelligence for architects.</p>
             </div>
-            <span
-              className="text-[11px]"
-              style={{ color: "var(--text-muted)" }}
-            >
-              &copy; {new Date().getFullYear()} CodeBrief
-            </span>
+            <div>
+              <p className="text-[9px] font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--text-muted)" }}>Product</p>
+              <div className="flex flex-col gap-2">
+                {[["/#how-it-works","How it works"],["/#features","Features"],["/#pricing","Pricing"],["/#generate","Generate a Brief"]].map(([href,label]) => (
+                  <a key={label} href={href} className="text-xs transition-colors" style={{ color: "var(--text-secondary)" }} onMouseEnter={(e)=>(e.currentTarget.style.color="var(--text-primary)")} onMouseLeave={(e)=>(e.currentTarget.style.color="var(--text-secondary)")}>{label}</a>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="text-[9px] font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--text-muted)" }}>Resources</p>
+              <div className="flex flex-col gap-2">
+                {[["/codes","City Code Directory"],["/#faq","FAQ"],["/blog","Blog"]]  .map(([href,label]) => (
+                  <a key={label} href={href} className="text-xs transition-colors" style={{ color: "var(--text-secondary)" }} onMouseEnter={(e)=>(e.currentTarget.style.color="var(--text-primary)")} onMouseLeave={(e)=>(e.currentTarget.style.color="var(--text-secondary)")}>{label}</a>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="text-[9px] font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--text-muted)" }}>Company</p>
+              <div className="flex flex-col gap-2">
+                {[["/privacy","Privacy Policy"],["/terms","Terms of Service"]]  .map(([href,label]) => (
+                  <a key={label} href={href} className="text-xs transition-colors" style={{ color: "var(--text-secondary)" }} onMouseEnter={(e)=>(e.currentTarget.style.color="var(--text-primary)")} onMouseLeave={(e)=>(e.currentTarget.style.color="var(--text-secondary)")}>{label}</a>
+                ))}
+              </div>
+            </div>
           </div>
-          <span
-            className="text-[11px]"
-            style={{ color: "var(--border-medium)" }}
-          >
-            Pre-design code intelligence for architects
-          </span>
+          <div className="flex items-center justify-between">
+            <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>&copy; {new Date().getFullYear()} CodeBrief. All rights reserved.</span>
+            <span className="text-[11px]" style={{ color: "var(--border-medium)" }}>Pre-design code intelligence for architects</span>
+          </div>
         </div>
       </footer>
     </div>

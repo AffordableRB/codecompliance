@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase-browser";
 import { marked } from "marked";
 import { REPORT_TYPES } from "@/lib/report-types";
 import { getFieldsForReports } from "@/lib/report-fields";
+import { parseConfidenceTags, extractSources, TIER_META, type ParsedSource } from "@/lib/confidence";
 
 /* ═══════════════════════════════════════════
    TYPES
@@ -194,6 +195,9 @@ export default function AppWorkspace() {
     generatedAt: string;
   } | null>(null);
   const [showMethodology, setShowMethodology] = useState(false);
+  const [reportTab, setReportTab] = useState<"report" | "sources">("report");
+  const [parsedSources, setParsedSources] = useState<ParsedSource[]>([]);
+  const [tierCounts, setTierCounts] = useState<{ CONFIRMED: number; VERIFY: number; GAP: number }>({ CONFIRMED: 0, VERIFY: 0, GAP: 0 });
 
   const briefRef = useRef<HTMLDivElement>(null);
   const logInterval = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -241,14 +245,25 @@ export default function AppWorkspace() {
     setExtraFields({});
     setReportMetadata(null);
     setShowMethodology(false);
+    setReportTab("report");
+    setParsedSources([]);
+    setTierCounts({ CONFIRMED: 0, VERIFY: 0, GAP: 0 });
   }
 
   function handleSelectBrief(brief: SavedBrief) {
     setActiveBriefId(brief.id);
-    setCompletedBrief(brief.brief_content);
+    const { clean: cleanBrief, tags } = parseConfidenceTags(brief.brief_content);
+    const sources = extractSources(brief.brief_content);
+    const counts = { CONFIRMED: 0, VERIFY: 0, GAP: 0 };
+    tags.forEach((t) => counts[t.tier]++);
+    setParsedSources(sources);
+    setTierCounts(counts);
+    setReportTab("report");
+    setCompletedBrief(cleanBrief);
     setStreamText("");
     setStep(5);
     setError("");
+    setReportMetadata(null);
     if (brief.input_json) setForm(brief.input_json);
     else setForm({ ...initialForm, buildingType: brief.building_type, location: brief.location, squareFootage: brief.square_footage, stories: brief.stories, occupancyType: brief.occupancy_type || "" });
   }
@@ -333,7 +348,16 @@ export default function AppWorkspace() {
         accumulated = accumulated.slice(delimIdx + DELIMITER.length);
       }
 
-      setCompletedBrief(accumulated);
+      // Parse confidence tags from the completed brief
+      const { clean: cleanBrief, tags } = parseConfidenceTags(accumulated);
+      const sources = extractSources(accumulated);
+      const counts = { CONFIRMED: 0, VERIFY: 0, GAP: 0 };
+      tags.forEach((t) => counts[t.tier]++);
+      setParsedSources(sources);
+      setTierCounts(counts);
+      setReportTab("report");
+
+      setCompletedBrief(cleanBrief);
       setStreamText("");
       setStep(5);
 
@@ -901,15 +925,50 @@ export default function AppWorkspace() {
           {/* ═══ STEP 5: RESULTS ═══ */}
           {step === 5 && completedBrief && (
             <div ref={briefRef} className="max-w-4xl mx-auto px-6 py-8">
-              <div className="mb-4 flex items-center justify-between">
-                <span className="text-[9px] font-semibold tracking-widest uppercase" style={{ color: "var(--accent)" }}>
-                  {currentReportName}
-                </span>
-                <span className="text-[9px]" style={{ color: "var(--text-muted)" }}>
-                  Generated {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
-                </span>
+              {/* Header row with tabs and confidence summary */}
+              <div className="mb-4 flex items-center justify-between no-print">
+                <div className="flex items-center gap-1">
+                  {(["report", "sources"] as const).map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setReportTab(tab)}
+                      className="px-4 py-1.5 text-[10px] font-semibold tracking-widest uppercase transition-colors"
+                      style={{
+                        background: reportTab === tab ? "var(--bg-dark)" : "transparent",
+                        color: reportTab === tab ? "#f5f2ee" : "var(--text-muted)",
+                        border: "1px solid",
+                        borderColor: reportTab === tab ? "var(--bg-dark)" : "var(--border-light)",
+                        marginRight: "-1px",
+                      }}
+                    >
+                      {tab === "report" ? "Report" : `Sources${parsedSources.length > 0 ? ` (${parsedSources.length})` : ""}`}
+                    </button>
+                  ))}
+                </div>
+                {/* Confidence tier summary pills */}
+                <div className="flex items-center gap-2">
+                  {(Object.entries(tierCounts) as [keyof typeof tierCounts, number][]).map(([tier, count]) => (
+                    count > 0 && (
+                      <div
+                        key={tier}
+                        className="flex items-center gap-1 px-2 py-1 text-[9px] font-semibold"
+                        style={{
+                          background: TIER_META[tier].bg,
+                          color: TIER_META[tier].color,
+                          border: `1px solid ${TIER_META[tier].border}`,
+                        }}
+                        title={TIER_META[tier].description}
+                      >
+                        <span>{count}</span>
+                        <span className="tracking-wide uppercase">{TIER_META[tier].label}</span>
+                      </div>
+                    )
+                  ))}
+                </div>
               </div>
 
+              {/* ── REPORT TAB ── */}
+              {reportTab === "report" && (
               <div className="report-document" style={{ background: "#fff", border: "1px solid var(--border-medium)" }}>
                 <ReportHeader form={form} reportName={currentReportName} />
                 <div className="px-8 py-6">
@@ -932,6 +991,83 @@ export default function AppWorkspace() {
                   <span className="text-[9px]" style={{ color: "rgba(245,242,238,0.25)" }}>codebrief.ai</span>
                 </div>
               </div>
+              )}
+
+              {/* ── SOURCES TAB ── */}
+              {reportTab === "sources" && (
+              <div style={{ background: "#fff", border: "1px solid var(--border-medium)" }}>
+                <div className="px-8 py-5" style={{ background: "var(--bg-dark)" }}>
+                  <p className="text-[9px] font-semibold tracking-widest uppercase mb-1" style={{ color: "var(--accent-light)" }}>Sources &amp; Confidence</p>
+                  <h2 className="text-base font-light" style={{ color: "#f5f2ee" }}>{currentReportName} — Source References</h2>
+                  <p className="text-xs mt-1" style={{ color: "rgba(245,242,238,0.4)" }}>{form.buildingType} · {form.location}</p>
+                </div>
+
+                {/* Tier legend */}
+                <div className="px-8 py-4 grid grid-cols-3 gap-3" style={{ borderBottom: "1px solid var(--border-light)", background: "var(--bg-warm)" }}>
+                  {(Object.entries(TIER_META) as [keyof typeof TIER_META, typeof TIER_META[keyof typeof TIER_META]][]).map(([tier, meta]) => (
+                    <div key={tier} className="flex items-start gap-2">
+                      <div className="mt-0.5 px-1.5 py-0.5 text-[8px] font-bold tracking-wide flex-shrink-0" style={{ background: meta.bg, color: meta.color, border: `1px solid ${meta.border}` }}>
+                        {meta.label.toUpperCase()}
+                      </div>
+                      <p className="text-[10px] leading-snug" style={{ color: "var(--text-muted)" }}>{meta.description}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Sources list */}
+                <div className="px-8 py-6">
+                  {parsedSources.length === 0 ? (
+                    <div className="text-center py-8">
+                      <p className="text-sm" style={{ color: "var(--text-muted)" }}>No structured sources were extracted from this report.</p>
+                      <p className="text-xs mt-2" style={{ color: "var(--text-muted)", fontWeight: 300 }}>Sources are extracted from the ## Sources section of the report. Not all report types include a structured sources section.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-0">
+                      {parsedSources.map((src, i) => (
+                        <div key={i} className="flex items-start gap-4 py-3" style={{ borderBottom: "1px solid var(--border-light)" }}>
+                          <div className="flex-shrink-0 mt-0.5">
+                            <span className="px-1.5 py-0.5 text-[8px] font-bold tracking-wide" style={{ background: TIER_META[src.tier].bg, color: TIER_META[src.tier].color, border: `1px solid ${TIER_META[src.tier].border}` }}>
+                              {TIER_META[src.tier].label.toUpperCase()}
+                            </span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium" style={{ color: "var(--text-primary)" }}>{src.label}</p>
+                            {src.section && <p className="text-[10px] mt-0.5 font-mono" style={{ color: "var(--accent)" }}>{src.section}</p>}
+                            {src.url && (
+                              <a href={src.url} target="_blank" rel="noopener noreferrer" className="text-[10px] mt-0.5 block truncate hover:underline" style={{ color: "var(--text-muted)" }}>
+                                {src.url}
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Also show search sources from metadata if available */}
+                {reportMetadata && reportMetadata.searchLog.length > 0 && (
+                  <div className="px-8 pb-6">
+                    <p className="text-[9px] font-semibold tracking-widest uppercase mb-3 pt-4" style={{ color: "var(--accent)", borderTop: "1px solid var(--border-light)" }}>Research Sources</p>
+                    <div className="space-y-2">
+                      {reportMetadata.searchLog.filter(e => e.status === "success").map((entry, i) => (
+                        <div key={i} className="flex items-start gap-2.5">
+                          <span className="text-xs flex-shrink-0 mt-0.5" style={{ color: "#16a34a" }}>✓</span>
+                          <div>
+                            <p className="text-xs font-medium" style={{ color: "var(--text-primary)" }}>{entry.query}</p>
+                            <p className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>{entry.summary}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="px-8 py-3" style={{ background: "var(--bg-dark)" }}>
+                  <p className="text-[9px]" style={{ color: "rgba(245,242,238,0.3)" }}>All sources are publicly available code documents. Verify with the Authority Having Jurisdiction before relying on any requirement for design or permitting.</p>
+                </div>
+              </div>
+              )}
 
               {/* Methodology Panel */}
               {reportMetadata && (

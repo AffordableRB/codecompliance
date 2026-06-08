@@ -82,6 +82,14 @@ Numbered list of building-code-specific risks. Do not duplicate zoning or site r
 ### Sources
 List all sources with URLs where available.
 
+CONFIDENCE TIER TAGGING — REQUIRED:
+After every specific code requirement, value, or citation, append one of these inline tags:
+- [CONFIRMED:source] — directly sourced from a specific code section or official URL found in search results (e.g. [CONFIRMED:IBC 2021 §903.2.1.1])
+- [VERIFY:reason] — derived, calculated, or inferred — methodology correct but confirm with AHJ (e.g. [VERIFY:local amendment may differ])
+- [GAP:reason] — data not found or conflicting (e.g. [GAP:local IBC adoption year not found])
+
+Tag EVERY data cell in every table. Do not leave any requirement untagged.
+
 REMEMBER: This is BUILDING CODE only. Lead with LOCAL amendments. Show calculations. Mark uncertain items with ⚠ VERIFY WITH AHJ.`,
     userPromptSuffix: "Generate a Code Analysis Report focused on building code (IBC/IFC/IPC) only. Do not include zoning analysis. Include brief energy and accessibility summaries with cross-references to the separate detailed reports. Show all calculations.",
   },
@@ -148,6 +156,9 @@ Clear statement: Is this project feasible on this site under current zoning? Wha
 
 ### Sources
 All sources with URLs.
+
+CONFIDENCE TIER TAGGING — REQUIRED:
+After every specific requirement, value, or citation, append one of: [CONFIRMED:source], [VERIFY:reason], or [GAP:reason]. Tag EVERY data cell in every table.
 
 Mark uncertain items with ⚠ VERIFY WITH AHJ.`,
     userPromptSuffix: "Generate a Zoning Feasibility Summary. Determine whether this project can be built on this site under current zoning. Show all calculations. Identify any variances or conditional uses required.",
@@ -223,6 +234,9 @@ Which compliance pathway is recommended for this project and why.
 ### Sources
 All sources with URLs.
 
+CONFIDENCE TIER TAGGING — REQUIRED:
+After every specific requirement, value, or citation, append one of: [CONFIRMED:source], [VERIFY:reason], or [GAP:reason]. Tag EVERY data cell in every table.
+
 Mark uncertain items with ⚠ VERIFY WITH AHJ.`,
     userPromptSuffix: "Generate an Energy Compliance Targets report. Identify the exact energy code, climate zone, and all prescriptive requirements. Include specific R-values, U-factors, and efficiency targets.",
   },
@@ -287,7 +301,10 @@ Factors that could significantly impact cost for this specific project type and 
 This is an order-of-magnitude cost context based on published data and market conditions. It is not a construction cost estimate. Obtain a detailed estimate from a qualified cost estimator during design development.
 
 ### Sources
-All sources with URLs.`,
+All sources with URLs.
+
+CONFIDENCE TIER TAGGING — REQUIRED:
+After every specific cost figure, fee, or citation, append one of: [CONFIRMED:source], [VERIFY:reason], or [GAP:reason]. Tag EVERY data cell in every table.`,
     userPromptSuffix: "Generate a Preliminary Cost Context report. Provide construction cost per SF ranges for this building type in this market. Include permit fees, impact fees, and soft cost percentages. Be clear this is preliminary framing, not an estimate.",
   },
 
@@ -360,7 +377,10 @@ OUTPUT FORMAT:
 Numbered list of specific investigations, studies, and agency meetings recommended before proceeding with design.
 
 ### Sources
-All sources with URLs.`,
+All sources with URLs.
+
+CONFIDENCE TIER TAGGING — REQUIRED:
+After every specific requirement, value, or citation, append one of: [CONFIRMED:source], [VERIFY:reason], or [GAP:reason]. Tag EVERY data cell in every table.`,
     userPromptSuffix: "Generate a comprehensive Risk & Due Diligence Report. Surface every hidden requirement, constraint, and risk for this project. Rate risks by severity. Include recommended due diligence actions.",
   },
 
@@ -432,6 +452,9 @@ Any additional site development requirements: landscaping minimums, screening, f
 ### Sources
 All sources with URLs.
 
+CONFIDENCE TIER TAGGING — REQUIRED:
+After every specific requirement, value, or citation, append one of: [CONFIRMED:source], [VERIFY:reason], or [GAP:reason]. Tag EVERY data cell in every table.
+
 Mark uncertain items with ⚠ VERIFY WITH AHJ.`,
     userPromptSuffix: "Generate a Site Constraints Summary. Calculate the buildable envelope. Show all math for setbacks, buildable area, and impervious cover. Identify utility providers and any capacity concerns.",
   },
@@ -494,7 +517,10 @@ Brief analysis of Fitwel certification pathway if relevant.
 Clear recommendation for this project type and budget level.
 
 ### Sources
-All sources with URLs.`,
+All sources with URLs.
+
+CONFIDENCE TIER TAGGING — REQUIRED:
+After every specific requirement, value, or citation, append one of: [CONFIRMED:source], [VERIFY:reason], or [GAP:reason]. Tag EVERY data cell in every table.`,
     userPromptSuffix: "Generate a Sustainability Goals Scoping report. Identify mandatory green building requirements for this jurisdiction. Analyze LEED, WELL, and Fitwel pathways for this building type. Recommend a sustainability strategy.",
   },
 
@@ -563,6 +589,9 @@ From application to permit issuance, with best case and typical case.
 
 ### Sources
 All sources with URLs.
+
+CONFIDENCE TIER TAGGING — REQUIRED:
+After every specific timeline, requirement, or citation, append one of: [CONFIRMED:source], [VERIFY:reason], or [GAP:reason]. Tag EVERY data cell in every table.
 
 Mark uncertain timelines with ⚠ VERIFY WITH JURISDICTION.`,
     userPromptSuffix: "Generate a Permitting Pathway Memo. Map out every required approval in sequence with estimated timelines. Identify which can run in parallel. Flag potential delays. Include agency contacts where available.",
@@ -642,6 +671,9 @@ Specific items frequently missed for this building type.
 ### Sources
 All sources with URLs.
 
+CONFIDENCE TIER TAGGING — REQUIRED:
+After every specific dimension, requirement, or citation, append one of: [CONFIRMED:source], [VERIFY:reason], or [GAP:reason]. Tag EVERY data cell in every table.
+
 Mark uncertain items with ⚠ VERIFY WITH AHJ.`,
     userPromptSuffix: "Generate a comprehensive ADA/Accessibility Review. Cover federal, state, and local accessibility requirements. Include specific dimensions and calculations. Identify which standard is most stringent for each requirement.",
   },
@@ -701,7 +733,10 @@ OUTPUT FORMAT:
 (General ranges by discipline for this project size)
 
 ### Sources
-Industry standards and code references.`,
+Industry standards and code references.
+
+CONFIDENCE TIER TAGGING — REQUIRED:
+After every specific requirement or citation, append one of: [CONFIRMED:source], [VERIFY:reason], or [GAP:reason]. Tag EVERY data cell in every table.`,
     userPromptSuffix: "Generate a Consultant Team Scoping report. Identify every consultant discipline needed for this specific project. Distinguish required from recommended. Include when to engage each and why they're needed.",
   },
 
@@ -765,6 +800,9 @@ Items that, if delayed, will delay the entire project.
 
 ### Sources
 Industry standards and jurisdiction-specific data.
+
+CONFIDENCE TIER TAGGING — REQUIRED:
+After every specific timeline, requirement, or citation, append one of: [CONFIRMED:source], [VERIFY:reason], or [GAP:reason]. Tag EVERY data cell in every table.
 
 Mark uncertain timelines with ⚠ VERIFY WITH JURISDICTION.`,
     userPromptSuffix: "Generate a Preliminary Project Schedule. Provide realistic phase durations for this building type and jurisdiction. Account for permitting timelines. Flag schedule risks. Show best/typical/worst case total timelines.",
@@ -841,6 +879,9 @@ Specific suggestions to improve program-to-site fit: reduce program, increase ef
 
 ### Sources
 Industry efficiency benchmarks, zoning references.
+
+CONFIDENCE TIER TAGGING — REQUIRED:
+After every specific value, calculation, or citation, append one of: [CONFIRMED:source], [VERIFY:reason], or [GAP:reason]. Tag EVERY data cell in every table.
 
 Mark assumptions with ⚠ VERIFY.`,
     userPromptSuffix: "Generate a Program Validation & Building Area Analysis. Calculate whether the owner's program fits within the site's zoning envelope. Show all area math, efficiency factors, and floor plate analysis. Identify gaps and recommend optimizations.",

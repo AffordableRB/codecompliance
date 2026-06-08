@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 
 /* ═══════════════════════════════════════════
    TYPES
@@ -15,9 +16,9 @@ export interface CityCodeData {
   ifcVersion: string;
   ieccVersion: string;
   adaAdopted: boolean;
-  zoningType: string; // e.g. "Euclidean", "Form-Based", "Hybrid"
-  permitTimeline: string; // e.g. "4–6 weeks"
-  lastUpdated: string; // ISO date string
+  zoningType: string;
+  permitTimeline: string;
+  lastUpdated: string;
 }
 
 /* ═══════════════════════════════════════════
@@ -59,13 +60,23 @@ const PLACEHOLDER_CITIES: CityCodeData[] = [
   { slug: "albuquerque-nm", city: "Albuquerque", state: "New Mexico", stateCode: "NM", ibcVersion: "2018", ifcVersion: "2018", ieccVersion: "2018", adaAdopted: true, zoningType: "Euclidean", permitTimeline: "3–6 weeks", lastUpdated: "2025-01-01" },
 ];
 
-// Group cities by state
 function groupByState(cities: CityCodeData[]): Record<string, CityCodeData[]> {
   return cities.reduce((acc, city) => {
     if (!acc[city.state]) acc[city.state] = [];
     acc[city.state].push(city);
     return acc;
   }, {} as Record<string, CityCodeData[]>);
+}
+
+/* ═══════════════════════════════════════════
+   IBC VERSION BADGE COLOR
+   ═══════════════════════════════════════════ */
+function ibcColor(version: string): string {
+  if (version === "2022") return "#1c1a17";
+  if (version === "2021") return "#3a3530";
+  if (version === "2020") return "#5a5450";
+  if (version === "2018") return "#7a7470";
+  return "#9a9490";
 }
 
 /* ═══════════════════════════════════════════
@@ -105,228 +116,351 @@ export default function CodesDirectory() {
 
   const grouped = useMemo(() => groupByState(filtered), [filtered]);
   const sortedStates = Object.keys(grouped).sort();
+  const isFiltering = search || stateFilter !== "All States" || ibcFilter !== "All Versions";
 
   return (
-    <div
-      className="flex flex-col min-h-screen"
-      style={{ background: "var(--bg-base)", color: "var(--text-primary)" }}
-    >
-      {/* ── Nav ── */}
-      <nav
-        className="sticky top-0 z-50"
-        style={{ background: "#f7f3ec", borderBottom: "1px solid #ddd5c8" }}
-      >
-        <div className="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
-          <a href="/" className="flex items-center gap-3">
-            <div className="w-7 h-7 flex items-center justify-center" style={{ border: "1px solid #1c1a17" }}>
-              <span className="text-[10px] font-bold tracking-tight" style={{ color: "#1c1a17" }}>CB</span>
+    <div style={{ background: "#f7f3ec", color: "#1c1a17", minHeight: "100vh", fontFamily: "var(--font-geist-sans), system-ui, sans-serif" }}>
+
+      {/* ── Navigation ── */}
+      <nav style={{ background: "#f7f3ec", borderBottom: "1px solid #ddd5c8", position: "sticky", top: 0, zIndex: 50 }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 40px", height: "60px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <a href="/" style={{ display: "flex", alignItems: "center", gap: "12px", textDecoration: "none" }}>
+            <div style={{ width: "28px", height: "28px", border: "1px solid #1c1a17", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "0.05em", color: "#1c1a17" }}>CB</span>
             </div>
-            <span className="text-sm font-medium tracking-widest uppercase" style={{ color: "#1c1a17", letterSpacing: "0.12em" }}>CodeBrief</span>
+            <span style={{ fontSize: "11px", fontWeight: 500, letterSpacing: "0.14em", textTransform: "uppercase", color: "#1c1a17" }}>CodeBrief</span>
           </a>
-          <div className="hidden md:flex items-center gap-8">
-            {[["/#how-it-works","How it works"],["/#features","Features"],["/#pricing","Pricing"],["/#faq","FAQ"]].map(([href,label]) => (
-              <a key={label} href={href} className="text-xs tracking-wide transition-colors" style={{ color: "#8a8078" }} onMouseEnter={(e)=>(e.currentTarget.style.color="#1c1a17")} onMouseLeave={(e)=>(e.currentTarget.style.color="#8a8078")}>{label}</a>
+          <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
+            {[["/#how-it-works","How it works"],["/#features","Features"],["/codes","City Codes"],["/pricing","Pricing"]].map(([href,label]) => (
+              <a key={label} href={href} style={{
+                fontSize: "11px",
+                letterSpacing: "0.04em",
+                color: href === "/codes" ? "#1c1a17" : "#8a8078",
+                textDecoration: href === "/codes" ? "none" : "none",
+                borderBottom: href === "/codes" ? "1px solid #1c1a17" : "none",
+                paddingBottom: href === "/codes" ? "1px" : "0",
+              }}>{label}</a>
             ))}
-            <a href="/codes" className="text-xs tracking-wide" style={{ color: "#1c1a17", borderBottom: "1px solid #1c1a17", paddingBottom: "1px" }}>City Codes</a>
           </div>
-          <div className="flex items-center gap-4">
-            <a href="/login" className="text-xs tracking-wide transition-colors" style={{ color: "#8a8078" }} onMouseEnter={(e)=>(e.currentTarget.style.color="#1c1a17")} onMouseLeave={(e)=>(e.currentTarget.style.color="#8a8078")}>Sign In</a>
-            <a href="/#generate" className="px-4 py-2 text-xs font-medium tracking-widest uppercase" style={{ background: "#1c1a17", color: "#f7f3ec" }}>Get Started</a>
+          <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+            <a href="/login" style={{ fontSize: "11px", letterSpacing: "0.04em", color: "#8a8078", textDecoration: "none" }}>Sign In</a>
+            <a href="/#generate" style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#f7f3ec", background: "#1c1a17", padding: "8px 16px", textDecoration: "none" }}>Get Started</a>
           </div>
         </div>
       </nav>
 
-      <main className="flex-1">
-        {/* ── Page Header ── */}
-        <section style={{ background: "#111111" }}>
-          <div className="max-w-7xl mx-auto px-8 py-16">
-            <p className="section-label mb-4" style={{ color: "rgba(245,242,238,0.4)" }}>Code Directory</p>
-            <h1
-              className="text-4xl md:text-5xl font-light tracking-tight mb-4"
-              style={{ color: "#f5f2ee", letterSpacing: "-0.02em", fontFamily: "var(--font-serif-display), Georgia, serif", fontWeight: 400 }}
+      {/* ── Search Hero ── */}
+      <section style={{ padding: "80px 40px 64px", textAlign: "center", borderBottom: "1px solid #ddd5c8" }}>
+        <div style={{ maxWidth: "720px", margin: "0 auto" }}>
+          <p style={{ fontSize: "10px", letterSpacing: "0.18em", textTransform: "uppercase", color: "#8a8078", marginBottom: "20px" }}>
+            Code Directory
+          </p>
+          <h1 style={{
+            fontFamily: "var(--font-serif-display), 'DM Serif Display', Georgia, serif",
+            fontSize: "clamp(32px, 5vw, 52px)",
+            fontWeight: 400,
+            letterSpacing: "-0.02em",
+            lineHeight: 1.1,
+            color: "#1c1a17",
+            marginBottom: "16px",
+          }}>
+            Building code requirements<br />for every US jurisdiction.
+          </h1>
+          <p style={{ fontSize: "15px", color: "#6b6258", lineHeight: 1.6, marginBottom: "40px", fontWeight: 300 }}>
+            IBC adoption versions, permitting timelines, and zoning frameworks.<br />
+            Free reference data for architects and developers.
+          </p>
+
+          {/* Search bar — the visual center */}
+          <div style={{ position: "relative", maxWidth: "560px", margin: "0 auto 16px" }}>
+            <svg
+              style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", width: "16px", height: "16px", color: "#8a8078" }}
+              fill="none" stroke="currentColor" viewBox="0 0 24 24"
             >
-              City Code Directory
-            </h1>
-            <p className="text-base max-w-2xl" style={{ color: "rgba(245,242,238,0.5)", fontWeight: 300 }}>
-              IBC adoption versions, permitting timelines, and zoning frameworks for major US cities.
-              Free reference data for architects and developers.
-            </p>
-            <div className="flex flex-wrap gap-8 mt-8 pt-6" style={{ borderTop: "1px solid rgba(245,242,238,0.08)" }}>
-              {[
-                { value: `${cities.length}+`, label: "Cities" },
-                { value: "50", label: "States" },
-                { value: "Free", label: "Always" },
-              ].map((s) => (
-                <div key={s.label}>
-                  <p className="text-xl font-light tracking-tight" style={{ color: "#f5f2ee", letterSpacing: "-0.02em" }}>{s.value}</p>
-                  <p className="text-[10px] tracking-widest uppercase mt-0.5" style={{ color: "rgba(245,242,238,0.3)" }}>{s.label}</p>
-                </div>
-              ))}
-            </div>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search city or state..."
+              style={{
+                width: "100%",
+                paddingLeft: "44px",
+                paddingRight: "16px",
+                paddingTop: "14px",
+                paddingBottom: "14px",
+                fontSize: "14px",
+                background: "#ffffff",
+                border: "1px solid #c8bfb4",
+                color: "#1c1a17",
+                outline: "none",
+                boxSizing: "border-box",
+                letterSpacing: "0.01em",
+              }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = "#1c1a17"; e.currentTarget.style.boxShadow = "0 0 0 2px rgba(28,26,23,0.06)"; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = "#c8bfb4"; e.currentTarget.style.boxShadow = "none"; }}
+            />
           </div>
-        </section>
 
-        {/* ── Search & Filters ── */}
-        <section style={{ background: "var(--bg-warm)", borderBottom: "1px solid var(--border-light)" }}>
-          <div className="max-w-7xl mx-auto px-8 py-6">
-            <div className="flex flex-col md:flex-row gap-4">
-              {/* Search */}
-              <div className="flex-1 relative">
-                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--text-muted)" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search city or state..."
-                  className="w-full pl-9 pr-4 py-2.5 text-sm"
-                  style={{
-                    background: "#ffffff",
-                    border: "1px solid var(--border-medium)",
-                    color: "var(--text-primary)",
-                    outline: "none",
-                  }}
-                  onFocus={(e) => (e.currentTarget.style.borderColor = "var(--text-primary)")}
-                  onBlur={(e) => (e.currentTarget.style.borderColor = "var(--border-medium)")}
-                />
-              </div>
-              {/* State filter */}
-              <select
-                value={stateFilter}
-                onChange={(e) => setStateFilter(e.target.value)}
-                className="px-3 py-2.5 text-sm"
-                style={{ background: "#ffffff", border: "1px solid var(--border-medium)", color: "var(--text-primary)", minWidth: "160px" }}
+          {/* Inline filters */}
+          <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
+            <select
+              value={stateFilter}
+              onChange={(e) => setStateFilter(e.target.value)}
+              style={{
+                padding: "8px 28px 8px 12px",
+                fontSize: "11px",
+                letterSpacing: "0.04em",
+                background: "#f0ead e",
+                border: "1px solid #c8bfb4",
+                color: "#1c1a17",
+                outline: "none",
+                cursor: "pointer",
+                appearance: "none",
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238a8078' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")`,
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "right 10px center",
+              }}
+            >
+              {states.map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
+            <select
+              value={ibcFilter}
+              onChange={(e) => setIbcFilter(e.target.value)}
+              style={{
+                padding: "8px 28px 8px 12px",
+                fontSize: "11px",
+                letterSpacing: "0.04em",
+                background: "#f0eade",
+                border: "1px solid #c8bfb4",
+                color: "#1c1a17",
+                outline: "none",
+                cursor: "pointer",
+                appearance: "none",
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238a8078' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")`,
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "right 10px center",
+              }}
+            >
+              {ibcVersions.map((v) => <option key={v} value={v}>IBC {v}</option>)}
+            </select>
+            {isFiltering && (
+              <button
+                onClick={() => { setSearch(""); setStateFilter("All States"); setIbcFilter("All Versions"); }}
+                style={{ padding: "8px 14px", fontSize: "11px", letterSpacing: "0.04em", background: "transparent", border: "1px solid #c8bfb4", color: "#8a8078", cursor: "pointer" }}
               >
-                {states.map((s) => <option key={s} value={s}>{s}</option>)}
-              </select>
-              {/* IBC filter */}
-              <select
-                value={ibcFilter}
-                onChange={(e) => setIbcFilter(e.target.value)}
-                className="px-3 py-2.5 text-sm"
-                style={{ background: "#ffffff", border: "1px solid var(--border-medium)", color: "var(--text-primary)", minWidth: "160px" }}
-              >
-                {ibcVersions.map((v) => <option key={v} value={v}>IBC {v}</option>)}
-              </select>
-            </div>
-            {/* Result count */}
-            <p className="text-[10px] tracking-wide mt-3" style={{ color: "var(--text-muted)" }}>
-              Showing {filtered.length} of {cities.length} cities
-              {search && ` matching "${search}"`}
-            </p>
-          </div>
-        </section>
-
-        {/* ── City Grid ── */}
-        <section style={{ background: "var(--bg-base)" }}>
-          <div className="max-w-7xl mx-auto px-8 py-12">
-            {filtered.length === 0 ? (
-              <div className="py-20 text-center">
-                <p className="text-sm" style={{ color: "var(--text-muted)" }}>No cities match your search.</p>
-                <button
-                  onClick={() => { setSearch(""); setStateFilter("All States"); setIbcFilter("All Versions"); }}
-                  className="mt-4 text-xs underline"
-                  style={{ color: "var(--accent)" }}
-                >
-                  Clear filters
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-12">
-                {sortedStates.map((state) => (
-                  <div key={state}>
-                    <div className="flex items-center gap-4 mb-4">
-                      <p className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>{state}</p>
-                      <div className="flex-1 h-px" style={{ background: "var(--border-light)" }} />
-                      <p className="text-[10px]" style={{ color: "var(--border-medium)" }}>{grouped[state].length} {grouped[state].length === 1 ? "city" : "cities"}</p>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0">
-                      {grouped[state].map((city, i) => (
-                        <a
-                          key={city.slug}
-                          href={`/codes/${city.slug}`}
-                          className="block p-6 transition-colors group"
-                          style={{
-                            border: "1px solid var(--border-light)",
-                            marginLeft: i % 3 !== 0 ? "-1px" : "0",
-                            marginTop: i >= 3 ? "-1px" : "0",
-                            background: "var(--bg-base)",
-                            textDecoration: "none",
-                          }}
-                          onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-warm)")}
-                          onMouseLeave={(e) => (e.currentTarget.style.background = "var(--bg-base)")}
-                        >
-                          <div className="flex items-start justify-between mb-3">
-                            <div>
-                              <h3 className="text-sm font-medium mb-0.5 group-hover:underline" style={{ color: "var(--text-primary)" }}>
-                                {city.city}
-                              </h3>
-                              <p className="text-[10px] tracking-wide" style={{ color: "var(--text-muted)" }}>{city.stateCode}</p>
-                            </div>
-                            <svg className="w-3.5 h-3.5 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "var(--text-muted)" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
-                            </svg>
-                          </div>
-                          <div className="grid grid-cols-3 gap-2">
-                            <CodeBadge label="IBC" value={city.ibcVersion} />
-                            <CodeBadge label="IECC" value={city.ieccVersion} />
-                            <CodeBadge label="Permit" value={city.permitTimeline} small />
-                          </div>
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
+                Clear
+              </button>
             )}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ── CTA ── */}
-        <section style={{ background: "#111111", borderTop: "1px solid #222" }}>
-          <div className="max-w-7xl mx-auto px-8 py-16 text-center">
-            <p className="section-label mb-4" style={{ color: "rgba(245,242,238,0.4)" }}>For Architects</p>
-            <h2 className="text-3xl font-light tracking-tight mb-4" style={{ color: "#f5f2ee", letterSpacing: "-0.02em" }}>
-              Need a full code analysis for your project?
-            </h2>
-            <p className="text-sm mb-8 max-w-md mx-auto" style={{ color: "rgba(245,242,238,0.4)", fontWeight: 300 }}>
-              City pages show reference data. CodeBrief generates a complete analysis — zoning, IBC, ADA, IECC, egress, and more — in 60 seconds.
-            </p>
-            <a
-              href="/#generate"
-              className="inline-block px-8 py-3.5 text-xs font-medium tracking-widest uppercase transition-colors"
-              style={{ background: "#f5f2ee", color: "#111111" }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "#e5e0d8")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "#f5f2ee")}
+      {/* ── Stats strip ── */}
+      <section style={{ background: "#f0eade", borderBottom: "1px solid #ddd5c8", padding: "20px 40px" }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto", display: "flex", gap: "48px", alignItems: "center" }}>
+          <span style={{ fontSize: "11px", letterSpacing: "0.04em", color: "#6b6258" }}>
+            <strong style={{ color: "#1c1a17", fontWeight: 600 }}>{filtered.length}</strong> {filtered.length === 1 ? "jurisdiction" : "jurisdictions"}
+            {isFiltering ? " matching" : " in directory"}
+          </span>
+          <span style={{ fontSize: "11px", letterSpacing: "0.04em", color: "#6b6258" }}>
+            <strong style={{ color: "#1c1a17", fontWeight: 600 }}>{sortedStates.length}</strong> states
+          </span>
+          <span style={{ fontSize: "11px", letterSpacing: "0.04em", color: "#6b6258" }}>
+            Updated <strong style={{ color: "#1c1a17", fontWeight: 600 }}>Jan 2025</strong>
+          </span>
+          <span style={{ marginLeft: "auto", fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "#8a8078" }}>
+            Free reference data
+          </span>
+        </div>
+      </section>
+
+      {/* ── Directory Table ── */}
+      <main style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 40px 80px" }}>
+
+        {filtered.length === 0 ? (
+          <div style={{ padding: "80px 0", textAlign: "center" }}>
+            <p style={{ fontSize: "15px", color: "#8a8078" }}>No jurisdictions match your search.</p>
+            <button
+              onClick={() => { setSearch(""); setStateFilter("All States"); setIbcFilter("All Versions"); }}
+              style={{ marginTop: "16px", fontSize: "11px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#1c1a17", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}
             >
-              Generate a Brief
-            </a>
+              Clear filters
+            </button>
           </div>
-        </section>
+        ) : (
+          <>
+            {/* Table header */}
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 100px 100px 100px 120px 100px",
+              padding: "16px 0 10px",
+              borderBottom: "1px solid #1c1a17",
+              marginTop: "40px",
+            }}>
+              {["Jurisdiction", "IBC", "IECC", "Zoning", "Permit Timeline", "ADA"].map((h) => (
+                <span key={h} style={{ fontSize: "9px", fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: "#8a8078" }}>{h}</span>
+              ))}
+            </div>
+
+            {/* State groups */}
+            {sortedStates.map((state) => (
+              <div key={state}>
+                {/* State divider — drawing title block style */}
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "16px",
+                  padding: "32px 0 0",
+                  marginBottom: "0",
+                }}>
+                  <span style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "#8a8078", whiteSpace: "nowrap" }}>
+                    {state}
+                  </span>
+                  <div style={{ flex: 1, height: "1px", background: "#ddd5c8" }} />
+                  <span style={{ fontSize: "9px", letterSpacing: "0.1em", color: "#b8b0a8" }}>
+                    {grouped[state].length} {grouped[state].length === 1 ? "city" : "cities"}
+                  </span>
+                </div>
+
+                {/* City rows */}
+                {grouped[state].map((city, idx) => (
+                  <Link
+                    key={city.slug}
+                    href={`/codes/${city.slug}`}
+                    style={{ textDecoration: "none" }}
+                  >
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr 100px 100px 100px 120px 100px",
+                        padding: "14px 0",
+                        borderBottom: `1px solid ${idx === grouped[state].length - 1 ? "transparent" : "#ede9e3"}`,
+                        cursor: "pointer",
+                        transition: "background 0.1s",
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = "#f0eade"; e.currentTarget.style.marginLeft = "-40px"; e.currentTarget.style.marginRight = "-40px"; e.currentTarget.style.paddingLeft = "40px"; e.currentTarget.style.paddingRight = "40px"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.marginLeft = "0"; e.currentTarget.style.marginRight = "0"; e.currentTarget.style.paddingLeft = "0"; e.currentTarget.style.paddingRight = "0"; }}
+                    >
+                      {/* City name */}
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <span style={{ fontSize: "13px", fontWeight: 500, color: "#1c1a17", letterSpacing: "0.01em" }}>
+                          {city.city}
+                        </span>
+                        <span style={{ fontSize: "9px", fontWeight: 600, letterSpacing: "0.1em", color: "#8a8078" }}>
+                          {city.stateCode}
+                        </span>
+                      </div>
+
+                      {/* IBC version */}
+                      <div style={{ display: "flex", alignItems: "center" }}>
+                        <span style={{
+                          fontSize: "10px",
+                          fontWeight: 600,
+                          letterSpacing: "0.06em",
+                          color: "#f7f3ec",
+                          background: ibcColor(city.ibcVersion),
+                          padding: "2px 7px",
+                        }}>
+                          {city.ibcVersion}
+                        </span>
+                      </div>
+
+                      {/* IECC version */}
+                      <div style={{ display: "flex", alignItems: "center" }}>
+                        <span style={{ fontSize: "11px", color: "#6b6258", letterSpacing: "0.02em" }}>
+                          {city.ieccVersion}
+                        </span>
+                      </div>
+
+                      {/* Zoning type */}
+                      <div style={{ display: "flex", alignItems: "center" }}>
+                        <span style={{ fontSize: "11px", color: "#6b6258", letterSpacing: "0.02em" }}>
+                          {city.zoningType}
+                        </span>
+                      </div>
+
+                      {/* Permit timeline */}
+                      <div style={{ display: "flex", alignItems: "center" }}>
+                        <span style={{ fontSize: "11px", color: "#6b6258", letterSpacing: "0.02em" }}>
+                          {city.permitTimeline}
+                        </span>
+                      </div>
+
+                      {/* ADA */}
+                      <div style={{ display: "flex", alignItems: "center" }}>
+                        {city.adaAdopted ? (
+                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                            <circle cx="7" cy="7" r="6" stroke="#1c1a17" strokeWidth="1"/>
+                            <path d="M4 7l2 2 4-4" stroke="#1c1a17" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        ) : (
+                          <span style={{ fontSize: "11px", color: "#b8b0a8" }}>—</span>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ))}
+          </>
+        )}
       </main>
 
+      {/* ── CTA Banner ── */}
+      <section style={{ background: "#1c1a17", padding: "64px 40px" }}>
+        <div style={{ maxWidth: "720px", margin: "0 auto", textAlign: "center" }}>
+          <p style={{ fontSize: "10px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(245,242,238,0.4)", marginBottom: "16px" }}>
+            Generate a Brief
+          </p>
+          <h2 style={{
+            fontFamily: "var(--font-serif-display), 'DM Serif Display', Georgia, serif",
+            fontSize: "clamp(24px, 4vw, 36px)",
+            fontWeight: 400,
+            letterSpacing: "-0.02em",
+            color: "#f5f2ee",
+            marginBottom: "12px",
+          }}>
+            Need the full code analysis for your project?
+          </h2>
+          <p style={{ fontSize: "14px", color: "rgba(245,242,238,0.5)", marginBottom: "32px", fontWeight: 300 }}>
+            Enter your project parameters and get a complete compliance brief in 60 seconds.
+          </p>
+          <a href="/#generate" style={{
+            display: "inline-block",
+            fontSize: "10px",
+            fontWeight: 600,
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            color: "#1c1a17",
+            background: "#f5f2ee",
+            padding: "14px 32px",
+            textDecoration: "none",
+          }}>
+            Generate a Brief
+          </a>
+        </div>
+      </section>
+
       {/* ── Footer ── */}
-      <footer style={{ background: "var(--bg-warm)", borderTop: "1px solid var(--border-light)" }}>
-        <div className="max-w-7xl mx-auto px-8 py-6 flex items-center justify-between">
-          <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>&copy; {new Date().getFullYear()} CodeBrief</span>
-          <div className="flex items-center gap-6">
+      <footer style={{ background: "#f0eade", borderTop: "1px solid #ddd5c8", padding: "32px 40px" }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "16px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <div style={{ width: "22px", height: "22px", border: "1px solid #1c1a17", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ fontSize: "7px", fontWeight: 700, color: "#1c1a17" }}>CB</span>
+            </div>
+            <span style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "#6b6258" }}>CodeBrief</span>
+          </div>
+          <div style={{ display: "flex", gap: "24px" }}>
             {[["/","Home"],["/codes","City Codes"],["/pricing","Pricing"],["/privacy","Privacy"],["/terms","Terms"]].map(([href,label]) => (
-              <a key={label} href={href} className="text-[11px] transition-colors" style={{ color: "var(--text-muted)" }} onMouseEnter={(e)=>(e.currentTarget.style.color="var(--text-primary)")} onMouseLeave={(e)=>(e.currentTarget.style.color="var(--text-muted)")}>{label}</a>
+              <a key={label} href={href} style={{ fontSize: "10px", letterSpacing: "0.06em", color: "#8a8078", textDecoration: "none" }}>{label}</a>
             ))}
           </div>
+          <span style={{ fontSize: "10px", letterSpacing: "0.04em", color: "#b8b0a8" }}>© 2025 CodeBrief</span>
         </div>
       </footer>
-    </div>
-  );
-}
 
-/* ── Sub-components ── */
-function CodeBadge({ label, value, small }: { label: string; value: string; small?: boolean }) {
-  return (
-    <div className="px-2 py-1.5" style={{ background: "var(--bg-warm)", border: "1px solid var(--border-light)" }}>
-      <p className="text-[8px] font-semibold tracking-widest uppercase mb-0.5" style={{ color: "var(--text-muted)" }}>{label}</p>
-      <p className={`font-medium ${small ? "text-[9px]" : "text-[10px]"}`} style={{ color: "var(--text-primary)" }}>{value}</p>
     </div>
   );
 }

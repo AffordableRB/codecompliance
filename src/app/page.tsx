@@ -657,155 +657,73 @@ export default function Home() {
             </section>
 
             {/* ── FEATURE SHOWCASE PANELS ── */}
-            <section id="features" className="no-print dark-section">
-
-              {/* Panel 1: Jurisdiction Intelligence */}
-              <div className="feature-panel">
-                <div className="feature-panel-content">
-                  <p className="label-caps-dark mb-5">Jurisdiction Intelligence</p>
-                  <h2 className="section-headline-dark mb-5">
-                    Every city. Every amendment.
-                  </h2>
-                  <p style={{ fontSize: "14px", lineHeight: 1.75, color: "rgba(240,234,216,0.5)", fontWeight: 300, marginBottom: "2rem", maxWidth: "420px" }}>
-                    CodeBrief covers 20,000+ US jurisdictions. When a city adopts
-                    a local amendment to the IBC, we know. When a county has its
-                    own zoning overlay, it&apos;s in the report.
-                  </p>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                    {[
-                      "State-adopted code edition identified automatically",
-                      "Local amendments and overlays included",
-                      "AHJ-specific requirements flagged",
-                    ].map((item) => (
-                      <div key={item} className="flex items-start gap-3">
-                        <span style={{ color: "rgba(255,255,255,0.2)", marginTop: "1px", flexShrink: 0 }}>—</span>
-                        <span style={{ fontSize: "13px", color: "rgba(240,234,216,0.55)", fontWeight: 300 }}>{item}</span>
-                      </div>
-                    ))}
-                  </div>
+            <section id="features" className="no-print" style={{ background: "var(--bg-warm)", borderTop: "1px solid var(--border-light)" }}>
+              <div style={{ maxWidth: "var(--max-w)", margin: "0 auto", padding: "var(--section-py) var(--container-px)" }}>
+                <div style={{ textAlign: "center", marginBottom: "4rem" }}>
+                  <p className="label-caps mb-4">Features</p>
+                  <h2 className="section-headline">Everything you need<br />before design begins</h2>
                 </div>
-                <div className="feature-panel-visual">
-                  {/* Jurisdiction map visual */}
-                  <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
-                    <div style={{ width: "100%", maxWidth: "360px" }}>
-                      <div style={{ marginBottom: "1rem" }}>
-                        <p style={{ fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.2)", marginBottom: "0.5rem" }}>Jurisdiction Coverage</p>
-                        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-                          {["CA", "TX", "NY", "FL", "IL", "WA", "CO", "GA", "MA", "AZ", "OR", "NC"].map((s) => (
-                            <span key={s} style={{ fontSize: "9px", fontWeight: 600, letterSpacing: "0.1em", color: "rgba(255,255,255,0.5)", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", padding: "3px 8px" }}>{s}</span>
-                          ))}
-                          <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.2)", padding: "3px 8px" }}>+38 more</span>
-                        </div>
-                      </div>
-                      <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", padding: "1rem" }}>
-                        <p style={{ fontSize: "9px", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.2)", marginBottom: "0.75rem" }}>Sample — Austin, TX</p>
-                        {[
-                          ["Adopted Code", "IBC 2021"],
-                          ["Local Amendments", "Austin Amendments 2021"],
-                          ["Energy Code", "IECC 2021 w/ TX Amendments"],
-                          ["Fire Code", "IFC 2021"],
-                        ].map(([k, v]) => (
-                          <div key={k} style={{ display: "flex", justifyContent: "space-between", paddingBottom: "6px", marginBottom: "6px", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-                            <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.3)" }}>{k}</span>
-                            <span style={{ fontSize: "9px", fontWeight: 500, color: "rgba(255,255,255,0.6)" }}>{v}</span>
-                          </div>
-                        ))}
-                      </div>
+
+                {/* Two-up feature cards — Procore style */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginBottom: "1.5rem" }}>
+
+                  {/* Card 1: Jurisdiction Intelligence */}
+                  <div style={{ background: "var(--bg-base)", border: "1px solid var(--border-light)", overflow: "hidden" }}>
+                    <div style={{ overflow: "hidden", height: "260px", background: "#f0ede6" }}>
+                      <img src="/feature-jurisdiction.png" alt="Jurisdiction Intelligence" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }} />
+                    </div>
+                    <div style={{ padding: "2rem" }}>
+                      <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--accent)", marginBottom: "0.75rem" }}>Jurisdiction Intelligence</p>
+                      <h3 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "1.5rem", lineHeight: 1.15, letterSpacing: "-0.02em", color: "var(--text-primary)", marginBottom: "0.875rem" }}>
+                        Every city. Every amendment.
+                      </h3>
+                      <p style={{ fontSize: "13px", lineHeight: 1.75, color: "var(--text-secondary)", marginBottom: "1.25rem" }}>
+                        CodeBrief covers 20,000+ US jurisdictions. When a city adopts a local amendment to the IBC, we know. When a county has its own zoning overlay, it&apos;s in the report.
+                      </p>
+                      <button onClick={scrollToForm} style={{ fontSize: "12px", fontWeight: 600, color: "var(--accent)", background: "none", border: "none", cursor: "pointer", padding: 0, letterSpacing: "0.02em" }}>
+                        Learn more →
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Card 2: Confidence Tiers */}
+                  <div style={{ background: "var(--bg-base)", border: "1px solid var(--border-light)", overflow: "hidden" }}>
+                    <div style={{ overflow: "hidden", height: "260px", background: "#f0ede6" }}>
+                      <img src="/feature-confidence.png" alt="Confidence Tiers" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }} />
+                    </div>
+                    <div style={{ padding: "2rem" }}>
+                      <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--accent)", marginBottom: "0.75rem" }}>Confidence Tiers</p>
+                      <h3 style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "1.5rem", lineHeight: 1.15, letterSpacing: "-0.02em", color: "var(--text-primary)", marginBottom: "0.875rem" }}>
+                        Know what you know.
+                      </h3>
+                      <p style={{ fontSize: "13px", lineHeight: 1.75, color: "var(--text-secondary)", marginBottom: "1.25rem" }}>
+                        Every finding is tagged Confirmed, Verify, or Gap. You always know which items are sourced from public code text and which need AHJ confirmation.
+                      </p>
+                      <button onClick={scrollToForm} style={{ fontSize: "12px", fontWeight: 600, color: "var(--accent)", background: "none", border: "none", cursor: "pointer", padding: 0, letterSpacing: "0.02em" }}>
+                        Learn more →
+                      </button>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Panel 2: Confidence Tiers */}
-              <div className="feature-panel reverse">
-                <div className="feature-panel-content">
-                  <p className="label-caps-dark mb-5">Confidence Tiers</p>
-                  <h2 className="section-headline-dark mb-5">
-                    Know what you know.
-                  </h2>
-                  <p style={{ fontSize: "14px", lineHeight: 1.75, color: "rgba(240,234,216,0.5)", fontWeight: 300, marginBottom: "2rem", maxWidth: "420px" }}>
-                    Every finding is tagged with a confidence tier. Confirmed
-                    findings are sourced directly from public code text. Verify
-                    items need AHJ confirmation. Gaps flag missing data.
-                  </p>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
-                    {[
-                      { color: "#4ade80", bg: "rgba(74,222,128,0.08)", border: "rgba(74,222,128,0.2)", label: "Confirmed", desc: "Sourced directly from public code text" },
-                      { color: "#fbbf24", bg: "rgba(251,191,36,0.08)", border: "rgba(251,191,36,0.2)", label: "Verify", desc: "Likely correct — confirm with AHJ" },
-                      { color: "#f87171", bg: "rgba(248,113,113,0.08)", border: "rgba(248,113,113,0.2)", label: "Gap", desc: "Data unavailable — requires direct research" },
-                    ].map((tier) => (
-                      <div key={tier.label} className="flex items-center gap-4">
-                        <span style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: tier.color, background: tier.bg, border: `1px solid ${tier.border}`, padding: "3px 10px", flexShrink: 0, minWidth: "80px", textAlign: "center" }}>
-                          {tier.label}
-                        </span>
-                        <span style={{ fontSize: "12px", color: "rgba(240,234,216,0.45)", fontWeight: 300 }}>{tier.desc}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="feature-panel-visual">
-                  <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
-                    <div style={{ width: "100%", maxWidth: "360px" }}>
-                      <p style={{ fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.2)", marginBottom: "0.75rem" }}>Egress Analysis — Sample</p>
-                      {[
-                        { tier: "CONFIRMED", color: "#4ade80", bg: "rgba(74,222,128,0.08)", border: "rgba(74,222,128,0.15)", text: "Minimum 2 exits required per IBC §1006.3.3 (occupant load 312 > 49)" },
-                        { tier: "CONFIRMED", color: "#4ade80", bg: "rgba(74,222,128,0.08)", border: "rgba(74,222,128,0.15)", text: "Exit access travel distance ≤ 250 ft (sprinklered B occupancy, IBC Table 1017.2)" },
-                        { tier: "VERIFY", color: "#fbbf24", bg: "rgba(251,191,36,0.08)", border: "rgba(251,191,36,0.15)", text: "Corridor width 44 in. min — verify Austin local amendment §1020.2" },
-                        { tier: "GAP", color: "#f87171", bg: "rgba(248,113,113,0.08)", border: "rgba(248,113,113,0.15)", text: "Roof access requirements — AHJ interpretation required for this use type" },
-                      ].map((item, i) => (
-                        <div key={i} style={{ background: item.bg, border: `1px solid ${item.border}`, padding: "0.625rem 0.75rem", marginBottom: "0.5rem", display: "flex", gap: "0.625rem", alignItems: "flex-start" }}>
-                          <span style={{ fontSize: "7px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: item.color, flexShrink: 0, marginTop: "2px" }}>{item.tier}</span>
-                          <span style={{ fontSize: "10px", lineHeight: 1.5, color: "rgba(255,255,255,0.5)" }}>{item.text}</span>
-                        </div>
-                      ))}
+                {/* Four-column icon grid — Procore bottom row */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "0", border: "1px solid var(--border-light)", background: "var(--bg-base)" }}>
+                  {FEATURES.map((f, i) => (
+                    <div key={f.label} style={{ padding: "1.75rem", borderLeft: i > 0 ? "1px solid var(--border-light)" : "none" }}>
+                      <p style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--accent)", marginBottom: "0.5rem" }}>{f.code}</p>
+                      <p style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-primary)", lineHeight: 1.3 }}>{f.label}</p>
                     </div>
-                  </div>
+                  ))}
                 </div>
               </div>
-
-              {/* Panel 3: Report Coverage */}
-              <div className="feature-panel">
-                <div className="feature-panel-content">
-                  <p className="label-caps-dark mb-5">Report Coverage</p>
-                  <h2 className="section-headline-dark mb-5">
-                    Twelve code domains.<br />One document.
-                  </h2>
-                  <p style={{ fontSize: "14px", lineHeight: 1.75, color: "rgba(240,234,216,0.5)", fontWeight: 300, marginBottom: "2rem", maxWidth: "420px" }}>
-                    Every analysis covers zoning, construction type, fire
-                    separation, egress, accessibility, energy, plumbing, parking,
-                    and risk flags. Each section includes the applicable code
-                    reference and the calculated requirement for your project.
-                  </p>
-                  <button onClick={scrollToForm} className="btn-ghost">
-                    See a sample report
-                  </button>
-                </div>
-                <div className="feature-panel-visual">
-                  <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
-                    <div style={{ width: "100%", maxWidth: "360px" }}>
-                      <p style={{ fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.2)", marginBottom: "0.75rem" }}>Report Contents</p>
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: "rgba(255,255,255,0.06)" }}>
-                        {FEATURES.map((f) => (
-                          <div key={f.label} style={{ background: "var(--bg-dark-2)", padding: "0.75rem" }}>
-                            <p style={{ fontSize: "8px", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--accent-light)", marginBottom: "3px" }}>{f.code}</p>
-                            <p style={{ fontSize: "10px", fontWeight: 500, color: "rgba(255,255,255,0.55)" }}>{f.label}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
             </section>
 
             {/* ── STATS STRIP ── */}
             <section
               className="no-print"
               style={{
-                background: "var(--bg-base)",
-                borderTop: "1px solid var(--border-light)",
-                borderBottom: "1px solid var(--border-light)",
+                background: "var(--bg-dark)",
+                borderTop: "1px solid rgba(255,255,255,0.06)",
               }}
             >
               <div style={{ maxWidth: "var(--max-w)", margin: "0 auto", padding: "4rem var(--container-px)" }}>
@@ -819,74 +737,95 @@ export default function Home() {
                       key={stat.label}
                       style={{
                         padding: "2rem 2.5rem",
-                        borderLeft: i > 0 ? "1px solid var(--border-light)" : "none",
+                        borderLeft: i > 0 ? "1px solid rgba(255,255,255,0.08)" : "none",
                         textAlign: i === 1 ? "center" : i === 2 ? "right" : "left",
                       }}
                     >
-                      <p className="stat-number" style={{ marginBottom: "0.5rem" }}>{stat.value}</p>
-                      <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-primary)", marginBottom: "0.25rem" }}>{stat.label}</p>
-                      <p style={{ fontSize: "11px", color: "var(--text-muted)", fontWeight: 300 }}>{stat.sub}</p>
+                      <p style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "clamp(2.5rem, 5vw, 3.5rem)", lineHeight: 1, letterSpacing: "-0.03em", color: "var(--text-inverse)", marginBottom: "0.5rem" }}>{stat.value}</p>
+                      <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(240,234,216,0.5)", marginBottom: "0.25rem" }}>{stat.label}</p>
+                      <p style={{ fontSize: "11px", color: "rgba(240,234,216,0.3)", fontWeight: 300 }}>{stat.sub}</p>
                     </div>
                   ))}
                 </div>
               </div>
             </section>
 
-            {/* ── TESTIMONIALS ── */}
-            <section
-              className="no-print"
-              style={{ background: "var(--bg-base)" }}
-            >
+            {/* ── TESTIMONIALS — Procore full-bleed carousel style ── */}
+            <section className="no-print" style={{ background: "var(--bg-base)" }}>
               <div style={{ maxWidth: "var(--max-w)", margin: "0 auto", padding: "var(--section-py) var(--container-px)" }}>
-                <div style={{ maxWidth: "560px", marginBottom: "4rem" }}>
-                  <p className="label-caps mb-4">Early Access</p>
-                  <h2 className="section-headline">
-                    Built for architects who<br />move fast in pre-design
-                  </h2>
+                <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+                  <h2 className="section-headline">See how firms build with CodeBrief</h2>
                 </div>
+              </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)" }}>
+              {/* Full-bleed testimonial card */}
+              <div style={{ position: "relative", width: "100%", height: "420px", overflow: "hidden" }}>
+                <img
+                  src="/testimonial-bg.jpg"
+                  alt="Building under construction"
+                  style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }}
+                />
+                {/* Dark overlay */}
+                <div style={{ position: "absolute", inset: 0, background: "rgba(20,18,14,0.55)" }} />
+                {/* Quote card — left-aligned like Procore */}
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: "3rem",
+                    left: "max(2rem, calc((100% - var(--max-w)) / 2 + var(--container-px)))",
+                    maxWidth: "480px",
+                    background: "var(--bg-base)",
+                    padding: "2rem 2.25rem",
+                  }}
+                >
+                  <p
+                    style={{
+                      fontFamily: "'DM Serif Display', Georgia, serif",
+                      fontSize: "clamp(1rem, 1.5vw, 1.2rem)",
+                      lineHeight: 1.5,
+                      color: "var(--text-primary)",
+                      marginBottom: "1.5rem",
+                    }}
+                  >
+                    &ldquo;Before CodeBrief, pulling code requirements for a schematic design took half a day. Now it takes minutes — and I trust the citations.&rdquo;
+                  </p>
+                  <div style={{ marginBottom: "1.25rem" }}>
+                    <p style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-primary)", marginBottom: "2px" }}>Sarah K.</p>
+                    <p style={{ fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Principal Architect, San Francisco</p>
+                  </div>
+                  <button onClick={scrollToForm} style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-primary)", background: "none", border: "none", cursor: "pointer", padding: 0, letterSpacing: "0.02em" }}>
+                    Read their story →
+                  </button>
+                </div>
+              </div>
+
+              {/* Two more testimonial quotes below */}
+              <div style={{ maxWidth: "var(--max-w)", margin: "0 auto", padding: "0 var(--container-px)" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderTop: "1px solid var(--border-light)" }}>
                   {[
                     {
-                      quote: "This is exactly what I needed for schematic design. I used to spend half a day pulling code requirements — now it takes minutes.",
-                      name: "Principal Architect",
-                      firm: "Architecture Firm, San Francisco",
-                    },
-                    {
-                      quote: "The confidence tiers are a game changer. I know exactly which items need AHJ confirmation versus which are solid. That's real signal.",
-                      name: "Project Manager",
-                      firm: "Architecture Firm, Austin",
+                      quote: "The confidence tiers are a game changer. I know exactly which items need AHJ confirmation versus which are solid. That&apos;s real signal.",
+                      name: "Marcus T.",
+                      role: "Project Manager, Austin",
                     },
                     {
                       quote: "The IBC citations alone save us hours per project. Having the section numbers right there in the report is genuinely useful.",
-                      name: "Associate Architect",
-                      firm: "Architecture Firm, New York",
+                      name: "Priya N.",
+                      role: "Associate Architect, New York",
                     },
                   ].map((t, i) => (
                     <div
                       key={i}
                       style={{
                         padding: "2.5rem",
-                        borderTop: "2px solid var(--border-light)",
                         borderLeft: i > 0 ? "1px solid var(--border-light)" : "none",
                       }}
                     >
-                      <p
-                        style={{
-                          fontSize: "14px",
-                          lineHeight: 1.75,
-                          color: "var(--text-secondary)",
-                          fontWeight: 300,
-                          fontStyle: "italic",
-                          marginBottom: "1.5rem",
-                        }}
-                      >
+                      <p style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: "1.1rem", lineHeight: 1.55, color: "var(--text-primary)", marginBottom: "1.25rem" }}>
                         &ldquo;{t.quote}&rdquo;
                       </p>
-                      <div>
-                        <p style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-primary)", marginBottom: "2px" }}>{t.name}</p>
-                        <p style={{ fontSize: "10px", letterSpacing: "0.06em", color: "var(--text-muted)" }}>{t.firm}</p>
-                      </div>
+                      <p style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-primary)", marginBottom: "2px" }}>{t.name}</p>
+                      <p style={{ fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-muted)" }}>{t.role}</p>
                     </div>
                   ))}
                 </div>
